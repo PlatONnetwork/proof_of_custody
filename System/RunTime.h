@@ -17,6 +17,8 @@ All rights reserved
 #include "Online/Machine.h"
 #include "System/SystemData.h"
 
+#include <openssl/ssl.h>
+
 void Run_Scale(unsigned int my_number, unsigned int no_online_threads, const vector<gfp> &MacK,
                SSL_CTX *ctx, const vector<unsigned int> &portnum,
                const SystemData &SD,

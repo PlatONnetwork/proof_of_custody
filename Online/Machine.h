@@ -11,8 +11,6 @@ All rights reserved
 #include "LSSS/Share.h"
 #include "Math/Integer.h"
 #include "Processor/Memory.h"
-#include "Processor/Program.h"
-#include "Schedule.h"
 #include "Tools/Timer.h"
 #include "config.h"
 #include <memory>
@@ -61,9 +59,6 @@ class Machine
   vector<Timer> timers;
 
 public:
-  // The vector of programs used by the schedule file
-  vector<Program> progs;
-
   int get_OTI_arg(unsigned int i)
   {
     return OTI[i].arg;
@@ -84,7 +79,7 @@ public:
 
   void Setup_IO(unique_ptr<Input_Output_Base> io_ptr)
   {
-    io= move(io_ptr);
+    io = move(io_ptr);
   }
 
   // The memory
@@ -92,13 +87,10 @@ public:
   Memory<Share> Ms;
   Memory<Integer> Mr;
 
-  // The Schedule process we are running
-  Schedule schedule;
-
   bool verbose;
   void set_verbose()
   {
-    verbose= true;
+    verbose = true;
   }
 
   // -----------------------------------------------------
@@ -107,7 +99,7 @@ public:
 
   Machine()
   {
-    verbose= false;
+    verbose = false;
   }
 
   // Set up/store data
@@ -138,9 +130,6 @@ public:
   // Corresponding lock
   //   Locks this thread until thread num has finished the tape
   void Lock_Until_Finished_Tape(unsigned int num);
-
-  // This runs tape tape_number on thread thread_number with argument arg
-  void run_tape(unsigned int thread_number, unsigned int tape_number, int arg);
 
   // Main run routine
   void run();

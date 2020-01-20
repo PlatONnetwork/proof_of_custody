@@ -10,6 +10,8 @@ All rights reserved
 #include "Online.h"
 #include "Processor/Processor.h"
 
+extern vector<sacrificed_data> SacrificeD;
+
 void online_phase(int online_num, Player &P, offline_control_data &OCD,
                   Machine &machine)
 {

@@ -13,6 +13,7 @@ All rights reserved
 void getTriples(Processor &Proc, vector<Share> &sp, offline_control_data &OCD, int opcode)
 {
   int thread = Proc.get_thread_num();
+  Wait_For_Preproc(opcode, 100, thread, OCD); // temp set 100
 
   switch (opcode)
   {

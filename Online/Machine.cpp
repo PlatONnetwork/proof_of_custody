@@ -59,22 +59,6 @@ void Machine::Dump_Memory(unsigned int whoami)
   outf.close();
 }
 
-void Machine::Load_Schedule_Into_Memory()
-{
-  unsigned int nprogs = schedule.progs.size();
-
-  // Load in the programs
-  progs.resize(nprogs);
-  for (unsigned int i = 0; i < nprogs; i++)
-  {
-    progs[i].parse(schedule.progs[i]);
-    Mc.minimum_size(progs[i].direct_mem(MODP)[CLEAR], schedule.tnames[i]);
-    Ms.minimum_size(progs[i].direct_mem(MODP)[SECRET], schedule.tnames[i]);
-    Mr.minimum_size(progs[i].direct_mem(INT)[CLEAR], schedule.tnames[i]);
-    //Msr.minimum_size(progs[i].direct_mem(INT)[SECRET], schedule.tnames[i]);
-  }
-}
-
 void Machine::Init_OTI(unsigned int nthreads)
 {
   for (unsigned int i = 0; i < nthreads; i++)
@@ -98,7 +82,6 @@ void Machine::SetUp_Threads(unsigned int nthreads)
   online_mutex.resize(nthreads);
   online_thread_ready.resize(nthreads);
   machine_ready.resize(nthreads);
-  schedule.set_max_n_threads(nthreads);
 
   Init_OTI(nthreads);
 }
@@ -167,29 +150,6 @@ void Machine::Lock_Until_Finished_Tape(unsigned int num)
   if (!OTI[num].finished)
     pthread_cond_wait(&online_thread_ready[num], &online_mutex[num]);
   pthread_mutex_unlock(&online_mutex[num]);
-}
-
-// This runs tape tape_number on thread thread_number with argument arg
-void Machine::run_tape(unsigned int thread_number, unsigned int tape_number,
-                       int arg)
-{
-  if (thread_number >= OTI.size())
-  {
-    throw Processor_Error("invalid thread number: " + to_string(thread_number) +
-                          "/" + to_string(OTI.size()));
-  }
-  if (tape_number >= progs.size())
-  {
-    throw Processor_Error("invalid tape number: " + to_string(tape_number) +
-                          "/" + to_string(progs.size()));
-  }
-
-  pthread_mutex_lock(&online_mutex[thread_number]);
-  OTI[thread_number].prognum = tape_number;
-  OTI[thread_number].arg = arg;
-  OTI[thread_number].finished = false;
-  pthread_cond_signal(&machine_ready[thread_number]);
-  pthread_mutex_unlock(&online_mutex[thread_number]);
 }
 
 void Machine::run()

@@ -91,7 +91,6 @@ void Processor_IO::private_input2(unsigned int player, Share &sa, unsigned int c
 
   if (player == P.whoami())
   {
-    //i_epsilon= machine.get_IO().private_input_gfp(channel);
     i_epsilon.assign(inputs[player]);
   }
 

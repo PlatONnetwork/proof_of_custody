@@ -89,24 +89,24 @@ Share Input_Output_Simple::input_share(unsigned int channel)
   return S;
 }
 
-void Input_Output_Simple::trigger(Schedule &schedule)
-{
-  printf("Restart requested: Enter a number to proceed\n");
-  int i;
-  cin >> i;
+// void Input_Output_Simple::trigger(Schedule &schedule)
+// {
+//   printf("Restart requested: Enter a number to proceed\n");
+//   int i;
+//   cin >> i;
 
-  // Load new schedule file program streams, using the original
-  // program name
-  //
-  // Here you could define programatically what the new
-  // programs you want to run are, by directly editing the
-  // public variables in the schedule object.
-  unsigned int nthreads= schedule.Load_Programs();
-  if (schedule.max_n_threads() < nthreads)
-    {
-      throw Processor_Error("Restart requires more threads, cannot do this");
-    }
-}
+//   // Load new schedule file program streams, using the original
+//   // program name
+//   //
+//   // Here you could define programatically what the new
+//   // programs you want to run are, by directly editing the
+//   // public variables in the schedule object.
+//   unsigned int nthreads= schedule.Load_Programs();
+//   if (schedule.max_n_threads() < nthreads)
+//     {
+//       throw Processor_Error("Restart requires more threads, cannot do this");
+//     }
+// }
 
 void Input_Output_Simple::debug_output(const stringstream &ss)
 {

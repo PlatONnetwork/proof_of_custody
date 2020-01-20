@@ -8,7 +8,9 @@ All rights reserved
 #ifndef _Processor_IO
 #define _Processor_IO
 
+#include "Offline/offline_data.h"
 #include "Online/Machine.h"
+#include "System/Player.h"
 
 /* Class for handling private input and output from parties
  *   You cannot execute two consequtive start's for the
@@ -29,20 +31,19 @@ public:
   Processor_IO(unsigned int nplayers)
       : rshares(nplayers)
   {
-    ;
   }
 
   // Get a private input values from a player on a given channel
   void private_input(unsigned int player, int target, unsigned int channel,
                      Processor &Proc, Player &P, Machine &machine, offline_control_data &OCD);
-                     
-  // Get a private input values from a player on a given channel
-  void private_input2(unsigned int player, Share& sa, unsigned int channel,
-                     Processor &Proc, Player &P, Machine &machine, offline_control_data &OCD);
 
   // Get a private input values from a player on a given channel
-  void private_input2(unsigned int player, Share& sa, unsigned int channel,
-                     Processor &Proc, Player &P, Machine &machine, offline_control_data &OCD,vector<int64_t>&inputs);
+  void private_input2(unsigned int player, Share &sa, unsigned int channel,
+                      Processor &Proc, Player &P, Machine &machine, offline_control_data &OCD);
+
+  // Get a private input values from a player on a given channel
+  void private_input2(unsigned int player, Share &sa, unsigned int channel,
+                      Processor &Proc, Player &P, Machine &machine, offline_control_data &OCD, vector<int64_t> &inputs);
 
   // Output a private value to a player on a channel
   void private_output(unsigned int player, int source, unsigned int channel,

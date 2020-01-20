@@ -10,11 +10,7 @@ All rights reserved
 #include "LSSS/Open_Protocol.h"
 #include "Online/Machine.h"
 
-//#include "OT/aAND.h"
-//#include "OT/aBitVector.h"
-//#include "Offline/DABitGenerator.h"
 #include "Processor_IO.h"
-#include "Program.h"
 
 #include <stack>
 using namespace std;
@@ -27,9 +23,6 @@ struct TempVars
   // INPUT and LDSI
   gfp rrp, tp, tmpp;
   gfp xip;
-  //aBitVector aBV;
-  //aBit aB;
-  //aTriple T;
 };
 
 class Processor
@@ -44,8 +37,6 @@ class Processor
   vector<gfp> Cp;
   vector<Share> Sp;
   vector<long> Ri;
-  //vector<aBitVector> srint;
-  //vector<aBit> sbit;
 
 // In DEBUG mode we keep track of valid/invalid read/writes on the registers
 #ifdef DEBUG
@@ -356,10 +347,6 @@ public:
     OP.RunOpenCheck(P, aux, connection, false);
   }
 
-  // Now the routine to execute a program with given argument
-  void execute(const Program &prog, int argument, Player &P, Machine &machine,
-               offline_control_data &OCD);
-
   unsigned int get_random_uint()
   {
     return prng.get_uint();
@@ -371,26 +358,6 @@ public:
     sent += size;
     rounds++;
   }
-
-#if 0
-  // Converts a sint register i0 to a sregint register i1
-  //   Uses the daBits
-  void convert_sint_to_sregint(int i0, int i1, Player &P);
-
-  // This is a special version for when log_2(p)<sreg_bitl
-  void convert_sint_to_sregint_small(int i0, int i1, Player &P);
-
-  // Converts a sregint register i0 to a srint register i1
-  //   Uses the daBits
-  void convert_sregint_to_sint(int i0, int i1, Player &P);
-
-  // Apply one of the indirect GC's
-  void apply_GC(const vector<int> &arguments, Player &P);
-
-  // Apply one of the local functions
-  void apply_local_function(RegType RT, SecrecyType ST,
-                            const vector<int> &arguments);
-#endif
 };
 
 #endif

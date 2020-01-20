@@ -10,12 +10,19 @@ All rights reserved
 #include "Offline/offline_data.h"
 #include "Online/Machine.h"
 #include "System/Player.h"
+#include "Processor/Processor.h"
 
+extern vector<sacrificed_data> SacrificeD;
 void online_phase(int online_num, Player &P, offline_control_data &OCD,
                   Machine &machine);
 
-extern vector<sacrificed_data> SacrificeD;
-void getTriples(Processor &Proc, vector<Share> &sp, offline_control_data &OCD, int opcode);
+enum
+{
+    TRIPLE = 0x50,
+    BIT = 0x51,
+    SQUARE = 0x52,
+    INPUT_MASK = 0x53
+};
 
 struct OnlineOp
 {

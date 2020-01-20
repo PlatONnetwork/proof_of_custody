@@ -20,6 +20,7 @@ using namespace std;
 
 #include "System/Networking.h"
 #include "System/RunTime.h"
+#include "System/Player.h"
 #include "config.h"
 
 #include "Tools/ezOptionParser.h"
