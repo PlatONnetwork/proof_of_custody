@@ -1,0 +1,11 @@
+
+open_channel(0)
+a=sint.get_private_input_from(0, 0)
+b=sint.get_private_input_from(1, 0)
+c=sint.get_private_input_from(2, 0)
+
+d = a + b + c
+actual = d.reveal()
+print_ln('xxxxxxxx %s', actual)
+
+close_channel(0)

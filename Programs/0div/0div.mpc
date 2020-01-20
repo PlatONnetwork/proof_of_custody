@@ -1,0 +1,4 @@
+a=sint(160)
+b=sint(16)
+div=a/b
+print_ln("%s", div.reveal())
