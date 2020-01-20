@@ -288,16 +288,6 @@ int main(int argc, const char *argv[])
    *************************************/
   vector<gfp> MacK(0);
 
-  /*************************************
-   * Now initialize the FHE data       *
-   *    - If needed                    *
-   *************************************/
-  FHE_Params params;
-  FFT_Data PTD;
-  Ring Rg;
-  Rg.initialize(8);
-  params.set(Rg, 17, 17, 1, false);
-
   /* Initialize SSL */
   SSL_CTX *ctx;
   Init_SSL_CTX(ctx, my_number, SD);
@@ -319,7 +309,7 @@ int main(int argc, const char *argv[])
   machine.Setup_IO(std::move(io));
 
   // Load the initial tapes for the first program into the schedule
-  unsigned int no_online_threads = 1; //machine.schedule.Load_Programs(progname);
+  unsigned int no_online_threads = 1;
 
   printf("begin runscale\n");
   Run_Scale(my_number, no_online_threads, MacK,

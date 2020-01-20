@@ -10,7 +10,6 @@ All rights reserved
 #include "Input_Output/IO.h"
 #include "LSSS/Share.h"
 #include "Math/Integer.h"
-#include "OT/aBitVector.h"
 #include "Processor/Memory.h"
 #include "Processor/Program.h"
 #include "Schedule.h"
@@ -92,7 +91,6 @@ public:
   Memory<gfp> Mc;
   Memory<Share> Ms;
   Memory<Integer> Mr;
-  Memory<aBitVector> Msr;
 
   // The Schedule process we are running
   Schedule schedule;

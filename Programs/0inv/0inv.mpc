@@ -1,5 +1,0 @@
-from Compiler import floatingpoint
-d = sint(5)
-d_inv = floatingpoint.Inv(d)
-print_ln("inverse is correct if 1: %s", d_inv.reveal())
-print_ln("inverse is correct if 1: %s", (d*d_inv).reveal())

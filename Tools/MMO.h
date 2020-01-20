@@ -25,10 +25,10 @@ class MMO
 {
   uint8_t IV[176] __attribute__((aligned(16)));
 
-  template<int N>
+  template <int N>
   static void encrypt_and_xor(void *output, const void *input,
                               const uint8_t *key);
-  template<int N>
+  template <int N>
   static void encrypt_and_xor(void *output, const void *input,
                               const uint8_t *key, const int *indices);
 
@@ -37,13 +37,13 @@ public:
   void zeroIV();
   void setIV(uint8_t key[AES_BLK_SIZE]);
 
-  template<class T>
+  template <class T>
   void hashOneBlock(uint8_t *output, const uint8_t *input);
 
-  template<class T, int N>
+  template <class T, int N>
   void hashBlockWise(uint8_t *output, const uint8_t *input);
 
-  template<class T>
+  template <class T>
   void outputOneBlock(uint8_t *output);
 };
 

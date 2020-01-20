@@ -9,9 +9,6 @@ All rights reserved
 
 #include "Online.h"
 #include "Processor/Processor.h"
-#include "OT/OT_Thread_Data.h"
-
-extern OT_Thread_Data OTD;
 
 void getTriples(Processor &Proc, vector<Share> &sp, offline_control_data &OCD, int opcode)
 {
@@ -256,8 +253,8 @@ void OnlineOp::open(const vector<Share> &vs, vector<gfp> &vc)
   vc.clear();
   vc.resize(vs.size());
 
-  Proc.POpen_Start2(start, vs, size, P);
-  Proc.POpen_Stop2(start, vc, size, P);
+  Proc.POpen_Start(start, vs, size, P);
+  Proc.POpen_Stop(start, vc, size, P);
 }
 
 void OnlineOp::reveal(const vector<Share> &vs, vector<gfp> &vc)

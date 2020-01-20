@@ -12,7 +12,7 @@ All rights reserved
 /* Create the server socket and intialize the socket address structure
  *   max is the max number of connections to expect
  */
-int OpenListener(int port, int max= 1);
+int OpenListener(int port, int max = 1);
 
 /* Connect for the client */
 int OpenConnection(const string &hostname, int port);

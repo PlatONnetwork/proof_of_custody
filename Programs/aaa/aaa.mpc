@@ -1,4 +1,0 @@
-
-a = sint(13)
-b = sint(163)
-c = a * b

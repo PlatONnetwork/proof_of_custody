@@ -61,41 +61,41 @@ void aes_256_encrypt(uint8_t *C, const uint8_t *M, const uint8_t *RK);
 
 __attribute__((optimize("unroll-loops"))) inline __m128i aes_128_encrypt(__m128i in, const uint8_t *key)
 {
-  __m128i &tmp= in;
-  tmp= _mm_xor_si128(tmp, ((__m128i *) key)[0]);
+  __m128i &tmp = in;
+  tmp = _mm_xor_si128(tmp, ((__m128i *)key)[0]);
   int j;
-  for (j= 1; j < 10; j++)
-    {
-      tmp= _mm_aesenc_si128(tmp, ((__m128i *) key)[j]);
-    }
-  tmp= _mm_aesenclast_si128(tmp, ((__m128i *) key)[j]);
+  for (j = 1; j < 10; j++)
+  {
+    tmp = _mm_aesenc_si128(tmp, ((__m128i *)key)[j]);
+  }
+  tmp = _mm_aesenclast_si128(tmp, ((__m128i *)key)[j]);
   return tmp;
 }
 
-template<int N>
+template <int N>
 __attribute__((optimize("unroll-loops"))) inline void ecb_aes_128_encrypt(__m128i *out, __m128i *in, const uint8_t *key)
 {
   __m128i tmp[N];
-  for (int i= 0; i < N; i++)
-    tmp[i]= _mm_xor_si128(in[i], ((__m128i *) key)[0]);
+  for (int i = 0; i < N; i++)
+    tmp[i] = _mm_xor_si128(in[i], ((__m128i *)key)[0]);
   int j;
-  for (j= 1; j < 10; j++)
-    for (int i= 0; i < N; i++)
-      tmp[i]= _mm_aesenc_si128(tmp[i], ((__m128i *) key)[j]);
-  for (int i= 0; i < N; i++)
-    out[i]= _mm_aesenclast_si128(tmp[i], ((__m128i *) key)[j]);
+  for (j = 1; j < 10; j++)
+    for (int i = 0; i < N; i++)
+      tmp[i] = _mm_aesenc_si128(tmp[i], ((__m128i *)key)[j]);
+  for (int i = 0; i < N; i++)
+    out[i] = _mm_aesenclast_si128(tmp[i], ((__m128i *)key)[j]);
 }
 
-template<int N>
+template <int N>
 inline void ecb_aes_128_encrypt(__m128i *out, const __m128i *in,
                                 const uint8_t *key, const int *indices)
 {
   __m128i tmp[N];
-  for (int i= 0; i < N; i++)
-    tmp[i]= in[indices[i]];
+  for (int i = 0; i < N; i++)
+    tmp[i] = in[indices[i]];
   ecb_aes_128_encrypt<N>(tmp, tmp, key);
-  for (int i= 0; i < N; i++)
-    out[indices[i]]= tmp[i];
+  for (int i = 0; i < N; i++)
+    out[indices[i]] = tmp[i];
 }
 
 inline void aes_encrypt(uint8_t *C, const uint8_t *M, const uint8_t *RK)

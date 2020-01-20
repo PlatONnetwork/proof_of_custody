@@ -15,9 +15,8 @@ All rights reserved
 #include "util_containers.h"
 #include "LSSS/Share.h"
 #include "Math/gfp.h"
-#include "OT/aBit.h"
 
-template<class T>
+template <class T>
 void take_first_to_vector(std::vector<T> &v, std::list<T> &l, size_t k)
 {
   list<T> temp;
@@ -29,4 +28,3 @@ void take_first_to_vector(std::vector<T> &v, std::list<T> &l, size_t k)
 
 template void take_first_to_vector(std::vector<gfp> &v, std::list<gfp> &l, size_t k);
 template void take_first_to_vector(std::vector<Share> &v, std::list<Share> &l, size_t k);
-template void take_first_to_vector(std::vector<aBit> &v, std::list<aBit> &l, size_t k);

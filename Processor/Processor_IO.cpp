@@ -19,116 +19,115 @@ void IO_Data_Wait(unsigned int player, unsigned int size, int thread,
   Wait_For_Preproc(DATA_INPUT_MASK, size, thread, OCD, player);
 }
 
-
 void Processor_IO::private_input(unsigned int player, int target, unsigned int channel,
                                  Processor &Proc, Player &P, Machine &machine,
                                  offline_control_data &OCD)
 {
   gfp i_epsilon;
-  int thread= Proc.get_thread_num();
+  int thread = Proc.get_thread_num();
 
   Wait_For_Preproc(DATA_INPUT_MASK, 1, thread, OCD, player);
 
   if (player == P.whoami())
-    {
-      i_epsilon= machine.get_IO().private_input_gfp(channel);
-    }
+  {
+    i_epsilon = machine.get_IO().private_input_gfp(channel);
+  }
 
   stringstream ss;
   OCD.OCD_mutex[thread].lock();
-  rshares[player]= SacrificeD[thread].ID.ios[player].front();
+  rshares[player] = SacrificeD[thread].ID.ios[player].front();
   SacrificeD[thread].ID.ios[player].pop_front();
   if (player == P.whoami())
-    {
-      i_epsilon.sub(SacrificeD[thread].ID.opened_ios.front());
-      SacrificeD[thread].ID.opened_ios.pop_front();
-      i_epsilon.output(ss, false);
-    }
+  {
+    i_epsilon.sub(SacrificeD[thread].ID.opened_ios.front());
+    SacrificeD[thread].ID.opened_ios.pop_front();
+    i_epsilon.output(ss, false);
+  }
   OCD.OCD_mutex[thread].unlock();
   Proc.increment_counters(Share::SD.M.shares_per_player(P.whoami()));
 
   if (player == P.whoami())
-    {
-      // Send via Channel 1 to ensure does not conflict with START/STOP OPENs
-      P.send_all(ss.str(), 1, false);
-    }
+  {
+    // Send via Channel 1 to ensure does not conflict with START/STOP OPENs
+    P.send_all(ss.str(), 1, false);
+  }
   else
-    {
-      // Receive via Channel 1
-      string ss;
-      P.receive_from_player(player, ss, 1, false);
-      stringstream is(ss);
-      gfp te;
-      te.input(is, false);
-      Proc.get_Sp_ref(target).add(rshares[player], te, P.get_mac_keys());
-    }
+  {
+    // Receive via Channel 1
+    string ss;
+    P.receive_from_player(player, ss, 1, false);
+    stringstream is(ss);
+    gfp te;
+    te.input(is, false);
+    Proc.get_Sp_ref(target).add(rshares[player], te, P.get_mac_keys());
+  }
 
   if (player == P.whoami())
-    {
-      Proc.get_Sp_ref(target).add(rshares[player], i_epsilon, P.get_mac_keys());
-    }
+  {
+    Proc.get_Sp_ref(target).add(rshares[player], i_epsilon, P.get_mac_keys());
+  }
 }
 
-void Processor_IO::private_input2(unsigned int player, Share& sa, unsigned int channel,
-                                 Processor &Proc, Player &P, Machine &machine,
-                                 offline_control_data &OCD)
+void Processor_IO::private_input2(unsigned int player, Share &sa, unsigned int channel,
+                                  Processor &Proc, Player &P, Machine &machine,
+                                  offline_control_data &OCD)
 {
   vector<int64_t> inputs_dumy = {176, 16, 5, 3, -9, 3, 7, 2, 3};
   inputs_dumy.resize(P.nplayers());
-  private_input2(player, sa, channel, Proc, P, machine, OCD,inputs_dumy);
+  private_input2(player, sa, channel, Proc, P, machine, OCD, inputs_dumy);
 }
 
-void Processor_IO::private_input2(unsigned int player, Share& sa, unsigned int channel,
-                                 Processor &Proc, Player &P, Machine &machine,
-                                 offline_control_data &OCD, vector<int64_t>&inputs)
+void Processor_IO::private_input2(unsigned int player, Share &sa, unsigned int channel,
+                                  Processor &Proc, Player &P, Machine &machine,
+                                  offline_control_data &OCD, vector<int64_t> &inputs)
 {
-  if(inputs.size()!=P.nplayers())
+  if (inputs.size() != P.nplayers())
     throw invalid_size();
 
   gfp i_epsilon;
-  int thread= Proc.get_thread_num();
+  int thread = Proc.get_thread_num();
 
   Wait_For_Preproc(DATA_INPUT_MASK, 1, thread, OCD, player);
 
   if (player == P.whoami())
-    {
-      //i_epsilon= machine.get_IO().private_input_gfp(channel);
-      i_epsilon.assign(inputs[player]);
-    }
+  {
+    //i_epsilon= machine.get_IO().private_input_gfp(channel);
+    i_epsilon.assign(inputs[player]);
+  }
 
   stringstream ss;
   OCD.OCD_mutex[thread].lock();
-  rshares[player]= SacrificeD[thread].ID.ios[player].front();
+  rshares[player] = SacrificeD[thread].ID.ios[player].front();
   SacrificeD[thread].ID.ios[player].pop_front();
   if (player == P.whoami())
-    {
-      i_epsilon.sub(SacrificeD[thread].ID.opened_ios.front());
-      SacrificeD[thread].ID.opened_ios.pop_front();
-      i_epsilon.output(ss, false);
-    }
+  {
+    i_epsilon.sub(SacrificeD[thread].ID.opened_ios.front());
+    SacrificeD[thread].ID.opened_ios.pop_front();
+    i_epsilon.output(ss, false);
+  }
   OCD.OCD_mutex[thread].unlock();
   Proc.increment_counters(Share::SD.M.shares_per_player(P.whoami()));
 
   if (player == P.whoami())
-    {
-      // Send via Channel 1 to ensure does not conflict with START/STOP OPENs
-      P.send_all(ss.str(), 1, false);
-    }
+  {
+    // Send via Channel 1 to ensure does not conflict with START/STOP OPENs
+    P.send_all(ss.str(), 1, false);
+  }
   else
-    {
-      // Receive via Channel 1
-      string ss;
-      P.receive_from_player(player, ss, 1, false);
-      stringstream is(ss);
-      gfp te;
-      te.input(is, false);
-      sa.add(rshares[player], te, P.get_mac_keys());
-    }
+  {
+    // Receive via Channel 1
+    string ss;
+    P.receive_from_player(player, ss, 1, false);
+    stringstream is(ss);
+    gfp te;
+    te.input(is, false);
+    sa.add(rshares[player], te, P.get_mac_keys());
+  }
 
   if (player == P.whoami())
-    {
-      sa.add(rshares[player], i_epsilon, P.get_mac_keys());
-    }
+  {
+    sa.add(rshares[player], i_epsilon, P.get_mac_keys());
+  }
 }
 
 void Processor_IO::private_output(unsigned int player, int source, unsigned int channel,
@@ -136,7 +135,7 @@ void Processor_IO::private_output(unsigned int player, int source, unsigned int 
                                   Machine &machine,
                                   offline_control_data &OCD)
 {
-  int thread= Proc.get_thread_num();
+  int thread = Proc.get_thread_num();
   Wait_For_Preproc(DATA_INPUT_MASK, 1, thread, OCD, player);
 
   OCD.OCD_mutex[thread].lock();
@@ -144,14 +143,14 @@ void Processor_IO::private_output(unsigned int player, int source, unsigned int 
   gfp o_epsilon;
 
   if (player == P.whoami())
-    {
-      o_epsilon= SacrificeD[thread].ID.opened_ios.front();
-      SacrificeD[thread].ID.opened_ios.pop_front();
-    }
+  {
+    o_epsilon = SacrificeD[thread].ID.opened_ios.front();
+    SacrificeD[thread].ID.opened_ios.pop_front();
+  }
 
   vector<Share> shares(1);
   vector<gfp> values(1);
-  shares[0]= SacrificeD[thread].ID.ios[player].front();
+  shares[0] = SacrificeD[thread].ID.ios[player].front();
   SacrificeD[thread].ID.ios[player].pop_front();
   OCD.OCD_mutex[thread].unlock();
 
@@ -165,8 +164,8 @@ void Processor_IO::private_output(unsigned int player, int source, unsigned int 
   Proc.RunOpenCheck(P, machine.get_IO().Get_Check(), 1);
   Proc.RunOpenCheck(P, machine.get_IO().Get_Check(), 2);
   if (player == P.whoami())
-    {
-      values[0].sub(o_epsilon);
-      machine.get_IO().private_output_gfp(values[0], channel);
-    }
+  {
+    values[0].sub(o_epsilon);
+    machine.get_IO().private_output_gfp(values[0], channel);
+  }
 }

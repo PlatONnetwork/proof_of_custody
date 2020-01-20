@@ -11,7 +11,7 @@ All rights reserved
 #include <mutex>
 using namespace std;
 
-#include "FHE/ZKPoK.h"
+//#include "FHE/ZKPoK.h"
 #include "LSSS/Share.h"
 
 /* These datatypes are just the data store for the offline phase
@@ -84,13 +84,13 @@ class offline_control_data
   void clean_up()
   {
     if (OCD_mutex != NULL)
-      {
-        delete[] OCD_mutex;
-        delete[] mul_mutex;
-        delete[] sqr_mutex;
-        delete[] bit_mutex;
-        OCD_mutex= NULL;
-      }
+    {
+      delete[] OCD_mutex;
+      delete[] mul_mutex;
+      delete[] sqr_mutex;
+      delete[] bit_mutex;
+      OCD_mutex = NULL;
+    }
   }
 
 public:
@@ -111,17 +111,17 @@ public:
   vector<int> finished_offline; // Counts how many threads HAVE died
 
   // The ZKPoKs needed for IO production when doing Full Threshold
-  vector<vector<ZKPoK>> IO_ZKPoKs;
+  //vector<vector<ZKPoK>> IO_ZKPoKs;
 
   void resize(unsigned int num_threads,
               unsigned int nplayers,
               unsigned int whoami)
   {
     clean_up();
-    OCD_mutex= new mutex[num_threads];
-    mul_mutex= new mutex[num_threads];
-    sqr_mutex= new mutex[num_threads];
-    bit_mutex= new mutex[num_threads];
+    OCD_mutex = new mutex[num_threads];
+    mul_mutex = new mutex[num_threads];
+    sqr_mutex = new mutex[num_threads];
+    bit_mutex = new mutex[num_threads];
     totm.resize(num_threads);
     tots.resize(num_threads);
     totb.resize(num_threads);
@@ -129,35 +129,16 @@ public:
     finish_offline.resize(num_threads);
     finished_online.resize(num_threads);
     finished_offline.resize(num_threads);
-    for (unsigned int i= 0; i < num_threads; i++)
-      {
-        totm[i]= 0;
-        tots[i]= 0;
-        totb[i]= 0;
-        totI[i]= 0;
-        finish_offline[i]= 0;
-        finished_offline[i]= 0;
-        finished_online[i]= 0;
-      }
-    if (Share::SD.type == Full)
-      {
-        IO_ZKPoKs.resize(num_threads);
-        for (unsigned int i= 0; i < num_threads; i++)
-          {
-            IO_ZKPoKs[i].resize(nplayers);
-            for (unsigned int j= 0; j < nplayers; j++)
-              {
-                if (j == whoami)
-                  {
-                    IO_ZKPoKs[i][j].set_params(true, true);
-                  }
-                else
-                  {
-                    IO_ZKPoKs[i][j].set_params(true, false);
-                  }
-              }
-          }
-      }
+    for (unsigned int i = 0; i < num_threads; i++)
+    {
+      totm[i] = 0;
+      tots[i] = 0;
+      totb[i] = 0;
+      totI[i] = 0;
+      finish_offline[i] = 0;
+      finished_offline[i] = 0;
+      finished_online[i] = 0;
+    }
   }
 
   unsigned int num_online_threads() const
@@ -167,7 +148,7 @@ public:
 
   offline_control_data()
   {
-    OCD_mutex= NULL;
+    OCD_mutex = NULL;
   }
   ~offline_control_data()
   {
@@ -182,14 +163,15 @@ public:
  * we assigned a random number (say 0x53) to be continous
  */
 
-enum {
-  DATA_TRIPLE= 0x50,
-  DATA_BIT= 0x51,
-  DATA_SQUARE= 0x52,
-  DATA_INPUT_MASK= 0x53
+enum
+{
+  DATA_TRIPLE = 0x50,
+  DATA_BIT = 0x51,
+  DATA_SQUARE = 0x52,
+  DATA_INPUT_MASK = 0x53
 };
 
 // Does thread locking until data type available.
 void Wait_For_Preproc(int type, unsigned int size, int thread,
-                      offline_control_data &OCD, unsigned int player= 0);
+                      offline_control_data &OCD, unsigned int player = 0);
 #endif

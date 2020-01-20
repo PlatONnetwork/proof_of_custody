@@ -10,9 +10,6 @@ All rights reserved
  */
 
 #include "System/RunTime.h"
-#include "OT/OT_Thread_Data.h"
-#include "Offline/DABitMachine.h"
-#include "Offline/FHE_Factory.h"
 #include "Offline/offline_phases.h"
 #include "Online/Online.h"
 #include "System/Networking.h"
@@ -34,8 +31,6 @@ All rights reserved
 #endif
 using namespace std;
 
-extern Base_Circuits Global_Circuit_Store;
-
 class thread_info
 {
 public:
@@ -48,15 +43,9 @@ public:
   vector<vector<int>> csockets;
   vector<gfp> MacK;
 
-  // FHE Data
-  const FHE_PK *pk;
-  const FHE_SK *sk;
-  const FFT_Data *PTD;
-
   int verbose;
 
-  Machine *machine;       // Pointer to the machine
-  FHE_Industry *industry; // Pointer to the FHE set of factories
+  Machine *machine; // Pointer to the machine
 };
 
 // We have 5 threads per online phase
@@ -74,10 +63,8 @@ void *Main_Func(void *ptr);
 
 vector<sacrificed_data> SacrificeD;
 
-MaliciousDABitMachine daBitMachine;
-
 /* Global data structure to hold the OT stuff */
-OT_Thread_Data OTD;
+//OT_Thread_Data OTD;
 
 /* Before calling this we assume various things have
  * been set up. In particular the following functions have
@@ -103,23 +90,17 @@ void Run_Scale(unsigned int my_number, unsigned int no_online_threads, const vec
                const SystemData &SD,
                Machine &machine, offline_control_data &OCD, int verbose)
 {
-  //machine.Load_Schedule_Into_Memory();
   machine.SetUp_Threads(no_online_threads);
-
-  //Global_Circuit_Store.initialize(gfp::pr());
-
   OCD.resize(no_online_threads, SD.n, my_number);
-  OTD.init(no_online_threads);
 
   SacrificeD.resize(no_online_threads);
-  for (unsigned int i= 0; i < no_online_threads; i++)
-    {
-      SacrificeD[i].initialize(SD.n);
-    }
+  for (unsigned int i = 0; i < no_online_threads; i++)
+  {
+    SacrificeD[i].initialize(SD.n);
+  }
 
-  unsigned int nthreads= 5 * no_online_threads;
-  unsigned int tnthreads= nthreads ;
-  daBitMachine.Initialize(SD.n, OCD);
+  unsigned int nthreads = 5 * no_online_threads;
+  unsigned int tnthreads = nthreads;
 
   /* Initialize the networking TCP sockets */
   int ssocket;
@@ -127,33 +108,32 @@ void Run_Scale(unsigned int my_number, unsigned int no_online_threads, const vec
   Get_Connections(ssocket, csockets, portnum, my_number, SD, verbose - 2);
   printf("All connections now done\n");
 
-
   global_time.start();
 
   printf("Setting up threads\n");
   fflush(stdout);
   threads.resize(tnthreads);
   vector<thread_info> tinfo(tnthreads);
-  for (unsigned int i= 0; i < tnthreads; i++)
+  for (unsigned int i = 0; i < tnthreads; i++)
+  {
+    if (i < nthreads)
     {
-      if (i < nthreads)
-        {
-          tinfo[i].thread_num= i;
-        }
-      tinfo[i].SD= &SD;
-      tinfo[i].OCD= &OCD;
-      tinfo[i].ctx= ctx;
-      tinfo[i].MacK= MacK;
-      tinfo[i].me= my_number;
-      tinfo[i].no_online_threads= no_online_threads;
-      tinfo[i].csockets= csockets[i];
-      tinfo[i].machine= &machine;
-      tinfo[i].verbose= verbose;
-      if (pthread_create(&threads[i], NULL, Main_Func, &tinfo[i]))
-        {
-          throw C_problem("Problem spawning thread");
-        }
+      tinfo[i].thread_num = i;
     }
+    tinfo[i].SD = &SD;
+    tinfo[i].OCD = &OCD;
+    tinfo[i].ctx = ctx;
+    tinfo[i].MacK = MacK;
+    tinfo[i].me = my_number;
+    tinfo[i].no_online_threads = no_online_threads;
+    tinfo[i].csockets = csockets[i];
+    tinfo[i].machine = &machine;
+    tinfo[i].verbose = verbose;
+    if (pthread_create(&threads[i], NULL, Main_Func, &tinfo[i]))
+    {
+      throw C_problem("Problem spawning thread");
+    }
+  }
 
   // Get all online threads in sync
   machine.Synchronize();
@@ -163,10 +143,10 @@ void Run_Scale(unsigned int my_number, unsigned int no_online_threads, const vec
 
   printf("Waiting for all clients to finish\n");
   fflush(stdout);
-  for (unsigned int i= 0; i < tnthreads; i++)
-    {
-      pthread_join(threads[i], NULL);
-    }
+  for (unsigned int i = 0; i < tnthreads; i++)
+  {
+    pthread_join(threads[i], NULL);
+  }
 
   Close_Connections(ssocket, csockets, my_number);
 
@@ -174,7 +154,8 @@ void Run_Scale(unsigned int my_number, unsigned int no_online_threads, const vec
   cout << "Total Time (with thread locking) = " << global_time.elapsed() << " seconds" << endl;
 
   long long total_triples = 0, total_squares = 0, total_bits = 0, total_inputs = 0;
-  for (size_t i = 0; i < no_online_threads; i++) {
+  for (size_t i = 0; i < no_online_threads; i++)
+  {
     total_triples += OCD.totm[i];
     total_squares += OCD.tots[i];
     total_bits += OCD.totb[i];
@@ -184,46 +165,14 @@ void Run_Scale(unsigned int my_number, unsigned int no_online_threads, const vec
   cout << "Produced a total of " << total_squares << " squares" << endl;
   cout << "Produced a total of " << total_bits << " bits" << endl;
   cout << "Produced a total of " << total_inputs << " inputs" << endl;
-
 }
-
-#ifdef BENCH_MEMORY
-void Print_Memory_Info(int player_num, int thread_num)
-{
-  int who= RUSAGE_THREAD;
-  //int who = RUSAGE_SELF; // for the calling process
-  struct rusage r_usage;
-
-  int ret= getrusage(who, &r_usage);
-  if (ret != 0)
-    {
-      printf(BENCH_TEXT_BOLD BENCH_COLOR_RED BENCH_MAGIC_START
-             "MEMORY:\n"
-             "  PLAYER#%d->THREAD#%u (PROCESS#%d)\n"
-             "  ERROR: return value -> %d\n" BENCH_MAGIC_END BENCH_ATTR_RESET,
-             player_num, thread_num, who, ret);
-    }
-  else
-    {
-      printf(BENCH_TEXT_BOLD BENCH_COLOR_RED BENCH_MAGIC_START
-             "{\"player\":%u,\n"
-             "  \"thread\":%d,\n"
-             "  \"process\":%d,\n"
-             "  \"memory\":{\n"
-             "    \"max_rss\":{\"KB\":%ld,\"MB\":%.2f}\n"
-             "  }\n"
-             "}\n" BENCH_MAGIC_END BENCH_ATTR_RESET,
-             player_num, thread_num, who, r_usage.ru_maxrss, ((double) r_usage.ru_maxrss / 1000));
-    }
-}
-#endif
 
 void *Main_Func(void *ptr)
 {
-  thread_info *tinfo= (thread_info *) ptr;
-  unsigned int num= tinfo->thread_num;
-  int me= tinfo->me;
-  int verbose= tinfo->verbose;
+  thread_info *tinfo = (thread_info *)ptr;
+  unsigned int num = tinfo->thread_num;
+  int me = tinfo->me;
+  int verbose = tinfo->verbose;
   printf("I am player %d in thread %d\n", me, num);
   fflush(stdout);
 
@@ -233,35 +182,35 @@ void *Main_Func(void *ptr)
   fflush(stdout);
 
   if (num < 10000)
+  {
+    int num5 = num % 5;
+    int num_online = (num - num5) / 5;
+    switch (num5)
     {
-      int num5= num % 5;
-      int num_online= (num - num5) / 5;
-      switch (num5)
-        {
-          case 0:
-            mult_phase(num_online, P, (tinfo->SD)->fake_sacrifice, *(tinfo->OCD), verbose);
-            break;
-          case 1:
-            square_phase(num_online, P, (tinfo->SD)->fake_sacrifice, *(tinfo->OCD),verbose);
-            break;
-          case 2:
-            bit_phase(num_online, P, (tinfo->SD)->fake_sacrifice, *(tinfo->OCD), verbose);
-            break;
-          case 3:
-            inputs_phase(num_online, P, (tinfo->SD)->fake_sacrifice, *(tinfo->OCD), verbose);
-            break;
-          case 4:
-            online_phase(num_online, P, *(tinfo->OCD), *(tinfo)->machine);
-            break;
-          default:
-            throw bad_value();
-            break;
-        }
-    }
-  else
-    {
+    case 0:
+      mult_phase(num_online, P, (tinfo->SD)->fake_sacrifice, *(tinfo->OCD), verbose);
+      break;
+    case 1:
+      square_phase(num_online, P, (tinfo->SD)->fake_sacrifice, *(tinfo->OCD), verbose);
+      break;
+    case 2:
+      bit_phase(num_online, P, (tinfo->SD)->fake_sacrifice, *(tinfo->OCD), verbose);
+      break;
+    case 3:
+      inputs_phase(num_online, P, (tinfo->SD)->fake_sacrifice, *(tinfo->OCD), verbose);
+      break;
+    case 4:
+      online_phase(num_online, P, *(tinfo->OCD), *(tinfo)->machine);
+      break;
+    default:
       throw bad_value();
+      break;
     }
+  }
+  else
+  {
+    throw bad_value();
+  }
 
 #ifdef BENCH_NETDATA
   P.print_network_data(num);
@@ -273,3 +222,34 @@ void *Main_Func(void *ptr)
 
   return 0;
 }
+
+#ifdef BENCH_MEMORY
+void Print_Memory_Info(int player_num, int thread_num)
+{
+  int who = RUSAGE_THREAD;
+  //int who = RUSAGE_SELF; // for the calling process
+  struct rusage r_usage;
+
+  int ret = getrusage(who, &r_usage);
+  if (ret != 0)
+  {
+    printf(BENCH_TEXT_BOLD BENCH_COLOR_RED BENCH_MAGIC_START
+           "MEMORY:\n"
+           "  PLAYER#%d->THREAD#%u (PROCESS#%d)\n"
+           "  ERROR: return value -> %d\n" BENCH_MAGIC_END BENCH_ATTR_RESET,
+           player_num, thread_num, who, ret);
+  }
+  else
+  {
+    printf(BENCH_TEXT_BOLD BENCH_COLOR_RED BENCH_MAGIC_START
+           "{\"player\":%u,\n"
+           "  \"thread\":%d,\n"
+           "  \"process\":%d,\n"
+           "  \"memory\":{\n"
+           "    \"max_rss\":{\"KB\":%ld,\"MB\":%.2f}\n"
+           "  }\n"
+           "}\n" BENCH_MAGIC_END BENCH_ATTR_RESET,
+           player_num, thread_num, who, r_usage.ru_maxrss, ((double)r_usage.ru_maxrss / 1000));
+  }
+}
+#endif

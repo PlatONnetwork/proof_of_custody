@@ -18,7 +18,7 @@ All rights reserved
 #include <list>
 #include <vector>
 
-template<class T>
+template <class T>
 void take_first_to_vector(std::vector<T> &v, std::list<T> &l, std::size_t k);
 
 #endif /* SRC_TOOLS_UTIL_CONTAINERS_H_ */

@@ -82,9 +82,9 @@ public:
   unsigned int get_uint();
   word get_word()
   {
-    word a= get_uint();
-    a<<= 32;
-    a+= get_uint();
+    word a = get_uint();
+    a <<= 32;
+    a += get_uint();
     return a;
   }
   __m128i get_doubleword();

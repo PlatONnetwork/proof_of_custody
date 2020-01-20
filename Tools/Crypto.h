@@ -26,9 +26,9 @@ bool Open(string &data, const string &comm, const string &open);
 /* Protocols for agreeing on random data */
 
 /* Create a random gfp element agreed between the players */
-void Create_Random(gfp &ans, Player &P, int connectin= 0);
+void Create_Random(gfp &ans, Player &P, int connectin = 0);
 /* Produce a random seed of length len */
-void Create_Random_Seed(uint8_t *seed, int len, Player &P, int connection= 0);
+void Create_Random_Seed(uint8_t *seed, int len, Player &P, int connection = 0);
 
 /* Protocols to commit and open to data */
 
@@ -39,8 +39,8 @@ void Create_Random_Seed(uint8_t *seed, int len, Player &P, int connection= 0);
  *
  * Check defines whether we do broadcast checking
  */
-template<class T>
-void Commit_And_Open(vector<vector<T>> &data, Player &P, bool check= false, int connection= 0);
+template <class T>
+void Commit_And_Open(vector<vector<T>> &data, Player &P, bool check = false, int connection = 0);
 
 /* This runs the Commit and Open Protocol for data[j] of type T
  *   0 <= j < num_players
@@ -48,7 +48,7 @@ void Commit_And_Open(vector<vector<T>> &data, Player &P, bool check= false, int 
  *
  * Check defines whether we do broadcast checking
  */
-template<class T>
-void Commit_And_Open(vector<T> &data, Player &P, bool check= false, int connection= 0);
+template <class T>
+void Commit_And_Open(vector<T> &data, Player &P, bool check = false, int connection = 0);
 
 #endif

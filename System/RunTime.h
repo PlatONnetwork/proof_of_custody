@@ -13,11 +13,9 @@ All rights reserved
  *
  */
 
-#include "FHE/FHE_Keys.h"
 #include "Offline/offline_data.h"
 #include "Online/Machine.h"
 #include "System/SystemData.h"
-
 
 void Run_Scale(unsigned int my_number, unsigned int no_online_threads, const vector<gfp> &MacK,
                SSL_CTX *ctx, const vector<unsigned int> &portnum,

@@ -29,42 +29,42 @@ inline __m128i sigma(__m128i a)
                        _mm_and_si128(a, _mm_set_epi64x(0xFFFFFFFFFFFFFFFF, 0x00)));
 }
 
-template<int N>
+template <int N>
 void MMO::encrypt_and_xor(void *output, const void *input, const uint8_t *key)
 {
   __m128i in[N], out[N];
-  for (int i= 0; i < N; i++)
-    {
-      in[i]= sigma(((__m128i *) input)[i]);
-    }
+  for (int i = 0; i < N; i++)
+  {
+    in[i] = sigma(((__m128i *)input)[i]);
+  }
   ecb_aes_128_encrypt<N>(out, in, key);
-  for (int i= 0; i < N; i++)
-    out[i]= _mm_xor_si128(out[i], in[i]);
+  for (int i = 0; i < N; i++)
+    out[i] = _mm_xor_si128(out[i], in[i]);
   avx_memcpy(output, out, sizeof(out));
 }
 
 // XXX Is this next one used?
-template<int N>
+template <int N>
 void MMO::encrypt_and_xor(void *output, const void *input, const uint8_t *key,
                           const int *indices)
 {
   __m128i in[N], out[N];
-  for (int i= 0; i < N; i++)
-    in[i]= _mm_loadu_si128(((__m128i *) input) + indices[i]);
+  for (int i = 0; i < N; i++)
+    in[i] = _mm_loadu_si128(((__m128i *)input) + indices[i]);
   encrypt_and_xor<N>(out, in, key);
-  for (int i= 0; i < N; i++)
-    _mm_storeu_si128(((__m128i *) output) + indices[i], out[i]);
+  for (int i = 0; i < N; i++)
+    _mm_storeu_si128(((__m128i *)output) + indices[i], out[i]);
 }
 
-template<>
+template <>
 void MMO::hashOneBlock<gf2n>(uint8_t *output, const uint8_t *input)
 {
   encrypt_and_xor<1>(output, input, IV);
 }
 
-template<>
+template <>
 void MMO::hashBlockWise<gf2n, 128>(uint8_t *output, const uint8_t *input)
 {
-  for (int i= 0; i < 16; i++)
-    encrypt_and_xor<8>(&((__m128i *) output)[i * 8], &((__m128i *) input)[i * 8], IV);
+  for (int i = 0; i < 16; i++)
+    encrypt_and_xor<8>(&((__m128i *)output)[i * 8], &((__m128i *)input)[i * 8], IV);
 }

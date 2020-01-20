@@ -17,32 +17,31 @@ void Machine::SetUp_Memory(unsigned int whoami, const string &memtype)
   Mc.set_default(gfp(0));
   Ms.set_default(Share(whoami));
   Mr.set_default(Integer(0));
-  Msr.set_default(aBitVector(0));
 
   // Initialize the global memory
   if (memtype.compare("old") == 0)
+  {
+    sprintf(filename, "Data/Memory-P%d", whoami);
+    ifstream inpf(filename, ios::in | ios::binary);
+    if (inpf.fail())
     {
-      sprintf(filename, "Data/Memory-P%d", whoami);
-      ifstream inpf(filename, ios::in | ios::binary);
-      if (inpf.fail())
-        {
-          throw file_error(filename);
-        }
-      // See below for ordering here
-      inpf >> Mc >> Mr >> Ms;
-      inpf.close();
+      throw file_error(filename);
     }
+    // See below for ordering here
+    inpf >> Mc >> Mr >> Ms;
+    inpf.close();
+  }
   else if (!(memtype.compare("empty") == 0))
-    {
-      cerr << "Invalid memory argument" << endl;
-      exit(1);
-    }
+  {
+    cerr << "Invalid memory argument" << endl;
+    exit(1);
+  }
 }
 
 void Machine::Dump_Memory(unsigned int whoami)
 {
   // Reduce memory size to speed up
-  int max_size= 1 << 20;
+  int max_size = 1 << 20;
   if (Mc.size() > max_size)
     Mc.resize(max_size);
   if (Ms.size() > max_size)
@@ -62,34 +61,34 @@ void Machine::Dump_Memory(unsigned int whoami)
 
 void Machine::Load_Schedule_Into_Memory()
 {
-  unsigned int nprogs= schedule.progs.size();
+  unsigned int nprogs = schedule.progs.size();
 
   // Load in the programs
   progs.resize(nprogs);
-  for (unsigned int i= 0; i < nprogs; i++)
-    {
-      progs[i].parse(schedule.progs[i]);
-      Mc.minimum_size(progs[i].direct_mem(MODP)[CLEAR], schedule.tnames[i]);
-      Ms.minimum_size(progs[i].direct_mem(MODP)[SECRET], schedule.tnames[i]);
-      Mr.minimum_size(progs[i].direct_mem(INT)[CLEAR], schedule.tnames[i]);
-      Msr.minimum_size(progs[i].direct_mem(INT)[SECRET], schedule.tnames[i]);
-    }
+  for (unsigned int i = 0; i < nprogs; i++)
+  {
+    progs[i].parse(schedule.progs[i]);
+    Mc.minimum_size(progs[i].direct_mem(MODP)[CLEAR], schedule.tnames[i]);
+    Ms.minimum_size(progs[i].direct_mem(MODP)[SECRET], schedule.tnames[i]);
+    Mr.minimum_size(progs[i].direct_mem(INT)[CLEAR], schedule.tnames[i]);
+    //Msr.minimum_size(progs[i].direct_mem(INT)[SECRET], schedule.tnames[i]);
+  }
 }
 
 void Machine::Init_OTI(unsigned int nthreads)
 {
-  for (unsigned int i= 0; i < nthreads; i++)
-    {
-      pthread_mutex_init(&online_mutex[i], NULL);
-      pthread_cond_init(&machine_ready[i], NULL);
-      pthread_cond_init(&online_thread_ready[i], NULL);
-      OTI[i].prognum= -2; // Dont do anything until we are ready
-      OTI[i].finished= true;
-      OTI[i].ready= false;
-      OTI[i].arg= 0;
-      // lock online thread for synchronization
-      pthread_mutex_lock(&online_mutex[i]);
-    }
+  for (unsigned int i = 0; i < nthreads; i++)
+  {
+    pthread_mutex_init(&online_mutex[i], NULL);
+    pthread_cond_init(&machine_ready[i], NULL);
+    pthread_cond_init(&online_thread_ready[i], NULL);
+    OTI[i].prognum = -2; // Dont do anything until we are ready
+    OTI[i].finished = true;
+    OTI[i].ready = false;
+    OTI[i].arg = 0;
+    // lock online thread for synchronization
+    pthread_mutex_lock(&online_mutex[i]);
+  }
 }
 
 void Machine::SetUp_Threads(unsigned int nthreads)
@@ -106,30 +105,30 @@ void Machine::SetUp_Threads(unsigned int nthreads)
 
 void Machine::Synchronize()
 {
-  for (unsigned int i= 0; i < OTI.size(); i++)
+  for (unsigned int i = 0; i < OTI.size(); i++)
+  {
+    while (!OTI[i].ready)
     {
-      while (!OTI[i].ready)
-        {
-          fprintf(stderr, "Waiting for thread %d to be ready\n", i);
-          pthread_cond_wait(&online_thread_ready[i], &online_mutex[i]);
-        }
-      pthread_mutex_unlock(&online_mutex[i]);
+      fprintf(stderr, "Waiting for thread %d to be ready\n", i);
+      pthread_cond_wait(&online_thread_ready[i], &online_mutex[i]);
     }
+    pthread_mutex_unlock(&online_mutex[i]);
+  }
 }
 
 void Machine::Signal_Ready(unsigned int num, bool flag)
 {
   pthread_mutex_lock(&online_mutex[num]);
-  OTI[num].ready= flag;
+  OTI[num].ready = flag;
   if (flag)
-    {
-      pthread_cond_signal(&online_thread_ready[num]);
-    }
+  {
+    pthread_cond_signal(&online_thread_ready[num]);
+  }
   else
-    {
-      OTI[num].prognum= -1;
-      pthread_cond_signal(&machine_ready[num]);
-    }
+  {
+    OTI[num].prognum = -1;
+    pthread_cond_signal(&machine_ready[num]);
+  }
   pthread_mutex_unlock(&online_mutex[num]);
 }
 
@@ -145,11 +144,11 @@ int Machine::Pause_While_Nothing_To_Do(unsigned int num)
 {
   pthread_mutex_lock(&online_mutex[num]);
   if (OTI[num].prognum == -2)
-    {
-      pthread_cond_wait(&machine_ready[num], &online_mutex[num]);
-    }
-  int program= OTI[num].prognum;
-  OTI[num].prognum= -2; // Reset it to run nothing next
+  {
+    pthread_cond_wait(&machine_ready[num], &online_mutex[num]);
+  }
+  int program = OTI[num].prognum;
+  OTI[num].prognum = -2; // Reset it to run nothing next
   pthread_mutex_unlock(&online_mutex[num]);
   return program;
 }
@@ -157,7 +156,7 @@ int Machine::Pause_While_Nothing_To_Do(unsigned int num)
 void Machine::Signal_Finished_Tape(unsigned int num)
 {
   pthread_mutex_lock(&online_mutex[num]);
-  OTI[num].finished= true;
+  OTI[num].finished = true;
   pthread_cond_signal(&online_thread_ready[num]);
   pthread_mutex_unlock(&online_mutex[num]);
 }
@@ -175,20 +174,20 @@ void Machine::run_tape(unsigned int thread_number, unsigned int tape_number,
                        int arg)
 {
   if (thread_number >= OTI.size())
-    {
-      throw Processor_Error("invalid thread number: " + to_string(thread_number) +
-                            "/" + to_string(OTI.size()));
-    }
+  {
+    throw Processor_Error("invalid thread number: " + to_string(thread_number) +
+                          "/" + to_string(OTI.size()));
+  }
   if (tape_number >= progs.size())
-    {
-      throw Processor_Error("invalid tape number: " + to_string(tape_number) +
-                            "/" + to_string(progs.size()));
-    }
+  {
+    throw Processor_Error("invalid tape number: " + to_string(tape_number) +
+                          "/" + to_string(progs.size()));
+  }
 
   pthread_mutex_lock(&online_mutex[thread_number]);
-  OTI[thread_number].prognum= tape_number;
-  OTI[thread_number].arg= arg;
-  OTI[thread_number].finished= false;
+  OTI[thread_number].prognum = tape_number;
+  OTI[thread_number].arg = arg;
+  OTI[thread_number].finished = false;
   pthread_cond_signal(&machine_ready[thread_number]);
   pthread_mutex_unlock(&online_mutex[thread_number]);
 }
@@ -197,55 +196,55 @@ void Machine::run()
 {
   // Initialise the timers
   timers.resize(N_TIMERS);
-  for (unsigned int i= 0; i < N_TIMERS; i++)
-    {
-      timers[i].start();
-    }
+  for (unsigned int i = 0; i < N_TIMERS; i++)
+  {
+    timers[i].start();
+  }
 
   // First go through the schedule and execute what is there
-  bool flag= true;
-  for (unsigned int i= 0; i < 1; i++)
+  bool flag = true;
+  for (unsigned int i = 0; i < 1; i++)
   {
     Lock_Until_Finished_Tape(i);
   }
 
   // Tell all online threads to stop
-  for (unsigned int i= 0; i < OTI.size(); i++)
-    {
-      Signal_Ready(i, false);
-    }
+  for (unsigned int i = 0; i < OTI.size(); i++)
+  {
+    Signal_Ready(i, false);
+  }
 
   cerr << "Waiting for all clients to finish" << endl;
   // Wait until all clients have signed out
-  for (unsigned int i= 0; i < OTI.size(); i++)
-    {
-      pthread_mutex_lock(&online_mutex[i]);
-      OTI[i].ready= true;
-      pthread_cond_signal(&machine_ready[i]);
-      pthread_mutex_unlock(&online_mutex[i]);
+  for (unsigned int i = 0; i < OTI.size(); i++)
+  {
+    pthread_mutex_lock(&online_mutex[i]);
+    OTI[i].ready = true;
+    pthread_cond_signal(&machine_ready[i]);
+    pthread_mutex_unlock(&online_mutex[i]);
 
-      pthread_mutex_destroy(&online_mutex[i]);
-      pthread_cond_destroy(&online_thread_ready[i]);
-      pthread_cond_destroy(&machine_ready[i]);
-    }
+    pthread_mutex_destroy(&online_mutex[i]);
+    pthread_cond_destroy(&online_thread_ready[i]);
+    pthread_cond_destroy(&machine_ready[i]);
+  }
 }
 
 void Machine::start_timer(unsigned int i)
 {
   if (i >= N_TIMERS)
-    {
-      throw invalid_length();
-    }
+  {
+    throw invalid_length();
+  }
   timers[i].reset();
 }
 
 void Machine::stop_timer(unsigned int i)
 {
   if (i >= N_TIMERS)
-    {
-      throw invalid_length();
-    }
-  double time= timers[i].elapsed();
+  {
+    throw invalid_length();
+  }
+  double time = timers[i].elapsed();
   printf(BENCH_TEXT_BOLD BENCH_COLOR_GREEN BENCH_MAGIC_START
          "{\"timer\":%u,\n"
          "  \"time\":{\"seconds\":%lf,\"ms\":%.4lf}\n"

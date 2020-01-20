@@ -14,27 +14,27 @@ All rights reserved
 #include <string.h>
 using namespace std;
 
-PRNG::PRNG() { useC= (Check_CPU_support_AES() == 0); }
+PRNG::PRNG() { useC = (Check_CPU_support_AES() == 0); }
 
 void PRNG::ReSeed(int thread)
 {
 #ifdef DETERMINISTIC
   memset(seed, 0, sizeof(uint8_t) * SEED_SIZE);
 #else
-  FILE *rD= fopen("/dev/urandom", "r");
+  FILE *rD = fopen("/dev/urandom", "r");
   if (fread(seed, sizeof(uint8_t), SEED_SIZE, rD) != SEED_SIZE)
-    {
-      throw C_problem("fread on urandom gone wrong");
-    }
+  {
+    throw C_problem("fread on urandom gone wrong");
+  }
 
   fclose(rD);
 #endif
   uint8_t buff[4];
   INT_TO_BYTES(buff, thread);
-  for (int i= 0; i < 4; i++)
-    {
-      seed[i]^= buff[i];
-    }
+  for (int i = 0; i < 4; i++)
+  {
+    seed[i] ^= buff[i];
+  }
   InitSeed();
 }
 
@@ -62,16 +62,16 @@ void PRNG::SetSeed(PRNG &G)
 void PRNG::InitSeed()
 {
   if (useC)
-    {
-      aes_schedule(KeyScheduleC, seed);
-    }
+  {
+    aes_schedule(KeyScheduleC, seed);
+  }
   else
-    {
-      aes_schedule(KeySchedule, seed);
-    }
+  {
+    aes_schedule(KeySchedule, seed);
+  }
   memset(state, 0, RAND_SIZE * sizeof(uint8_t));
-  for (int i= 0; i < PIPELINES; i++)
-    state[i * AES_BLK_SIZE]= i;
+  for (int i = 0; i < PIPELINES; i++)
+    state[i * AES_BLK_SIZE] = i;
   next();
   // cout << "SetSeed : "; print_state(); cout << endl;
 }
@@ -79,60 +79,60 @@ void PRNG::InitSeed()
 void PRNG::print_state() const
 {
   int i;
-  for (i= 0; i < SEED_SIZE; i++)
+  for (i = 0; i < SEED_SIZE; i++)
+  {
+    if (seed[i] < 10)
     {
-      if (seed[i] < 10)
-        {
-          cout << "0";
-        }
-      cout << hex << (int) seed[i];
+      cout << "0";
     }
+    cout << hex << (int)seed[i];
+  }
   cout << "\t";
-  for (i= 0; i < RAND_SIZE; i++)
+  for (i = 0; i < RAND_SIZE; i++)
+  {
+    if (random[i] < 10)
     {
-      if (random[i] < 10)
-        {
-          cout << "0";
-        }
-      cout << hex << (int) random[i];
+      cout << "0";
     }
+    cout << hex << (int)random[i];
+  }
   cout << "\t";
-  for (i= 0; i < SEED_SIZE; i++)
+  for (i = 0; i < SEED_SIZE; i++)
+  {
+    if (state[i] < 10)
     {
-      if (state[i] < 10)
-        {
-          cout << "0";
-        }
-      cout << hex << (int) state[i];
+      cout << "0";
     }
+    cout << hex << (int)state[i];
+  }
   cout << " " << dec << cnt << " : ";
 }
 
 void PRNG::hash()
 {
   if (useC)
-    {
-      aes_encrypt(random, state, KeyScheduleC);
-    }
+  {
+    aes_encrypt(random, state, KeyScheduleC);
+  }
   else
-    {
-      ecb_aes_128_encrypt<PIPELINES>((__m128i *) random, (__m128i *) state,
-                                     KeySchedule);
-    }
+  {
+    ecb_aes_128_encrypt<PIPELINES>((__m128i *)random, (__m128i *)state,
+                                   KeySchedule);
+  }
   // This is a new random value so we have not used any of it yet
-  cnt= 0;
+  cnt = 0;
 }
 
 void PRNG::next()
 {
   // Increment state
-  for (int i= 0; i < PIPELINES; i++)
-    {
-      int64_t *s= (int64_t *) &state[i * AES_BLK_SIZE];
-      s[0]+= PIPELINES;
-      if (s[0] == 0)
-        s[1]++;
-    }
+  for (int i = 0; i < PIPELINES; i++)
+  {
+    int64_t *s = (int64_t *)&state[i * AES_BLK_SIZE];
+    s[0] += PIPELINES;
+    if (s[0] == 0)
+      s[1]++;
+  }
   hash();
 }
 
@@ -140,15 +140,15 @@ double PRNG::get_double()
 {
   // We need four bytes of randomness
   if (cnt > RAND_SIZE - 4)
-    {
-      next();
-    }
-  unsigned int a0= random[cnt], a1= random[cnt + 1], a2= random[cnt + 2],
-               a3= random[cnt + 3];
-  double ans= (a0 + (a1 << 8) + (a2 << 16) + (a3 << 24));
-  cnt= cnt + 4;
-  unsigned int den= 0xFFFFFFFF;
-  ans= ans / den;
+  {
+    next();
+  }
+  unsigned int a0 = random[cnt], a1 = random[cnt + 1], a2 = random[cnt + 2],
+               a3 = random[cnt + 3];
+  double ans = (a0 + (a1 << 8) + (a2 << 16) + (a3 << 24));
+  cnt = cnt + 4;
+  unsigned int den = 0xFFFFFFFF;
+  ans = ans / den;
   // print_state(); cout << " DBLE " <<  ans << endl;
   return ans;
 }
@@ -157,13 +157,13 @@ unsigned int PRNG::get_uint()
 {
   // We need four bytes of randomness
   if (cnt > RAND_SIZE - 4)
-    {
-      next();
-    }
-  unsigned int a0= random[cnt], a1= random[cnt + 1], a2= random[cnt + 2],
-               a3= random[cnt + 3];
-  cnt= cnt + 4;
-  unsigned int ans= (a0 + (a1 << 8) + (a2 << 16) + (a3 << 24));
+  {
+    next();
+  }
+  unsigned int a0 = random[cnt], a1 = random[cnt + 1], a2 = random[cnt + 2],
+               a3 = random[cnt + 3];
+  cnt = cnt + 4;
+  unsigned int ans = (a0 + (a1 << 8) + (a2 << 16) + (a3 << 24));
   // print_state(); cout << " UINT " << ans << endl;
   return ans;
 }
@@ -172,18 +172,18 @@ __m128i PRNG::get_doubleword()
 {
   if (cnt > RAND_SIZE - 16)
     next();
-  __m128i ans= _mm_loadu_si128((__m128i *) &random[cnt]);
-  cnt+= 16;
+  __m128i ans = _mm_loadu_si128((__m128i *)&random[cnt]);
+  cnt += 16;
   return ans;
 }
 
 unsigned char PRNG::get_uchar()
 {
   if (cnt >= RAND_SIZE)
-    {
-      next();
-    }
-  unsigned char ans= random[cnt];
+  {
+    next();
+  }
+  unsigned char ans = random[cnt];
   cnt++;
   // print_state(); cout << " UCHA " << (int) ans << endl;
   return ans;
@@ -192,35 +192,35 @@ unsigned char PRNG::get_uchar()
 /* Returns len random bytes */
 void PRNG::get_random_bytes(uint8_t *ans, int len)
 {
-  int pos= 0;
+  int pos = 0;
   while (len)
-    {
-      int step= min(len, RAND_SIZE - cnt);
-      memcpy(ans + pos, random + cnt, step);
-      pos+= step;
-      len-= step;
-      cnt+= step;
-      if (cnt == RAND_SIZE)
-        next();
-    }
+  {
+    int step = min(len, RAND_SIZE - cnt);
+    memcpy(ans + pos, random + cnt, step);
+    pos += step;
+    len -= step;
+    cnt += step;
+    if (cnt == RAND_SIZE)
+      next();
+  }
 }
 
 /* Returns len random bytes */
 void PRNG::get_random_bytes(vector<uint8_t> &ans)
 {
-  int pos= 0;
-  int len= ans.size();
+  int pos = 0;
+  int len = ans.size();
   while (len)
+  {
+    int step = min(len, RAND_SIZE - cnt);
+    for (int i = 0; i < step; i++)
     {
-      int step= min(len, RAND_SIZE - cnt);
-      for (int i= 0; i < step; i++)
-        {
-          ans[pos + i]= random[cnt + i];
-        }
-      pos+= step;
-      len-= step;
-      cnt+= step;
-      if (cnt == RAND_SIZE)
-        next();
+      ans[pos + i] = random[cnt + i];
     }
+    pos += step;
+    len -= step;
+    cnt += step;
+    if (cnt == RAND_SIZE)
+      next();
+  }
 }

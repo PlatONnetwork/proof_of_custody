@@ -19,12 +19,12 @@ All rights reserved
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "GC/Garbled.h"
-#include "OT/OT_Thread_Data.h"
+//#include "GC/Garbled.h"
+//#include "OT/OT_Thread_Data.h"
 
-extern OT_Thread_Data OTD;
+//extern OT_Thread_Data OTD;
 
-extern Base_Circuits Global_Circuit_Store;
+//extern Base_Circuits Global_Circuit_Store;
 extern vector<sacrificed_data> SacrificeD;
 
 using namespace std;
@@ -1468,6 +1468,7 @@ bool Instruction::execute(Processor &Proc, Player &P, Machine &machine,
   int r[3]= {this->r[0], this->r[1], this->r[2]};
   int n= this->n;
 
+#if 0
   // Extract daBit
   if (opcode == DABIT)
     {
@@ -1477,6 +1478,7 @@ bool Instruction::execute(Processor &Proc, Player &P, Machine &machine,
         }
       return restart;
     }
+#endif
 
   for (unsigned int i= 0; i < size; i++)
     {
@@ -2070,7 +2072,7 @@ bool Instruction::execute(Processor &Proc, Player &P, Machine &machine,
             machine.Mc.clear_memory();
             machine.Ms.clear_memory();
             machine.Mr.clear_memory();
-            machine.Msr.clear_memory();
+            //machine.Msr.clear_memory();
             break;
           case CLEAR_REGISTERS:
             Proc.clear_registers();
@@ -2151,6 +2153,7 @@ bool Instruction::execute(Processor &Proc, Player &P, Machine &machine,
               }
             Proc.iop.private_input(p, r[0], m, Proc, P, machine, OCD);
             break;
+#if 0
           /* Now we add in the new instructions for sregint and sbit operations */
           case LDMSINT:
             Proc.write_srint(r[0], machine.Msr.read(n));
@@ -2293,6 +2296,7 @@ bool Instruction::execute(Processor &Proc, Player &P, Machine &machine,
           case LF_REGINT:
             Proc.apply_local_function(INT, CLEAR, start);
             break;
+#endif
           default:
             printf("Invalid opcode=%d. Since it is not implemented\n", opcode);
             throw not_implemented();

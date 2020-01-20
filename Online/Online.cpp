@@ -9,9 +9,6 @@ All rights reserved
 
 #include "Online.h"
 #include "Processor/Processor.h"
-#include "OT/OT_Thread_Data.h"
-
-extern OT_Thread_Data OTD;
 
 void online_phase(int online_num, Player &P, offline_control_data &OCD,
                   Machine &machine)

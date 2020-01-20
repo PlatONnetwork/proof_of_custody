@@ -10,23 +10,16 @@ All rights reserved
 #include <list>
 using namespace std;
 
-#include "FHE_Factory.h"
 #include "LSSS/Open_Protocol.h"
 #include "LSSS/PRSS.h"
 #include "offline_data.h"
 
 void make_IO_data_fake(Player &P, unsigned int player_num, list<Share> &a,
                        list<gfp> &opened);
+
 void make_IO_data_non_Full(Player &P, PRSS &prss, unsigned int player_num,
                            list<Share> &a, list<gfp> &opened,
                            Open_Protocol &OP);
-                           
-void make_IO_data(Player &P, int fake_sacrifice, PRSS &prss,
-                  unsigned int player_num, list<Share> &a, list<gfp> &opened,
-                  const FHE_PK &pk, const FHE_SK &sk, const FFT_Data &PTD,
-                  offline_control_data &OCD, Open_Protocol &OP,
-                  unsigned int num_online, FHE_Industry &industry);
-
 
 void make_IO_data(Player &P, int fake_sacrifice, PRSS &prss,
                   unsigned int player_num, list<Share> &a, list<gfp> &opened,

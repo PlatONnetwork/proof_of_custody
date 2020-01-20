@@ -37,7 +37,7 @@ public:
              const vector<string> &IP_Numbers,
              const vector<string> &PlayerCertFiles,
              const vector<string> &PlayerNames,
-             int fake_off= 0, int fake_sac= 0)
+             int fake_off = 0, int fake_sac = 0)
   {
     init(numplayers, RootCertName,
          IP_Numbers, PlayerCertFiles, PlayerNames,

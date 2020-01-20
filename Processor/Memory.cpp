@@ -9,7 +9,7 @@ All rights reserved
 #include "LSSS/Share.h"
 #include "Math/Integer.h"
 #include "Math/gfp.h"
-#include "OT/aBitVector.h"
+//#include "OT/aBitVector.h"
 
 #include <fstream>
 
@@ -102,7 +102,7 @@ void Load_Memory(Memory<T> &M, ifstream &inpf)
 template class Memory<gfp>;
 template class Memory<Share>;
 template class Memory<Integer>;
-template class Memory<aBitVector>;
+//template class Memory<aBitVector>;
 
 template istream &operator>>(istream &s, Memory<gfp> &M);
 template istream &operator>>(istream &s, Memory<Share> &M);
@@ -115,4 +115,4 @@ template ostream &operator<<(ostream &s, const Memory<Integer> &M);
 template void Load_Memory(Memory<gfp> &M, ifstream &inpf);
 template void Load_Memory(Memory<Share> &M, ifstream &inpf);
 template void Load_Memory(Memory<Integer> &M, ifstream &inpf);
-template void Load_Memory(Memory<aBitVector> &M, ifstream &inpf);
+//template void Load_Memory(Memory<aBitVector> &M, ifstream &inpf);

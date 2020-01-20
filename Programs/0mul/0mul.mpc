@@ -1,4 +1,0 @@
-a=sint(166)
-b=sint(163)
-mul=a*b
-print_ln("%s", mul.reveal())

@@ -53,7 +53,7 @@ class Timer
   }
 
 public:
-  Timer(clockid_t clock_id= CLOCK_MONOTONIC)
+  Timer(clockid_t clock_id = CLOCK_MONOTONIC)
       : running(false), elapsed_time(0), clock_id(clock_id)
   {
     clock_gettime(clock_id, &startv);
@@ -62,30 +62,30 @@ public:
   Timer &start()
   {
     if (running)
-      {
-        throw Timer_Error("Timer already running.");
-      }
+    {
+      throw Timer_Error("Timer already running.");
+    }
     // clock() is not suitable in threaded programs so time using something else
     clock_gettime(clock_id, &startv);
-    running= true;
+    running = true;
     return *this;
   }
 
   void stop()
   {
     if (!running)
-      {
-        throw Timer_Error("Time not running.");
-      }
-    elapsed_time+= elapsed_since_last_start();
+    {
+      throw Timer_Error("Time not running.");
+    }
+    elapsed_time += elapsed_since_last_start();
 
-    running= false;
+    running = false;
     clock_gettime(clock_id, &startv);
   }
 
   void reset()
   {
-    elapsed_time= 0;
+    elapsed_time = 0;
     clock_gettime(clock_id, &startv);
   }
 

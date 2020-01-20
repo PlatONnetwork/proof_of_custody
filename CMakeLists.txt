@@ -15,7 +15,7 @@ include_directories($<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 # TODO why is it not in config.h as well?
 add_definitions(-DMAX_MOD_SZ=7)
 add_compile_options(
-        -maes
+        -maes 
         -mpclmul
         -msse4.1
         -mavx
@@ -30,142 +30,21 @@ find_package(CryptoPP REQUIRED)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-file(GLOB exceptions
-        Exceptions/handler.cpp
-)
 
-file(GLOB fhe
-        FHE/Ciphertext.cpp
-        FHE/Distributions.cpp
-        FHE/FFT.cpp
-        FHE/FFT_Data.cpp
-        FHE/FHE_Keys.cpp
-        FHE/FHE_Params.cpp
-        FHE/Plaintext.cpp
-        FHE/Random_Coins.cpp
-        FHE/Ring.cpp
-        FHE/Ring_Element.cpp
-        FHE/Rq_Element.cpp
-        FHE/ZKPoK.cpp
-        )
-
-file(GLOB gc
-        GC/Base_Circuits.cpp
-        GC/Circuit.cpp
-        GC/Garbled.cpp
-        GC/SimplifyCircuit.cpp
-        )
-
-file(GLOB io
-        Input_Output/Input_Output_Base.cpp
-        Input_Output/Input_Output_Simple.cpp
-        )
-
-file(GLOB lsss
-        LSSS/CAS.cpp
-        LSSS/MSP.cpp
-        LSSS/Open_Protocol.cpp
-        LSSS/PRSS.cpp
-        LSSS/PRZS.cpp
-        LSSS/Schur_Matrices.cpp
-        LSSS/Share.cpp
-        LSSS/ShareData.cpp
-        )
-
-file(GLOB mpcmath
-        Math/bigint.cpp
-        Math/gf2n.cpp
-        Math/gfp.cpp
-        Math/Integer.cpp
-        Math/Matrix.cpp
-        Math/modp.cpp
-        Math/Zp_Data.cpp
-        )
-
-file(GLOB offline
-        Offline/DABitGenerator.cpp
-        Offline/DABitMachine.cpp
-        Offline/FakePrep.cpp
-        Offline/FHE_Factory.cpp
-        Offline/offline.cpp
-        Offline/offline2.cpp
-        Offline/offline_data.cpp
-        Offline/offline_FHE.cpp
-        Offline/offline_IO_production.cpp
-        Offline/offline_IO_production2.cpp
-        Offline/offline_Maurer.cpp
-        Offline/offline_phases.cpp
-        Offline/offline_phases2.cpp
-        Offline/offline_Reduced.cpp
-        Offline/offline_subroutines.cpp
-        Offline/sacrifice.cpp
-        Offline/XOR_Machine.cpp
-        )
-
-file(GLOB online
-        Online/Machine.cpp
-        Online/Online.cpp
-        Online/Online2.cpp
-        Online/Schedule.cpp
-        )
-
-file(GLOB ot
-        OT/aAND.cpp
-        OT/aAND_Thread.cpp
-        OT/aBit.cpp
-        OT/aBit_Thread.cpp
-        OT/aBitFactory.cpp
-        OT/aBitVector.cpp
-        OT/BitMatrix.cpp
-        OT/BitVector.cpp
-        OT/COT.cpp
-        OT/CRS.cpp
-        OT/DMC.cpp
-        OT/HaAND.cpp
-        OT/LaAND.cpp
-        OT/ROT.cpp
-        OT/SimpleROT.cpp
-        )
-
-file(GLOB processor
-        Processor/Instruction.cpp
-        Processor/Memory.cpp
-        Processor/Processor2.cpp
-        Processor/Processor.cpp
-        Processor/Processor_IO.cpp
-        Processor/Program.cpp
-        )
-
-file(GLOB system
-        System/Networking.cpp
-        System/Player.cpp
-        System/RunTime.cpp
-        System/SystemData.cpp
-        )
-
-file(GLOB tools
-        Tools/aes-ni.cpp
-        Tools/aes.cpp
-        Tools/CBC-MAC.cpp
-        Tools/Crypto.cpp
-        Tools/MMO.cpp
-        Tools/random.cpp
-        Tools/Timer.cpp
-        Tools/util_containers.cpp
-        )
-
-file(GLOB local
-        Local/BLAS.cpp
-        Local/Local_Functions.cpp
-        )
+file(GLOB exceptions Exceptions/*.cpp)
+file(GLOB io Input_Output/*.cpp)
+file(GLOB lsss LSSS/*.cpp)
+file(GLOB mpcmath Math/*.cpp)
+file(GLOB offline Offline/*.cpp)
+file(GLOB online Online/*.cpp)
+file(GLOB processor Processor/*.cpp)
+file(GLOB system System/*.cpp)
+file(GLOB tools Tools/*.cpp)
 
 # scale
 add_library(scale STATIC
         ${exceptions}
-        ${fhe}
-        ${gc}
         ${io}
-        ${local}
         ${lsss}
         ${mpcmath}
         ${offline}
@@ -184,5 +63,5 @@ target_link_libraries(scale PRIVATE
 add_executable(Player.x Player.cpp)
 target_link_libraries(Player.x PRIVATE scale)
 
-add_executable(setup Setup.cpp)
-target_link_libraries(setup PRIVATE OpenSSL::Crypto OpenSSL::SSL scale)
+add_executable(Setup.x Setup.cpp)
+target_link_libraries(Setup.x PRIVATE OpenSSL::Crypto OpenSSL::SSL scale)
