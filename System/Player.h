@@ -60,11 +60,17 @@ public:
   mutable vector<Timer> clocks;
 
   // Thread specifies which thread this instance is related to
+  Player(){}
   Player(int mynumber, const SystemData &SD, int thread, SSL_CTX *ctx,
          vector<vector<int>> &csockets,
          const vector<gfp> &MacK, int verbose);
 
   ~Player();
+
+  //Init player
+  void Init(int mynumber, const SystemData &SD, int thread, SSL_CTX *ctx,
+         vector<vector<int>> &csockets,
+         const vector<gfp> &MacK, int verbose);
 
   // Send and receive strings
   void send_all(const string &o, int connection= 0, bool verbose= false) const;

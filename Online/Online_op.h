@@ -4,20 +4,20 @@ Copyright (c) 2019, COSIC-KU Leuven, Kasteelpark Arenberg 10, bus 2452, B-3001 L
 
 All rights reserved
 */
-#ifndef _Online
-#define _Online
+#ifndef _OnlineOP
+#define _OnlineOP
 
 #include "Offline/offline_data.h"
 #include "Online/Machine.h"
 #include "System/Player.h"
 #include "Processor/Processor.h"
 
-//extern vector<sacrificed_data> SacrificeD;
-
+extern vector<sacrificed_data> SacrificeD;
+/*
 void online_phase(int online_num, Player &P, offline_control_data &OCD,
                   Machine &machine);
+*/
 
-/*
 enum
 {
     TRIPLE = 0x50,
@@ -26,11 +26,9 @@ enum
     INPUT_MASK = 0x53
 };
 
-
 class OnlineOp
 {
-    public:
-
+public:
     Processor &Proc;
     int online_num;
     Player &P;
@@ -64,5 +62,5 @@ class OnlineOp
     void test_mul();
     void test_div();
 };
-*/
+
 #endif

@@ -58,6 +58,8 @@ add_library(scale STATIC
 target_link_libraries(scale PRIVATE
         Threads::Threads OpenSSL::Crypto OpenSSL::SSL
         ${CRYPTOPP_LIBRARIES} ${MPIR_LIBRARIES} ${MPIRXX_LIBRARIES}
+        mcl
+        mclbn384_256
         )
 
 add_executable(Player.x Player.cpp)

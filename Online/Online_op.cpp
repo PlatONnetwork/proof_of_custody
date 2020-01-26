@@ -9,8 +9,9 @@ All rights reserved
 
 #include "Online.h"
 #include "Processor/Processor.h"
+#include "Online_op.h"
 
-void getTriples(Processor &Proc, vector<Share> &sp, offline_control_data &OCD, int opcode)
+void getTuples(Processor &Proc, vector<Share> &sp, offline_control_data &OCD, int opcode)
 {
   int thread = Proc.get_thread_num();
   Wait_For_Preproc(opcode, 100, thread, OCD); // temp set 100
@@ -70,7 +71,7 @@ void OnlineOp::mul(Share &a, Share &b, Share &c)
     sp[i].set_player(P.whoami());
   }
 
-  getTriples(Proc, sp, OCD, TRIPLE);
+  getTuples(Proc, sp, OCD, TRIPLE);
 
   /*
   phase 1
@@ -127,14 +128,14 @@ void OnlineOp::div(Share &a, Share &b, Share &c)
   {
     sp[i].set_player(P.whoami());
   }
-  getTriples(Proc, sp, OCD, TRIPLE);
+  getTuples(Proc, sp, OCD, TRIPLE);
 
   vector<Share> sps(2); // SQUARE
   for (int i = 0; i < sps.size(); i++)
   {
     sps[i].set_player(P.whoami());
   }
-  getTriples(Proc, sps, OCD, SQUARE);
+  getTuples(Proc, sps, OCD, SQUARE);
 
   /*
   phase 1
@@ -196,7 +197,7 @@ void OnlineOp::div(Share &a, Share &b, Share &c)
   00 00 00 02 00 00 00 05 00 00 00 A6                 A6 --> Sp[5]
   00 00 00 26 00 00 00 03 00 00 00 05 00 00 00 01     Sp[5] - Sp[1] --> Sp[3]
   */
-  getTriples(Proc, sp, OCD, TRIPLE);
+  getTuples(Proc, sp, OCD, TRIPLE);
   gfp cp2 = 1;
   cp0 = 1;
   Share sp4 = sps[0] * cp0;

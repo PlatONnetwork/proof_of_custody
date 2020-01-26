@@ -248,7 +248,105 @@ Player::~Player()
     }
   }
 }
+void Player::Init(int mynumber, const SystemData &SD, int thread, SSL_CTX *ctx,
+                  vector<vector<int>> &csockets,
+                  const vector<gfp> &MacK, int verbose)
+{
+  clocks.resize(10);
+  G.ReSeed(thread);
+  sha256.resize(3);
+  SHA256_Init(&sha256[0]);
+  SHA256_Init(&sha256[1]);
+  SHA256_Init(&sha256[2]);
 
+  me = mynumber;
+  ssl.resize(SD.n);
+
+#ifdef BENCH_NETDATA
+  br_messages_sent = 0;
+  pp_messages_sent = 0;
+  data_sent = 0;
+  data_received = 0;
+#endif
+
+  // When communicating with player i, player me acts as server when i<me
+  for (unsigned int i = 0; i < SD.n; i++)
+  {
+    ssl[i].resize(3);
+    for (unsigned int j = 0; j < 3; j++)
+    {
+      if (i != me)
+      {
+        ssl[i][j] = SSL_new(ctx); /* get new SSL state with context */
+        if (i < me)
+        { /* set connection socket to SSL state */
+          int ret = SSL_set_fd(ssl[i][j], csockets[i][j]);
+          if (ret == 0)
+          {
+            printf("S: Player %d failed to SSL_set_fd with player %d on connection %d in thread %d\n",
+                   mynumber, i, j, thread);
+            throw SSL_error("SSL_set_fd");
+          }
+          if (verbose > 0)
+          {
+            printf("S: Player %d going SSL with player %d on connction %d at %s in thread %d\n",
+                   mynumber, i, j, SD.IP[i].c_str(), thread);
+          }
+          /* do SSL-protocol accept */
+          ret = SSL_accept(ssl[i][j]);
+          if (ret <= 0)
+          {
+            printf("S: Error in player %d accepting to player %d on connection %d at address %s "
+                   "in thread %d\n",
+                   mynumber, i, j, SD.IP[i].c_str(), thread);
+            ERR_print_errors_fp(stdout);
+            throw SSL_error("SSL_accept");
+          }
+          if (verbose > 0)
+          {
+            printf("S: Player %d connected to player %d on connection %d in thread %d with %s "
+                   "encryption\n",
+                   mynumber, i, j, thread, SSL_get_cipher(ssl[i][j]));
+          }
+        }
+        else
+        { // Now client side stuff
+          int ret = SSL_set_fd(ssl[i][j], csockets[i][j]);
+          if (ret == 0)
+          {
+            printf("C: Player %d failed to SSL_set_fd with player %d on connection% d in thread %d\n",
+                   mynumber, i, j, thread);
+            throw SSL_error("SSL_set_fd");
+          }
+          if (verbose > 0)
+          {
+            printf("C: Player %d going SSL with player %d on connection %d at %s in thread %d\n",
+                   mynumber, i, j, SD.IP[i].c_str(), thread);
+          }
+          /* do SSL-protocol connect */
+          ret = SSL_connect(ssl[i][j]);
+          if (ret <= 0)
+          {
+            printf("C: Error player %d connecting to player %d on connection %d at address %s in "
+                   "thread %d\n",
+                   mynumber, i, j, SD.IP[i].c_str(), thread);
+            ERR_print_errors_fp(stdout);
+            throw SSL_error("SSL_connect");
+          }
+          if (verbose > 0)
+          {
+            printf("C: Player %d connected to player %d on connection %d in thread %d with %s "
+                   "encryption\n",
+                   mynumber, i, j, thread, SSL_get_cipher(ssl[i][j]));
+          }
+        }
+        ShowCerts(ssl[i][j], SD.PlayerCN[i], verbose - 1); /* get cert and test common name */
+      }
+    }
+  }
+
+  mac_keys = MacK;
+}
 void Player::send_all(const string &o, int connection, bool verbose) const
 {
   uint8_t buff[4];

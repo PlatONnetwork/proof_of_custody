@@ -26,6 +26,10 @@ All rights reserved
 #include <unistd.h>
 #include <vector>
 #include <stdio.h>
+
+#include "Online/bls.h"
+#include "Online/vss.h"
+
 #ifdef BENCH_MEMORY
 #include <sys/resource.h>
 #endif
@@ -165,6 +169,7 @@ void Run_Scale(unsigned int my_number, unsigned int no_online_threads, const vec
   cout << "Produced a total of " << total_squares << " squares" << endl;
   cout << "Produced a total of " << total_bits << " bits" << endl;
   cout << "Produced a total of " << total_inputs << " inputs" << endl;
+
 }
 
 void *Main_Func(void *ptr)
@@ -180,6 +185,7 @@ void *Main_Func(void *ptr)
 
   printf("Set up player %d in thread %d \n", me, num);
   fflush(stdout);
+  
 
   if (num < 10000)
   {

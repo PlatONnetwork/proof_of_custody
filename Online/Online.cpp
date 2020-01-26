@@ -9,6 +9,7 @@ All rights reserved
 
 #include "Online.h"
 #include "Processor/Processor.h"
+#include "Online_op.h"
 
 extern vector<sacrificed_data> SacrificeD;
 
@@ -85,7 +86,7 @@ void online_phase(int online_num, Player &P, offline_control_data &OCD,
   }
 
   ///////////////////////
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 1; i++)
   {
     OnlineOp online_op(Proc, online_num, P, OCD, machine);
     vector<Share> inputs_dumy;
