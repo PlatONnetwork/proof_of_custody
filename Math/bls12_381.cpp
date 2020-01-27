@@ -1,6 +1,18 @@
 #include "bls12_381.h"
 #include <stdio.h>
 
+void getBasePointG1(mclBnG1 &basePoint)
+{
+    mclBnG1_setStr(&basePoint, (char *)G1_P.c_str(), G1_P.size(), 10);
+}
+
+void mclFr_to_G1(mclBnG1 &out, const mclBnFr in)
+{
+    mclBnG1 basePoint;
+    getBasePointG1(basePoint);
+    mclBnG1_mul(&out,&basePoint,&in);
+}
+
 void print_mclBnFr(const mclBnFr a)
 {
     char buf[128];

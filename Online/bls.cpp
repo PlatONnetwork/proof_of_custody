@@ -1,8 +1,10 @@
 #include "bls.h"
 #include "vss.h"
 
-void BLS::gen_keypair()
+void BLS::keygen()
 {
+    mclBnG1 basePoint;
+    getBasePointG1(basePoint);
     if (mclBnFr_setByCSPRNG(&sk) == -1)
     {
         throw "Errors in generating signing key!";
@@ -18,7 +20,8 @@ void BLS::sign(const string msg)
 
 int BLS::verify(const bls_sigma _sigma, const string msg)
 {
-    char buff[1024];
+    mclBnG1 basePoint;
+    getBasePointG1(basePoint);
 
     mclBnGT e1, e2;
     mclBnG2 h;
@@ -30,7 +33,7 @@ int BLS::verify(const bls_sigma _sigma, const string msg)
     return ret;
 }
 
-void BLS::dis_gen_keypair()
+void BLS::d_keygen(Player &P)
 {
     VSS v(nparty, threshold);
     vector<bls_sk> shs;
@@ -44,29 +47,19 @@ void BLS::dis_gen_keypair()
     bls_sk tmp_share;
     aux_verify.resize(aux.size());
     string ss;
-    cout << "reach here 1\n";
+
     for (int i = 0; i < P.nplayers(); i++)
     {
-        cout << "i: " << i << endl;
-        cout << "Who am i: " << P.whoami() << endl;
         if (i == P.whoami())
         {
-            cout << "reach here 2\n";
             mclBnFr_add(&sk, &sk, &shs[i]);
-            cout << "reach here 3\n";
-
             int j = 0;
             while (j < P.nplayers())
             {
-                cout << "reach here 4\n";
                 if (j != i)
                 {
-                    cout << "j: " << j << endl;
                     mclBnFr_to_str(ss, shs[j]);
-                    cout<<ss.size()<<endl;
-                    cout<<"test here\n";
                     P.send_to_player(j, ss, 1);
-                    cout<<"test here here\n";
                 }
                 j++;
             }
@@ -80,15 +73,11 @@ void BLS::dis_gen_keypair()
         }
         else
         {
-            cout << "reach here 5\n";
-
             ss.clear();
             P.receive_from_player(i, ss, 1, false);
-            cout << "reach here 6\n";
 
             str_to_mclBnFr(tmp_share, ss);
             mclBnFr_add(&sk, &sk, &tmp_share);
-            cout << "reach here 7\n";
 
             for (int k = 0; k < aux.size(); k++)
             {
@@ -105,7 +94,7 @@ void BLS::dis_gen_keypair()
     }
 }
 
-void BLS::dis_sign(const string msg)
+void BLS::d_sign(const string msg)
 {
     sign(msg);
 }

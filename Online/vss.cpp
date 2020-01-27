@@ -28,6 +28,8 @@ void VSS::gen_share(vector<mclBnFr> &shares, vector<mclBnG1> &aux)
     mclBnFr out;
     mclBnFr num;
     mclBnG1 tmpG1;
+    mclBnG1 basePoint;
+    getBasePointG1(basePoint);
 
     coeff[0] = s;
     mclBnG1_mul(&tmpG1,&basePoint,&coeff[0]);
@@ -54,6 +56,8 @@ int VSS::verify_share(mclBnFr share, vector<mclBnG1> aux, uint32_t n)
 {
     mclBnG1 ret, retEval;
     mclBnFr s_num;
+    mclBnG1 basePoint;
+    getBasePointG1(basePoint);
 
     mclBnG1_mul(&ret, &basePoint, &share);
 
@@ -71,19 +75,27 @@ int VSS::verify_share(mclBnFr share, vector<mclBnG1> aux, uint32_t n)
     int res = mclBnG1_isEqual(&ret,&retEval);
 
     delete[] pcoeff;
-/*
-    mclBnG1_clear(&ret);
-    mclBnG1_clear(&retEval);
-    mclBnFr_clear(&s_num);
-*/
+
     return res;
 }
 
-void VSS::recover_share(vector<mclBnFr> shares)
+void recover_share(mclBnFr &out, const vector<mclBnFr> shares)
 {
+    int len = shares.size();
+    mclBnFr *xVec = new mclBnFr[len];
+    mclBnFr *yVec = new mclBnFr[len];
+    for(int i = 0; i < len; i++)
+    {
+        mclBnFr_setInt32(&xVec[i],i+1);
+        yVec[i] = shares[i];
+    } 
+    mclBn_FrLagrangeInterpolation(&out,xVec,yVec,len);
+
+    delete[] xVec;
+    delete[] yVec;
 }
 
-void VSS::lagrange_coeff(vector<mclBnFr> &lag_coeff, vector<int> val)
+void lagrange_coeff(vector<mclBnFr> &lag_coeff, vector<int> val)
 {//val has non-zero and distinct elements, not optimized.
 
     vector<mclBnFr> Fr_val;
@@ -118,10 +130,5 @@ void VSS::lagrange_coeff(vector<mclBnFr> &lag_coeff, vector<int> val)
         mclBnFr_mul(&nume_prod,&nume_prod,&deno_prod);
         lag_coeff.push_back(nume_prod);
     }
-/*
-    mclBnFr_clear(&tmp);
-    mclBnFr_clear(&nume_prod);
-    mclBnFr_clear(&deno_prod);
-    mclBnFr_clear(&xi);
-*/
+
 }

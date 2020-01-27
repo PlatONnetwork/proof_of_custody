@@ -13,24 +13,19 @@ class BLS
 public:
     bls_vk vk;
     bls_sigma sigma;
-    Player P;
+    //    Player P;
     uint32_t nparty;
     uint32_t threshold;
-    bls_vk basePoint;
-
 
     BLS()
     {
         mclBn_init(MCL_BLS12_381, MCLBN_COMPILED_TIME_VAR);
-        mclBnG1_setStr(&basePoint, (char *)G1_P.c_str(), G1_P.size(), 10);
     }
-
-
-    BLS(Player _P, uint32_t np, uint32_t th) : P(_P),nparty(np),threshold(th)
+    BLS(uint32_t np, uint32_t th) : nparty(np), threshold(th)
     {
         mclBn_init(MCL_BLS12_381, MCLBN_COMPILED_TIME_VAR);
-        mclBnG1_setStr(&basePoint, (char *)G1_P.c_str(), G1_P.size(), 10);
     }
+    //    BLS(Player _P, uint32_t np, uint32_t th) : P(_P),nparty(np),threshold(th){}
 
     void set_vk(const bls_vk _vk)
     {
@@ -42,14 +37,19 @@ public:
         sigma = _sigma;
     }
 
+    bls_sk get_sk()
+    {
+        return sk;
+    }
+
     //normal keygen,sign,verify algorithms
-    void gen_keypair();
+    void keygen();
     void sign(const string msg);
     int verify(const bls_sigma _sigma, const string msg);
 
     //distributed keygen,sign algorithms
-    void dis_gen_keypair();
-    void dis_sign(const string msg);
+    void d_keygen(Player &P);
+    void d_sign(const string msg);
 
     void combine_sigma();
 };

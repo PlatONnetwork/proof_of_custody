@@ -147,8 +147,8 @@ void init(int argc, const char *argv[],
   );
   opt.parse(argc, argv);
 
-//  unsigned int my_number;
-//  int verbose;
+  //  unsigned int my_number;
+  //  int verbose;
   int fhefacts;
   string progname;
   string memtype;
@@ -208,7 +208,7 @@ void init(int argc, const char *argv[],
   /*************************************
    *  Setup offline_control_data OCD   *
    *************************************/
-//  offline_control_data OCD;
+  //  offline_control_data OCD;
   OCD.minm = (unsigned int)minimums[0];
   OCD.mins = (unsigned int)minimums[1];
   OCD.minb = (unsigned int)minimums[2];
@@ -255,9 +255,9 @@ void init(int argc, const char *argv[],
   /*************************************
    *     Initialise the system data    *
    *************************************/
-//  SystemData SD("Data/NetworkData.txt");
-//  SD = SystemData("Data/NetworkData.txt");
-  
+  //  SystemData SD("Data/NetworkData.txt");
+  //  SD = SystemData("Data/NetworkData.txt");
+
   if (my_number >= SD.n)
   {
     throw data_mismatch();
@@ -271,7 +271,7 @@ void init(int argc, const char *argv[],
   /*************************************
    *    Initialize the portnums        *
    *************************************/
-//  vector<unsigned int> portnum(SD.n);
+  //  vector<unsigned int> portnum(SD.n);
   portnum.resize(SD.n);
 
   for (unsigned int i = 0; i < SD.n; i++)
@@ -315,22 +315,22 @@ void init(int argc, const char *argv[],
   /*************************************
    *    Load in MAC keys (if any)      *
    *************************************/
-//  vector<gfp> MacK(0);
+  //  vector<gfp> MacK(0);
   MacK.resize(0);
 
   /* Initialize SSL */
-//  SSL_CTX *ctx;
+  //  SSL_CTX *ctx;
 
   Init_SSL_CTX(ctx, my_number, SD);
 
   int ssocket;
   vector<vector<vector<int>>> csockets(1, vector<vector<int>>(SD.n, vector<int>(3)));
   Get_Connections(ssocket, csockets, portnum, my_number, SD, verbose - 2);
-  printf("Connections now done\n");
-  P.Init(my_number,SD,0,ctx,csockets[0],MacK,verbose);
+  printf("Connected!\n");
+  P.Init(my_number, SD, 0, ctx, csockets[0], MacK, verbose);
 
-/* Initialize the machine */
-//  Machine machine;
+  /* Initialize the machine */
+  //  Machine machine;
   if (verbose < 0)
   {
     machine.set_verbose();
@@ -346,126 +346,71 @@ void init(int argc, const char *argv[],
   machine.Setup_IO(std::move(io));
 
   // Load the initial tapes for the first program into the schedule
-//  unsigned int no_online_threads = 1;
+  //  unsigned int no_online_threads = 1;
   no_online_threads = 1;
 }
 
-int main(int argc, const char *argv[])
+void testTool(Player &P)
 {
-  unsigned int my_number;
-  unsigned int no_online_threads;
-  vector<gfp> MacK;
-  SSL_CTX *ctx;
-  vector<unsigned int> portnum;
-  SystemData SD("Data/NetworkData.txt");
-  Machine machine;
-  offline_control_data OCD;
-  Player P;
-  int verbose;
+  mclBn_init(MCL_BLS12_381, MCLBN_COMPILED_TIME_VAR);
 
-  init(argc,argv,
-       my_number,
-       no_online_threads,
-       MacK,
-       ctx,
-       portnum,
-       SD,
-       machine,
-       OCD,
-       P,
-       verbose);
-
-/*
-  printf("begin runscale\n");  
-  Run_Scale(my_number, no_online_threads, MacK,
-            ctx, portnum,
-            SD, machine, OCD,
-            verbose);
-*/
-  
-  //==================TEST TOOLS==================
-  cout<<"Number of Players: "<<P.nplayers()<<endl;
-  mclBn_init(MCL_BLS12_381,MCLBN_COMPILED_TIME_VAR);
   string str;
   mclBnFr tmpfr;
   mclBnG1 basePoint, tmpG1;
   mclBnFr_setByCSPRNG(&tmpfr);
   print_mclBnFr(tmpfr);
-  mclBnFr_to_str(str,tmpfr);
-  str_to_mclBnFr(tmpfr,str);
+  mclBnFr_to_str(str, tmpfr);
+  str_to_mclBnFr(tmpfr, str);
   print_mclBnFr(tmpfr);
-  cout<<str.size()<<endl;
-/*
+  cout << str.size() << endl;
+
   mclBnG1_setStr(&basePoint, (char *)G1_P.c_str(), G1_P.size(), 10);
-  mclBnG1_mul(&tmpG1,&basePoint,&tmpfr);
+  mclBnG1_mul(&tmpG1, &basePoint, &tmpfr);
   print_mclBnG1(tmpG1);
-  mclBnG1_to_str(str,tmpG1);
-  str_to_mclBnG1(tmpG1,str);
-  print_mclBnG1(tmpG1); 
-  cout<<str.size()<<endl;
-*/
-  cout<<"test Player:\n";
+  mclBnG1_to_str(str, tmpG1);
+  str_to_mclBnG1(tmpG1, str);
+  print_mclBnG1(tmpG1);
+  cout << str.size() << endl;
+
+  cout << "test Player:\n";
   string ss;
-  if(P.whoami() ==0)
+  if (P.whoami() == 0)
   {
     ss = str;
-    P.send_to_player(1,ss,1);
+    P.send_to_player(1, ss, 1);
   }
 
-  if(P.whoami() == 1)
+  if (P.whoami() == 1)
   {
-    P.receive_from_player(0,ss,1,false);
+    P.receive_from_player(0, ss, 1, false);
   }
 
   mclBnFr tmp;
-  str_to_mclBnFr(tmp,ss);
+  str_to_mclBnFr(tmp, ss);
   print_mclBnFr(tmp);
-//==================TEST TOOLS==================
-//==================TEST BLS==================
-  BLS bls;
-  char buff[512];
-  mclBnG1_getStr(buff, sizeof(buff), &(bls.basePoint), 10);
-  printf("Base Point of G1: \n%s\n", buff);
+}
 
-  cout<<"Fr Size: "<<mclBn_getFrByteSize()<<endl;
-  cout<<"G1 Size: "<<mclBn_getG1ByteSize()<<endl;
-
-  BLS bls1;
-  const string msg = "1234567890";
-  bls1.gen_keypair();
-  bls1.sign(msg);
-
-  BLS bls2;
-  bls2.set_vk(bls1.vk);
-  if (bls2.verify(bls1.sigma, msg))
-  {
-    cout << "Normal BLS Correct!" << endl;
-  }
-  else
-  {
-    cout << "Normal BLS Wrong!" << endl;
-  }
-
-
-  //DKG TEST
-  BLS dbls(P,3,1);
-  dbls.dis_gen_keypair();
-  print_mclBnG1(dbls.vk);
-  //==================TEST BLS==================
-  
-  //==================TEST VSS==================
-  VSS v(3,1);
+void testVSS()
+{
+  VSS v(3, 1);
   vector<mclBnFr> shs;
   vector<mclBnG1> aux;
 
-  
   v.rnd_secret();
   v.gen_share(shs, aux);
+  for (int i = 0; i < aux.size(); i++)
+  {
+    cout << "aux " << i << ": " << endl;
+    print_mclBnG1(aux[i]);
+  }
 
-  cout<<"secret:\n";
+  cout << "secret:\n";
   print_mclBnFr(v.get_secret());
-  cout<<"Base Point of G1:\n";
-  print_mclBnG1(v.basePoint);
+
+  cout << "recovered secret:\n";
+  mclBnFr out;
+  recover_share(out,shs);
+  print_mclBnFr(out);
 
   int count = 0;
 
@@ -485,8 +430,110 @@ int main(int argc, const char *argv[])
   {
     cout << count << " VSS Errors!" << endl;
   }
+}
 
-  //==================TEST VSS==================
+void testBLS(Player &P)
+{
+  cout<<"Fr Size: "<<mclBn_getFrByteSize()<<endl;
+  cout<<"G1 Size: "<<mclBn_getG1ByteSize()<<endl;
+
+  BLS bls1;
+  const string msg = "1234567890";
+  bls1.keygen();
+  bls1.sign(msg);
+
+  BLS bls2;
+  bls2.set_vk(bls1.vk);
+  if (bls2.verify(bls1.sigma, msg))
+  {
+    cout << "Normal BLS Correct!" << endl;
+  }
+  else
+  {
+    cout << "Normal BLS Wrong!" << endl;
+  }
+
+  //DKG TEST
+  BLS dbls(3, 1);
+  dbls.d_keygen(P);
+  cout << "vk is: " << endl;
+  print_mclBnG1(dbls.vk);
+  cout << "secret share is: " << endl;
+  print_mclBnFr(dbls.get_sk());
+
+  vector<bls_sk> shares(P.nplayers());
+  shares[P.whoami()] = dbls.get_sk();
+  string ss;
+  mclBnFr out;
+  mclBnG1 outG1;
+
+  if(P.whoami() !=0)
+  {
+    mclBnFr_to_str(ss,dbls.get_sk());
+    P.send_to_player(0,ss,1);
+  }
+  else
+  {
+    for(int i = 1; i < P.nplayers(); i++)
+    {
+      P.receive_from_player(i,ss,1,false);
+      str_to_mclBnFr(shares[i],ss);
+    }
+
+    recover_share(out,shares);
+    cout<<"recovered secret key is: "<<endl;
+    print_mclBnFr(out);
+    mclFr_to_G1(outG1,out);
+
+    if(mclBnG1_isEqual(&outG1,&dbls.vk))
+    {
+      cout<<"DKG test correct!\n";
+    }
+    else
+    {
+      cout<<"DKG test wrong!\n";
+    }
+    
+  }
+}
+
+int main(int argc, const char *argv[])
+{
+  unsigned int my_number;
+  unsigned int no_online_threads;
+  vector<gfp> MacK;
+  SSL_CTX *ctx;
+  vector<unsigned int> portnum;
+  SystemData SD("Data/NetworkData.txt");
+  Machine machine;
+  offline_control_data OCD;
+  Player P;
+  int verbose;
+
+  init(argc, argv,
+       my_number,
+       no_online_threads,
+       MacK,
+       ctx,
+       portnum,
+       SD,
+       machine,
+       OCD,
+       P,
+       verbose);
+
+  /*
+  printf("begin runscale\n");  
+  Run_Scale(my_number, no_online_threads, MacK,
+            ctx, portnum,
+            SD, machine, OCD,
+            verbose);
+  */
+
+  cout << "Number of Players: " << P.nplayers() << endl;
+  testTool(P);
+  testVSS();
+  testBLS(P);
 
   machine.Dump_Memory(my_number);
 
