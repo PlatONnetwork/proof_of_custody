@@ -434,10 +434,10 @@ void testVSS()
 
 void testBLS(Player &P)
 {
-  cout<<"Fr Size: "<<mclBn_getFrByteSize()<<endl;
-  cout<<"G1 Size: "<<mclBn_getG1ByteSize()<<endl;
 
   BLS bls1;
+  cout<<"Fr Size: "<<mclBn_getFrByteSize()<<endl;
+  cout<<"G1 Size: "<<mclBn_getG1ByteSize()<<endl;
   const string msg = "1234567890";
   bls1.keygen();
   bls1.sign(msg);
@@ -531,8 +531,8 @@ int main(int argc, const char *argv[])
   */
 
   cout << "Number of Players: " << P.nplayers() << endl;
-  testTool(P);
-  testVSS();
+//  testTool(P);
+//  testVSS();
   testBLS(P);
 
   machine.Dump_Memory(my_number);

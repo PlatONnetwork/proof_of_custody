@@ -32,7 +32,7 @@ public:
     void gen_share(vector<mclBnFr> &shares, vector<mclBnG1> &aux);
 
     //verfiy shares
-    int verify_share(mclBnFr share, vector<mclBnG1> aux, uint32_t n);
+    bool verify_share(mclBnFr share, vector<mclBnG1> aux, uint32_t n);
 
     VSS(uint32_t np, uint32_t thre) : nparty(np), threshold(thre)
     {

@@ -13,7 +13,6 @@ class BLS
 public:
     bls_vk vk;
     bls_sigma sigma;
-    //    Player P;
     uint32_t nparty;
     uint32_t threshold;
 
@@ -21,11 +20,11 @@ public:
     {
         mclBn_init(MCL_BLS12_381, MCLBN_COMPILED_TIME_VAR);
     }
+
     BLS(uint32_t np, uint32_t th) : nparty(np), threshold(th)
     {
         mclBn_init(MCL_BLS12_381, MCLBN_COMPILED_TIME_VAR);
     }
-    //    BLS(Player _P, uint32_t np, uint32_t th) : P(_P),nparty(np),threshold(th){}
 
     void set_vk(const bls_vk _vk)
     {

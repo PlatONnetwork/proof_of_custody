@@ -52,7 +52,7 @@ void VSS::gen_share(vector<mclBnFr> &shares, vector<mclBnG1> &aux)
     delete[] coeff;
 }
 
-int VSS::verify_share(mclBnFr share, vector<mclBnG1> aux, uint32_t n)
+bool VSS::verify_share(mclBnFr share, vector<mclBnG1> aux, uint32_t n)
 {
     mclBnG1 ret, retEval;
     mclBnFr s_num;
@@ -72,7 +72,7 @@ int VSS::verify_share(mclBnFr share, vector<mclBnG1> aux, uint32_t n)
 
     mclBn_G1EvaluatePolynomial(&retEval, pcoeff, aux.size(),&s_num);
 
-    int res = mclBnG1_isEqual(&ret,&retEval);
+    bool res = mclBnG1_isEqual(&ret,&retEval) == 1? true : false ;
 
     delete[] pcoeff;
 

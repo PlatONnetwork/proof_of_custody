@@ -1,5 +1,6 @@
 #include "bls.h"
 #include "vss.h"
+#include "Tools/Crypto.h"
 
 void BLS::keygen()
 {
@@ -7,7 +8,7 @@ void BLS::keygen()
     getBasePointG1(basePoint);
     if (mclBnFr_setByCSPRNG(&sk) == -1)
     {
-        throw "Errors in generating signing key!";
+        throw invalid_keygen();
     }
     mclBnG1_mul(&vk, &basePoint, &sk);
 }
@@ -37,59 +38,130 @@ void BLS::d_keygen(Player &P)
 {
     VSS v(nparty, threshold);
     vector<bls_sk> shs;
-    vector<bls_vk> aux, aux_verify;
+    vector<bls_vk> aux;
     v.rnd_secret();
     v.gen_share(shs, aux);
 
-    mclBnFr_setInt32(&sk, 0);
+    sk = shs[P.whoami()];
     vk = aux[0];
 
-    bls_sk tmp_share;
-    aux_verify.resize(aux.size());
+    vector<bls_sk> tmp_shares(P.nplayers());
+
+    vector<vector<bls_vk>> aux_tmp(P.nplayers(), vector<bls_vk>(aux.size()));
+
     string ss;
 
+    vector<string> CommAux(P.nplayers());
+    vector<string> OpenAux(P.nplayers());
+
+    mclBnG1_to_str(ss, aux[0]);
+    Commit(CommAux[P.whoami()], OpenAux[P.whoami()], ss, P.G);
+
+    //send my commitment
     for (int i = 0; i < P.nplayers(); i++)
     {
-        if (i == P.whoami())
+        if (i != P.whoami())
         {
-            mclBnFr_add(&sk, &sk, &shs[i]);
-            int j = 0;
-            while (j < P.nplayers())
-            {
-                if (j != i)
-                {
-                    mclBnFr_to_str(ss, shs[j]);
-                    P.send_to_player(j, ss, 1);
-                }
-                j++;
-            }
+            P.send_to_player(i, CommAux[P.whoami()], 1);
+        }
+    }
 
+    //receive other commitments
+    for (int i = 0; i < P.nplayers(); i++)
+    {
+        if (i != P.whoami())
+        {
+            P.receive_from_player(i, CommAux[i], 1, false);
+        }
+    }
+
+    //send my opening
+    for (int i = 0; i < P.nplayers(); i++)
+    {
+        if (i != P.whoami())
+        {
+            P.send_to_player(i, OpenAux[P.whoami()], 1);
+        }
+    }
+
+    //receive other opening
+    for (int i = 0; i < P.nplayers(); i++)
+    {
+        if (i != P.whoami())
+        {
+            P.receive_from_player(i, OpenAux[i], 1, false);
+        }
+    }
+
+    //run Feldman VSS
+
+    //send shares
+    tmp_shares[P.whoami()] = shs[P.whoami()];
+    for (int i = 0; i < P.nplayers(); i++)
+    {
+        if (i != P.whoami())
+        {
+            mclBnFr_to_str(ss, shs[i]);
+            P.send_to_player(i, ss, 1);
+        }
+    }
+
+    //receive shares
+    for (int i = 0; i < P.nplayers(); i++)
+    {
+        if (i != P.whoami())
+        {
+            P.receive_from_player(i, ss, 1, false);
+            str_to_mclBnFr(tmp_shares[i], ss);
+        }
+    }
+
+    //send aux
+    for (int i = 0; i < P.nplayers(); i++)
+    {
+        if (i != P.whoami())
+        {
             for (int k = 0; k < aux.size(); k++)
             {
-                ss.clear();
                 mclBnG1_to_str(ss, aux[k]);
-                P.send_all(ss, 1, false);
+                P.send_to_player(i, ss, 1);
             }
         }
-        else
+    }
+
+    //receive aux
+    aux_tmp[P.whoami()] = aux;
+    for (int i = 0; i < P.nplayers(); i++)
+    {
+        if (i != P.whoami())
         {
-            ss.clear();
-            P.receive_from_player(i, ss, 1, false);
-
-            str_to_mclBnFr(tmp_share, ss);
-            mclBnFr_add(&sk, &sk, &tmp_share);
-
             for (int k = 0; k < aux.size(); k++)
             {
                 ss.clear();
                 P.receive_from_player(i, ss, 1, false);
-                str_to_mclBnG1(aux_verify[k], ss);
+                str_to_mclBnG1(aux_tmp[i][k], ss);
             }
-            if (!v.verify_share(tmp_share, aux_verify, P.whoami() + 1))
+        }
+    }
+
+    for (int i = 0; i < P.nplayers(); i++)
+    {
+        if (i != P.whoami())
+        {
+            bool res1 = Open(ss, CommAux[i], OpenAux[i]);
+            bool res2 = v.verify_share(tmp_shares[i], aux_tmp[i], P.whoami() + 1);
+            bls_vk a0;
+            str_to_mclBnG1(a0, ss);
+            bool res3 = mclBnG1_isEqual(&a0, &aux_tmp[i][0]) ? true : false;
+            if (res1 && res2 && res3)
             {
-                throw "shares not verified!";
+                mclBnFr_add(&sk, &sk, &tmp_shares[i]);
+                mclBnG1_add(&vk, &vk, &aux_tmp[i][0]);
             }
-            mclBnG1_add(&vk, &vk, &aux_verify[0]);
+            else
+            {
+                throw invalid_share();
+            }
         }
     }
 }

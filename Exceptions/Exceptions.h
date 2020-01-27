@@ -222,6 +222,21 @@ class not_Q2 : public exception
   }
 };
 
+class invalid_share : public exception
+{
+  virtual const char *what() const throw()
+  {
+    return "Invalid Share";
+  }
+};
+
+class invalid_keygen : public exception
+{
+  virtual const char *what() const throw()
+  {
+    return "Invalid KeyGen";
+  }
+};
 /* FHE Exceptions */
 class level_mismatch : public exception
 {
