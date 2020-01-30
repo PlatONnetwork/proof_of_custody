@@ -26,9 +26,19 @@ enum
     INPUT_MASK = 0x53
 };
 
+class UsedTuples
+{
+    public:
+    unsigned int UsedTriples = 0;
+    unsigned int UsedSquares = 0;
+    unsigned int UsedBit = 0;
+    unsigned int UsedInputMask = 0;
+};
+
 class OnlineOp
 {
 public:
+    UsedTuples UT;
     Processor &Proc;
     int online_num;
     Player &P;
@@ -40,12 +50,21 @@ public:
     }
     int verbose = 2;
 
-    // a + b = c
-    void add(Share &a, Share &b, Share &c);
-    // a * b = c
-    void mul(Share &a, Share &b, Share &c);
-    // a / b = c (mod q)
-    void div(Share &a, Share &b, Share &c);
+    void getTuples(vector<Share> &sp, int opcode);
+    // c = a + b (b is share)
+    void add(Share &c, const Share &a, const Share &b);
+    // c = a + b (b is plain)
+    void add_plain(Share &c, const Share &a, const gfp &b);
+    // c = a * b (b is plain)
+    void mul_plain(Share &c, const Share &a, const gfp &b);
+    // c = a * b (b is share)
+    void mul(Share &c, const Share &a, const Share &b);
+    // aa = a^2
+    void sqr(Share &aa, const Share &a);
+    //ia = a^{-1} mod q
+    void inv(Share &ia, const Share &a);
+    // c = a * b^{-1} mod q 
+    void div(Share &c, const Share &a, const Share &b);
     // vs --> vc
     void open(const vector<Share> &vs, vector<gfp> &vc);
 
@@ -59,7 +78,10 @@ public:
 
     // the following apis for testing
     void test_add();
+    void test_add_plain();
+    void test_mul_plain();
     void test_mul();
+    void test_sqr();
     void test_div();
 };
 

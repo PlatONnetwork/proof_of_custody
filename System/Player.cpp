@@ -249,8 +249,7 @@ Player::~Player()
   }
 }
 void Player::Init(int mynumber, const SystemData &SD, int thread, SSL_CTX *ctx,
-                  vector<vector<int>> &csockets,
-                  const vector<gfp> &MacK, int verbose)
+                  vector<vector<int>> &csockets, int verbose)
 {
   clocks.resize(10);
   G.ReSeed(thread);
@@ -344,8 +343,6 @@ void Player::Init(int mynumber, const SystemData &SD, int thread, SSL_CTX *ctx,
       }
     }
   }
-
-  mac_keys = MacK;
 }
 void Player::send_all(const string &o, int connection, bool verbose) const
 {

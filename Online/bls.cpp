@@ -45,6 +45,8 @@ void BLS::d_keygen(Player &P)
     sk = shs[P.whoami()];
     vk = aux[0];
 
+    cout<<aux.size()<<endl;
+
     vector<bls_sk> tmp_shares(P.nplayers());
 
     vector<vector<bls_vk>> aux_tmp(P.nplayers(), vector<bls_vk>(aux.size()));
@@ -84,7 +86,7 @@ void BLS::d_keygen(Player &P)
         }
     }
 
-    //receive other opening
+    //receive other openings
     for (int i = 0; i < P.nplayers(); i++)
     {
         if (i != P.whoami())
@@ -144,6 +146,7 @@ void BLS::d_keygen(Player &P)
         }
     }
 
+    //check commitments,verify shares and set sk,vk
     for (int i = 0; i < P.nplayers(); i++)
     {
         if (i != P.whoami())
@@ -164,6 +167,17 @@ void BLS::d_keygen(Player &P)
             }
         }
     }
+/*
+    for (int i = 0; i < P.nplayers(); i++)
+    {
+        cout << "print aux_tmp " << i << endl;
+        for (int k = 0; k < aux.size(); k++)
+        {
+            print_mclBnG1(aux_tmp[i][k]);
+        }
+        cout<< "==================\n";
+    }
+*/
 }
 
 void BLS::d_sign(const string msg)

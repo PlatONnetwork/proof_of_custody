@@ -69,8 +69,7 @@ public:
 
   //Init player
   void Init(int mynumber, const SystemData &SD, int thread, SSL_CTX *ctx,
-         vector<vector<int>> &csockets,
-         const vector<gfp> &MacK, int verbose);
+         vector<vector<int>> &csockets, int verbose);
 
   // Send and receive strings
   void send_all(const string &o, int connection= 0, bool verbose= false) const;

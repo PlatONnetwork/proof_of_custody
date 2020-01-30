@@ -1,8 +1,8 @@
 # Dependencies
 Besides the required lib for scale mamba, you also need to install the [mcl](https://github.com/herumi/mcl) library.
 
-# run the demo
-./test.sh
+# Run the demo
+./run.sh
 
 # Progresses (Stage I)
 1. Seperate Scale-Mamba (80%)

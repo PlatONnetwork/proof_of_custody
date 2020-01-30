@@ -46,18 +46,157 @@ void Usage(ezOptionParser &opt)
   offline_control_data OCD;
   int verbose;
 */
-
 void init(int argc, const char *argv[],
           unsigned int &my_number,
           unsigned int &no_online_threads,
-          vector<gfp> &MacK,
           SSL_CTX *&ctx,
           vector<unsigned int> &portnum,
           SystemData &SD,
           Machine &machine,
           offline_control_data &OCD,
-          Player &P,
           int &verbose)
+{
+  if (argc != 2)
+  {
+    cerr << "ERROR: incorrect number of arguments to Player.x\n";
+  }
+  else
+  {
+    my_number = (unsigned int)atoi(argv[1]);
+  }
+
+  string memtype = "empty";
+  unsigned int portnumbase = 5000;
+  verbose = -1;
+
+  /*************************************
+   *  Setup offline_control_data OCD   *
+   *************************************/
+  //  offline_control_data OCD;
+  OCD.minm = 0;
+  OCD.mins = 0;
+  OCD.minb = 0;
+  OCD.maxm = 0;
+  OCD.maxs = 0;
+  OCD.maxb = 0;
+  OCD.maxI = 0;
+
+  cout << "(Min,Max) number of ...\n";
+  cout << "\t(" << OCD.minm << ",";
+  if (OCD.maxm == 0)
+  {
+    cout << "infty";
+  }
+  else
+  {
+    cout << OCD.maxm;
+  }
+  cout << ") multiplication triples" << endl;
+
+  cout << "\t(" << OCD.mins << ",";
+  if (OCD.maxs == 0)
+  {
+    cout << "infty";
+  }
+  else
+  {
+    cout << OCD.maxs;
+  }
+  cout << ") square pairs" << endl;
+
+  cout << "\t(" << OCD.minb << ",";
+  if (OCD.maxb == 0)
+  {
+    cout << "infty";
+  }
+  else
+  {
+    cout << OCD.maxb;
+  }
+  cout << ") bits" << endl;
+
+  /*************************************
+   *     Initialise the system data    *
+   *************************************/
+  //  SystemData SD("Data/NetworkData.txt");
+  //  SD = SystemData("Data/NetworkData.txt");
+
+  if (my_number >= SD.n)
+  {
+    throw data_mismatch();
+  }
+
+  /*************************************
+   *    Initialize the portnums        *
+   *************************************/
+  //  vector<unsigned int> portnum(SD.n);
+  portnum.resize(SD.n);
+
+  for (unsigned int i = 0; i < SD.n; i++)
+  {
+    portnum[i] = portnumbase + i;
+  }
+
+  /*************************************
+   * Initialise the secret sharing     *
+   * data and the gfp field data       *
+   *************************************/
+  ifstream inp("Data/SharingData.txt");
+  if (inp.fail())
+  {
+    throw file_error("Data/SharingData.txt");
+  }
+  bigint p;
+  inp >> p;
+  cout << "\n\np=" << p << endl;
+  gfp::init_field(p);
+  ShareData ShD;
+  inp >> ShD;
+  inp.close();
+  if (ShD.M.nplayers() != SD.n)
+  {
+    throw data_mismatch();
+  }
+  if (SD.fake_offline == 1)
+  {
+    ShD.Otype = Fake;
+  }
+  Share::init_share_data(ShD);
+
+  /* Initialize SSL */
+  Init_SSL_CTX(ctx, my_number, SD);
+
+  /* Initialize the machine */
+  //  Machine machine;
+  if (verbose < 0)
+  {
+    machine.set_verbose();
+    verbose = 0;
+  }
+  machine.SetUp_Memory(my_number, memtype);
+
+  // Here you configure the IO in the machine
+  //  - This depends on what IO machinary you are using
+  //  - Here we are just using the simple IO class
+  unique_ptr<Input_Output_Simple> io(new Input_Output_Simple);
+  io->init(cin, cout, true);
+  machine.Setup_IO(std::move(io));
+
+  // Load the initial tapes for the first program into the schedule
+  //  unsigned int no_online_threads = 1;
+  no_online_threads = 1;
+}
+
+void init2(int argc, const char *argv[],
+           unsigned int &my_number,
+           unsigned int &no_online_threads,
+           vector<gfp> &MacK,
+           SSL_CTX *&ctx,
+           vector<unsigned int> &portnum,
+           SystemData &SD,
+           Machine &machine,
+           offline_control_data &OCD,
+           int &verbose)
 {
   ezOptionParser opt;
 
@@ -323,12 +462,6 @@ void init(int argc, const char *argv[],
 
   Init_SSL_CTX(ctx, my_number, SD);
 
-  int ssocket;
-  vector<vector<vector<int>>> csockets(1, vector<vector<int>>(SD.n, vector<int>(3)));
-  Get_Connections(ssocket, csockets, portnum, my_number, SD, verbose - 2);
-  printf("Connected!\n");
-  P.Init(my_number, SD, 0, ctx, csockets[0], MacK, verbose);
-
   /* Initialize the machine */
   //  Machine machine;
   if (verbose < 0)
@@ -409,7 +542,7 @@ void testVSS()
 
   cout << "recovered secret:\n";
   mclBnFr out;
-  recover_share(out,shs);
+  recover_share(out, shs);
   print_mclBnFr(out);
 
   int count = 0;
@@ -436,8 +569,8 @@ void testBLS(Player &P)
 {
 
   BLS bls1;
-  cout<<"Fr Size: "<<mclBn_getFrByteSize()<<endl;
-  cout<<"G1 Size: "<<mclBn_getG1ByteSize()<<endl;
+  cout << "Fr Size: " << mclBn_getFrByteSize() << endl;
+  cout << "G1 Size: " << mclBn_getG1ByteSize() << endl;
   const string msg = "1234567890";
   bls1.keygen();
   bls1.sign(msg);
@@ -467,33 +600,32 @@ void testBLS(Player &P)
   mclBnFr out;
   mclBnG1 outG1;
 
-  if(P.whoami() !=0)
+  if (P.whoami() != 0)
   {
-    mclBnFr_to_str(ss,dbls.get_sk());
-    P.send_to_player(0,ss,1);
+    mclBnFr_to_str(ss, dbls.get_sk());
+    P.send_to_player(0, ss, 1);
   }
   else
   {
-    for(int i = 1; i < P.nplayers(); i++)
+    for (int i = 1; i < P.nplayers(); i++)
     {
-      P.receive_from_player(i,ss,1,false);
-      str_to_mclBnFr(shares[i],ss);
+      P.receive_from_player(i, ss, 1, false);
+      str_to_mclBnFr(shares[i], ss);
     }
 
-    recover_share(out,shares);
-    cout<<"recovered secret key is: "<<endl;
+    recover_share(out, shares);
+    cout << "recovered secret key is: " << endl;
     print_mclBnFr(out);
-    mclFr_to_G1(outG1,out);
+    mclFr_to_G1(outG1, out);
 
-    if(mclBnG1_isEqual(&outG1,&dbls.vk))
+    if (mclBnG1_isEqual(&outG1, &dbls.vk))
     {
-      cout<<"DKG test correct!\n";
+      cout << "DKG test correct!\n";
     }
     else
     {
-      cout<<"DKG test wrong!\n";
+      cout << "DKG test wrong!\n";
     }
-    
   }
 }
 
@@ -501,39 +633,50 @@ int main(int argc, const char *argv[])
 {
   unsigned int my_number;
   unsigned int no_online_threads;
-  vector<gfp> MacK;
   SSL_CTX *ctx;
   vector<unsigned int> portnum;
   SystemData SD("Data/NetworkData.txt");
   Machine machine;
   offline_control_data OCD;
   Player P;
-  int verbose;
+  int verbose = 0;
 
   init(argc, argv,
        my_number,
        no_online_threads,
-       MacK,
        ctx,
        portnum,
        SD,
        machine,
        OCD,
-       P,
        verbose);
 
-  /*
-  printf("begin runscale\n");  
+  vector<unsigned int> portnum1(SD.n);
+  for(int i = 0; i < SD.n; i++)
+  {
+    portnum1[i] = 50000+SD.n+i; 
+  }
+  int ssocket;
+  vector<vector<vector<int>>> csockets(1, vector<vector<int>>(SD.n, vector<int>(3)));
+  Get_Connections(ssocket, csockets, portnum1, my_number, SD, verbose - 2);
+  printf("Connected!\n");
+  P.Init(my_number, SD, 0, ctx, csockets[0], verbose);
+
+  cout << "Number of Players: " << P.nplayers() << endl;
+    testTool(P);
+    testVSS();
+    testBLS(P);
+
+  Close_Connections(ssocket, csockets, my_number);
+
+  vector<gfp> MacK;
+  MacK.resize(0);
+  printf("begin runscale\n");
+
   Run_Scale(my_number, no_online_threads, MacK,
             ctx, portnum,
             SD, machine, OCD,
             verbose);
-  */
-
-  cout << "Number of Players: " << P.nplayers() << endl;
-//  testTool(P);
-//  testVSS();
-  testBLS(P);
 
   machine.Dump_Memory(my_number);
 

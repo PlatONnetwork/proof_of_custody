@@ -9,13 +9,16 @@ All rights reserved
 
 #include "Online.h"
 #include "Processor/Processor.h"
-#include "Online_op.h"
+#include "OnlineOp.h"
 
-void getTuples(Processor &Proc, vector<Share> &sp, offline_control_data &OCD, int opcode)
+void OnlineOp::getTuples(vector<Share> &sp, int opcode)
 {
   int thread = Proc.get_thread_num();
   Wait_For_Preproc(opcode, 100, thread, OCD); // temp set 100
-
+  for(int i = 0; i < sp.size(); i++)
+  {
+    sp[i].set_player(P.whoami());
+  }
   switch (opcode)
   {
   case TRIPLE:
@@ -29,6 +32,7 @@ void getTuples(Processor &Proc, vector<Share> &sp, offline_control_data &OCD, in
     sp[2] = SacrificeD[thread].TD.tc.front();
     SacrificeD[thread].TD.tc.pop_front();
     OCD.mul_mutex[thread].unlock();
+    UT.UsedTriples++;
     break;
   case SQUARE:
     if (sp.size() != 2)
@@ -39,6 +43,7 @@ void getTuples(Processor &Proc, vector<Share> &sp, offline_control_data &OCD, in
     sp[1] = SacrificeD[thread].SD.sb.front();
     SacrificeD[thread].SD.sb.pop_front();
     OCD.sqr_mutex[thread].unlock();
+    UT.UsedSquares++;
     break;
   case BIT:
     if (sp.size() != 1)
@@ -47,78 +52,95 @@ void getTuples(Processor &Proc, vector<Share> &sp, offline_control_data &OCD, in
     sp[0] = SacrificeD[thread].BD.bb.front();
     SacrificeD[thread].BD.bb.pop_front();
     OCD.bit_mutex[thread].unlock();
+    UT.UsedBit++;
     break;
   default:
     throw bad_value();
     break;
   }
 }
-
-// a + b = c
-void OnlineOp::add(Share &a, Share &b, Share &c)
+// c = a + b (b is share)
+void OnlineOp::add(Share &c, const Share &a, const Share &b)
 {
   c = a + b;
 }
-// a * b = c
-void OnlineOp::mul(Share &a, Share &b, Share &c)
+
+void OnlineOp::add_plain(Share &c, const Share &a, const gfp &b)
 {
-  /*
-  phase 0 triples
-  */
+  c.add(a, b);
+}
+
+void OnlineOp::mul_plain(Share &c, const Share &a, const gfp &b)
+{
+  c.mul(a, b);
+}
+// a * b = c
+void OnlineOp::mul(Share &c, const Share &a, const Share &b)
+{
+  
+  //phase 0: get triples
   vector<Share> sp(3);
-  for (int i = 0; i < sp.size(); i++)
-  {
-    sp[i].set_player(P.whoami());
-  }
+  getTuples(sp, TRIPLE);
 
-  getTuples(Proc, sp, OCD, TRIPLE);
+  //phase 1: sub and open
 
-  /*
-  phase 1
-  00 00 00 50 00 00 00 01 00 00 00 00 00 00 00 02     TRIPLE[a,b,c] --> Sp[1,0,2]
-  00 00 00 02 00 00 00 05 00 00 00 A3                 (y) A3 --> Sp[5]
-  00 00 00 26 00 00 00 04 00 00 00 05 00 00 00 00     (y-b) Sp[5] - Sp[0] --> Sp[4]
-  00 00 00 02 00 00 00 05 00 00 00 A6                 (x) A3 --> Sp[5]
-  00 00 00 26 00 00 00 03 00 00 00 05 00 00 00 01     (x-a) Sp[5] - Sp[1] --> Sp[3]
-  00 00 00 A0 00 00 00 02 00 00 00 03 00 00 00 04     (x-a,y-b) Sp[3,4] --> Open
-  00 00 00 A1 00 00 00 02 00 00 00 01 00 00 00 02     Open --> Cp[1,2]
-  */
-  auto xa = a - sp[0]; // x - a
-  auto yb = b - sp[1]; // y - b
+  Share epsilon = a - sp[0]; // epsilon = x - a
+  Share rho = b - sp[1];     // rho = y - b
   vector<gfp> vc;
-  open({xa, yb}, vc);
+  open({epsilon, rho}, vc);
   if (verbose > 1)
   {
     cout << "mul vc[0]:" << vc[0] << endl;
     cout << "mul vc[1]:" << vc[1] << endl;
   }
 
-  /*
-  phase 2
-  00 00 00 31 00 00 00 03 00 00 00 00 00 00 00 01     Sp[0] * Cp[1] --> Sp[3]
-  00 00 00 21 00 00 00 00 00 00 00 02 00 00 00 03     Sp[2] + Sp[3] --> Sp[0]
-  00 00 00 31 00 00 00 02 00 00 00 01 00 00 00 02     Sp[1] * Cp[2] --> Sp[2]
-  00 00 00 21 00 00 00 01 00 00 00 00 00 00 00 02     Sp[0] + Sp[2] --> Sp[1]
-  00 00 00 30 00 00 00 00 00 00 00 01 00 00 00 02     Cp[1] * Cp[2] --> Cp[0]
-  00 00 00 22 00 00 00 00 00 00 00 01 00 00 00 00     Sp[1] + Cp[0] --> Sp[0]
-  00 00 00 A0 00 00 00 01 00 00 00 00                 Sp[0] --> Open
-  00 00 00 A1 00 00 00 01 00 00 00 00                 Open --> Cp[0]
-  */
-  {
-    Share sp3 = sp[1] * vc[0];
-    Share sp0 = sp[2] + sp3;
+  //phase 2 get mul share
 
-    Share sp2 = sp[0] * vc[1];
-    Share sp1 = sp0 + sp2;
+  Share tmp;
+  mul_plain(tmp, sp[1], vc[0]);
+  add(sp[2], sp[2], tmp);
 
-    gfp cp0 = vc[0] * vc[1];
-    c.set_player(P.whoami());
-    c.add(sp1, cp0, P.get_mac_keys());
-    c.add(sp1, cp0, P.get_mac_keys());
-  }
+  mul_plain(tmp, sp[0], vc[1]);
+  add(sp[2], sp[2], tmp);
+
+  gfp cp0 = vc[0] * vc[1];
+  add_plain(c, sp[2], cp0);
 }
-// a / b = c
-void OnlineOp::div(Share &a, Share &b, Share &c)
+// aa = a^2
+void OnlineOp::sqr(Share &aa, const Share &a)
+{
+  
+  //phase 0: get triples
+  vector<Share> sp(2);
+  getTuples(sp, SQUARE);
+
+  //phase 1: sub and open
+
+  Share epsilon = a - sp[0]; // epsilon = x - a
+  vector<gfp> vc;
+  open({epsilon}, vc);
+  if (verbose > 1)
+  {
+    cout << "sqr vc[0]:" << vc[0] << endl;
+  }
+
+  //phase 2 get squre share
+
+  Share tmp;
+  mul_plain(tmp, sp[0], vc[0]);
+  add(sp[1], sp[1], tmp);
+  add(sp[1], sp[1], tmp);
+
+  gfp cp0 = vc[0] * vc[0];
+  add_plain(aa, sp[1], cp0);  
+}
+
+void OnlineOp::inv(Share &ia, const Share &a)
+{
+  
+}
+// c = a * b^{-1} mod q
+void OnlineOp::div(Share &c, const Share &a, const Share &b)
 {
   /*
   phase 0 triples
@@ -128,14 +150,14 @@ void OnlineOp::div(Share &a, Share &b, Share &c)
   {
     sp[i].set_player(P.whoami());
   }
-  getTuples(Proc, sp, OCD, TRIPLE);
+  getTuples(sp, TRIPLE);
 
   vector<Share> sps(2); // SQUARE
   for (int i = 0; i < sps.size(); i++)
   {
     sps[i].set_player(P.whoami());
   }
-  getTuples(Proc, sps, OCD, SQUARE);
+  getTuples(sps, SQUARE);
 
   /*
   phase 1
@@ -197,7 +219,7 @@ void OnlineOp::div(Share &a, Share &b, Share &c)
   00 00 00 02 00 00 00 05 00 00 00 A6                 A6 --> Sp[5]
   00 00 00 26 00 00 00 03 00 00 00 05 00 00 00 01     Sp[5] - Sp[1] --> Sp[3]
   */
-  getTuples(Proc, sp, OCD, TRIPLE);
+  getTuples(sp, TRIPLE);
   gfp cp2 = 1;
   cp0 = 1;
   Share sp4 = sps[0] * cp0;
@@ -247,7 +269,137 @@ void OnlineOp::div(Share &a, Share &b, Share &c)
   cp0 = cp34[0] * cp34[1];
   c.add(sp1, cp0, P.get_mac_keys());
 }
+/*
+void OnlineOp::div(Share &c, const Share &a, const Share &b)
+{
+  
+  //phase 0 triples
 
+  vector<Share> sp(3); // TRIPLE
+  for (int i = 0; i < sp.size(); i++)
+  {
+    sp[i].set_player(P.whoami());
+  }
+  getTuples(sp, TRIPLE);
+
+  vector<Share> sps(2); // SQUARE
+  for (int i = 0; i < sps.size(); i++)
+  {
+    sps[i].set_player(P.whoami());
+  }
+  getTuples(sps, SQUARE);
+
+  
+  //phase 1
+  //00 00 00 50 00 00 00 04 00 00 00 00 00 00 00 05     TRIPLE[a,b,c] --> Sp[4,0,5]
+  //00 00 00 52 00 00 00 03 00 00 00 06                 SQUARE[a,b] --> Sp[3,6]
+  //00 00 00 26 00 00 00 01 00 00 00 03 00 00 00 04     Sp[3] - Sp[4] --> Sp[1]
+  //00 00 00 02 00 00 00 06 00 00 00 A3                 A3 --> Sp[6]
+  //00 00 00 26 00 00 00 02 00 00 00 06 00 00 00 00     Sp[6] - Sp[0] --> Sp[2]
+  //00 00 00 A0 00 00 00 02 00 00 00 01 00 00 00 02     Sp[1,2] --> Open
+  //00 00 00 A1 00 00 00 02 00 00 00 01 00 00 00 02     --> Cp[1,2]
+  
+  gfp cpa, cpb;
+  Share spa, spb, spc;
+  spa.set_player(P.whoami());
+  spb.set_player(P.whoami());
+  spc.set_player(P.whoami());
+  Share sp1 = sps[0] - sp[0];
+  Share sp2 = b - sp[1];
+
+  vector<gfp> cp12;
+  open({sp1, sp2}, cp12);
+  if (verbose > 1)
+  {
+    cout << "div cp12[0]:" << cp12[0] << endl;
+    cout << "div cp12[1]:" << cp12[1] << endl;
+  }
+
+  
+  //phase 2
+  //00 00 00 31 00 00 00 01 00 00 00 00 00 00 00 01     Sp[0] * Cp[1] --> Sp[1]
+  //00 00 00 21 00 00 00 00 00 00 00 05 00 00 00 01     Sp[5] + Sp[1] --> Sp[0]
+  //00 00 00 31 00 00 00 02 00 00 00 04 00 00 00 02     Sp[4] * Cp[2] --> Sp[2]
+  //00 00 00 21 00 00 00 01 00 00 00 00 00 00 00 02     Sp[0] + Sp[2] --> Sp[1]
+  //00 00 00 30 00 00 00 00 00 00 00 01 00 00 00 02     Cp[1] * Cp[2] --> Cp[0]
+  //00 00 00 22 00 00 00 00 00 00 00 01 00 00 00 00     Sp[1] + Cp[0] --> Sp[0]
+  //00 00 00 A0 00 00 00 01 00 00 00 00                 Sp[0] --> Open
+  //00 00 00 A1 00 00 00 01 00 00 00 01                 Open --> Cp[1]
+  
+  sp1 = sp[1] * cp12[0];
+  Share sp0 = sp[2] + sp1;
+  sp2 = sp[0] * cp12[1];
+  sp1 = sp0 + sp2;
+  gfp cp0 = cp12[0] * cp12[1];
+  sp0.add(sp1, cp0, P.get_mac_keys());
+
+  vector<gfp> vcp0;
+  open({sp0}, vcp0);
+  if (verbose > 1)
+  {
+    cout << "div vcp0[0]:" << vcp0[0] << endl;
+  }
+
+  
+  //phase 3
+  //00 00 00 50 00 00 00 01 00 00 00 00 00 00 00 02     TRIPLE[a,b,c] --> Sp[1,0,2]
+  //00 00 00 01 00 00 00 02 00 00 00 01                 1 --> Cp[2]
+  //00 00 00 01 00 00 00 00 00 00 00 01                 1 --> Cp[0]
+  //00 00 00 31 00 00 00 04 00 00 00 03 00 00 00 00     Sp[3] * Cp[0] --> Sp[4]
+  //00 00 00 02 00 00 00 05 00 00 00 A6                 A6 --> Sp[5]
+  //00 00 00 26 00 00 00 03 00 00 00 05 00 00 00 01     Sp[5] - Sp[1] --> Sp[3]
+  
+  getTuples(sp, TRIPLE);
+  gfp cp2 = 1;
+  cp0 = 1;
+  Share sp4 = sps[0] * cp0;
+  Share sp3 = a - sp[0];
+
+  
+  //phase 4
+  //00 00 00 34 00 00 00 00 00 00 00 02 00 00 00 01     INV(Cp[1]) * Cp[2] --> Cp[0]
+  
+  if (vcp0[0].is_zero())
+    throw Processor_Error("Division by zero from register");
+  gfp tmp;
+  tmp.invert(vcp0[0]);
+  tmp.mul(cp2);
+  cp0 = tmp;
+
+  
+  //phase 5
+  //00 00 00 31 00 00 00 05 00 00 00 04 00 00 00 00     Sp[4] * Cp[0] --> Sp[5]
+  //00 00 00 26 00 00 00 04 00 00 00 05 00 00 00 00     Sp[5] - Sp[0] --> Sp[4]
+  //00 00 00 A0 00 00 00 02 00 00 00 03 00 00 00 04     Sp[3,4] --> Open
+  //00 00 00 A1 00 00 00 02 00 00 00 01 00 00 00 02     --> Cp[1,2]
+  //00 00 00 31 00 00 00 03 00 00 00 00 00 00 00 01     Sp[0] * Cp[1] --> Sp[3]
+  //00 00 00 21 00 00 00 00 00 00 00 02 00 00 00 03     Sp[2] + Sp[3] --> Sp[0]
+  //00 00 00 31 00 00 00 02 00 00 00 01 00 00 00 02     Sp[1] * Cp[2] --> Sp[2]
+  //00 00 00 21 00 00 00 01 00 00 00 00 00 00 00 02     Sp[0] + Sp[2] --> Sp[1]
+  //00 00 00 30 00 00 00 00 00 00 00 01 00 00 00 02     Cp[1] * Cp[2] --> Cp[0]
+  //00 00 00 22 00 00 00 00 00 00 00 01 00 00 00 00     Sp[1] + Cp[0] --> Sp[0]
+  //00 00 00 A0 00 00 00 01 00 00 00 00                 Sp[0] --> Open
+  //00 00 00 A1 00 00 00 01 00 00 00 00                 --> Cp[0]
+
+  Share sp5 = sp4 * cp0;
+  sp4 = sp5 - sp[1];
+  vector<gfp> cp34;
+  open({sp3, sp4}, cp34);
+  if (verbose > 1)
+  {
+    cout << "div cp34[0]:" << cp34[0] << endl;
+    cout << "div cp34[1]:" << cp34[1] << endl;
+  }
+
+  //
+  sp3 = sp[1] * cp34[0];
+  sp0 = sp[2] + sp3;
+  sp2 = sp[0] * cp34[1];
+  sp1 = sp0 + sp2;
+  cp0 = cp34[0] * cp34[1];
+  c.add(sp1, cp0, P.get_mac_keys());
+}
+*/
 void OnlineOp::open(const vector<Share> &vs, vector<gfp> &vc)
 {
   vector<int> start;
@@ -286,11 +438,12 @@ void OnlineOp::get_inputs_dumy(vector<Share> &inputs)
     inputs[i].set_player(P.whoami());
   }
 
-  vector<int64_t> inputs_dumy = {176, 16, 5, 3, -9, 3, 7, 2, 3};
+  vector<int64_t> inputs_dumy = {176, 16, -5, 3, -9, 3, 7, 2, 3};
   inputs_dumy.resize(P.nplayers());
+  cout << "inputs size: " << inputs_dumy.size() << endl;
   for (int i = 0; i < inputs.size(); i++)
   {
-    Proc.iop.private_input2(i, inputs[i], 0, Proc, P, machine, OCD, inputs_dumy);
+    Proc.iop.private_input2(i, inputs[i], 1, Proc, P, machine, OCD, inputs_dumy);
   }
 }
 
@@ -314,6 +467,49 @@ void OnlineOp::test_add()
   }
   cout << "============================== END ==============================" << endl;
 }
+void OnlineOp::test_add_plain()
+{
+  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
+
+  vector<Share> inputs;
+  get_inputs_dumy(inputs);
+
+  if (inputs.size() < 1)
+    throw invalid_size();
+
+  gfp tmp;
+  tmp.assign(10);
+  Share res;
+  res.set_player(P.whoami());
+  for (int i = 0; i < P.nplayers(); i++)
+  {
+    add_plain(res, inputs[i], tmp);
+    reveal_and_print({res});
+  }
+  cout << "============================== END ==============================" << endl;
+}
+
+void OnlineOp::test_mul_plain()
+{
+  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
+
+  vector<Share> inputs;
+  get_inputs_dumy(inputs);
+
+  if (inputs.size() < 1)
+    throw invalid_size();
+
+  gfp tmp;
+  tmp.assign(10);
+  Share res;
+  res.set_player(P.whoami());
+  for (int i = 0; i < P.nplayers(); i++)
+  {
+    mul_plain(res, inputs[i], tmp);
+    reveal_and_print({res});
+  }
+  cout << "============================== END ==============================" << endl;
+}
 void OnlineOp::test_mul()
 {
   cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
@@ -332,6 +528,26 @@ void OnlineOp::test_mul()
     reveal_and_print({res});
   }
   cout << "============================== END ==============================" << endl;
+}
+void OnlineOp::test_sqr()
+{
+  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
+
+  vector<Share> inputs;
+  get_inputs_dumy(inputs);
+
+  if (inputs.size() < 1)
+    throw invalid_size();
+
+  Share res;
+  res.set_player(P.whoami());
+  for (int i = 0; i < P.nplayers(); i++)
+  {
+    sqr(res, inputs[i]);
+    reveal_and_print({res});
+  }
+  cout << "============================== END ==============================" << endl;
+
 }
 void OnlineOp::test_div()
 {
