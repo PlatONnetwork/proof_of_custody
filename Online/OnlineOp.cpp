@@ -10,12 +10,13 @@ All rights reserved
 #include "Online.h"
 #include "Processor/Processor.h"
 #include "OnlineOp.h"
+#include "LSSS/PRSS.h"
 
 void OnlineOp::getTuples(vector<Share> &sp, int opcode)
 {
   int thread = Proc.get_thread_num();
   Wait_For_Preproc(opcode, 100, thread, OCD); // temp set 100
-  for(int i = 0; i < sp.size(); i++)
+  for (int i = 0; i < sp.size(); i++)
   {
     sp[i].set_player(P.whoami());
   }
@@ -77,7 +78,7 @@ void OnlineOp::mul_plain(Share &c, const Share &a, const gfp &b)
 // a * b = c
 void OnlineOp::mul(Share &c, const Share &a, const Share &b)
 {
-  
+
   //phase 0: get triples
   vector<Share> sp(3);
   getTuples(sp, TRIPLE);
@@ -109,7 +110,7 @@ void OnlineOp::mul(Share &c, const Share &a, const Share &b)
 // aa = a^2
 void OnlineOp::sqr(Share &aa, const Share &a)
 {
-  
+
   //phase 0: get triples
   vector<Share> sp(2);
   getTuples(sp, SQUARE);
@@ -132,274 +133,41 @@ void OnlineOp::sqr(Share &aa, const Share &a)
   add(sp[1], sp[1], tmp);
 
   gfp cp0 = vc[0] * vc[0];
-  add_plain(aa, sp[1], cp0);  
+  add_plain(aa, sp[1], cp0);
 }
 
 void OnlineOp::inv(Share &ia, const Share &a)
 {
-  
+  Share rshare;
+  PRSS prss(P);
+  //get random share r
+  rshare = prss.next_share(P);
+
+  Share c;
+  //get share of r*a;
+  mul(c, rshare, a);
+  vector<gfp> ra;
+
+  //open ra;
+  open({c}, ra);
+  if (ra[0].is_zero())
+  {
+    throw Processor_Error("Division by zero");
+  }
+
+  //invert ra;
+  gfp ira;
+  ira.invert(ra[0]);
+  mul_plain(ia, rshare, ira);
 }
+
 // c = a * b^{-1} mod q
 void OnlineOp::div(Share &c, const Share &a, const Share &b)
 {
-  /*
-  phase 0 triples
-  */
-  vector<Share> sp(3); // TRIPLE
-  for (int i = 0; i < sp.size(); i++)
-  {
-    sp[i].set_player(P.whoami());
-  }
-  getTuples(sp, TRIPLE);
-
-  vector<Share> sps(2); // SQUARE
-  for (int i = 0; i < sps.size(); i++)
-  {
-    sps[i].set_player(P.whoami());
-  }
-  getTuples(sps, SQUARE);
-
-  /*
-  phase 1
-  00 00 00 50 00 00 00 04 00 00 00 00 00 00 00 05     TRIPLE[a,b,c] --> Sp[4,0,5]
-  00 00 00 52 00 00 00 03 00 00 00 06                 SQUARE[a,b] --> Sp[3,6]
-  00 00 00 26 00 00 00 01 00 00 00 03 00 00 00 04     Sp[3] - Sp[4] --> Sp[1]
-  00 00 00 02 00 00 00 06 00 00 00 A3                 A3 --> Sp[6]
-  00 00 00 26 00 00 00 02 00 00 00 06 00 00 00 00     Sp[6] - Sp[0] --> Sp[2]
-  00 00 00 A0 00 00 00 02 00 00 00 01 00 00 00 02     Sp[1,2] --> Open
-  00 00 00 A1 00 00 00 02 00 00 00 01 00 00 00 02     --> Cp[1,2]
-  */
-  gfp cpa, cpb;
-  Share spa, spb, spc;
-  spa.set_player(P.whoami());
-  spb.set_player(P.whoami());
-  spc.set_player(P.whoami());
-  Share sp1 = sps[0] - sp[0];
-  Share sp2 = b - sp[1];
-
-  vector<gfp> cp12;
-  open({sp1, sp2}, cp12);
-  if (verbose > 1)
-  {
-    cout << "div cp12[0]:" << cp12[0] << endl;
-    cout << "div cp12[1]:" << cp12[1] << endl;
-  }
-
-  /*
-  phase 2
-  00 00 00 31 00 00 00 01 00 00 00 00 00 00 00 01     Sp[0] * Cp[1] --> Sp[1]
-  00 00 00 21 00 00 00 00 00 00 00 05 00 00 00 01     Sp[5] + Sp[1] --> Sp[0]
-  00 00 00 31 00 00 00 02 00 00 00 04 00 00 00 02     Sp[4] * Cp[2] --> Sp[2]
-  00 00 00 21 00 00 00 01 00 00 00 00 00 00 00 02     Sp[0] + Sp[2] --> Sp[1]
-  00 00 00 30 00 00 00 00 00 00 00 01 00 00 00 02     Cp[1] * Cp[2] --> Cp[0]
-  00 00 00 22 00 00 00 00 00 00 00 01 00 00 00 00     Sp[1] + Cp[0] --> Sp[0]
-  00 00 00 A0 00 00 00 01 00 00 00 00                 Sp[0] --> Open
-  00 00 00 A1 00 00 00 01 00 00 00 01                 Open --> Cp[1]
-  */
-  sp1 = sp[1] * cp12[0];
-  Share sp0 = sp[2] + sp1;
-  sp2 = sp[0] * cp12[1];
-  sp1 = sp0 + sp2;
-  gfp cp0 = cp12[0] * cp12[1];
-  sp0.add(sp1, cp0, P.get_mac_keys());
-
-  vector<gfp> vcp0;
-  open({sp0}, vcp0);
-  if (verbose > 1)
-  {
-    cout << "div vcp0[0]:" << vcp0[0] << endl;
-  }
-
-  /*
-  phase 3
-  00 00 00 50 00 00 00 01 00 00 00 00 00 00 00 02     TRIPLE[a,b,c] --> Sp[1,0,2]
-  00 00 00 01 00 00 00 02 00 00 00 01                 1 --> Cp[2]
-  00 00 00 01 00 00 00 00 00 00 00 01                 1 --> Cp[0]
-  00 00 00 31 00 00 00 04 00 00 00 03 00 00 00 00     Sp[3] * Cp[0] --> Sp[4]
-  00 00 00 02 00 00 00 05 00 00 00 A6                 A6 --> Sp[5]
-  00 00 00 26 00 00 00 03 00 00 00 05 00 00 00 01     Sp[5] - Sp[1] --> Sp[3]
-  */
-  getTuples(sp, TRIPLE);
-  gfp cp2 = 1;
-  cp0 = 1;
-  Share sp4 = sps[0] * cp0;
-  Share sp3 = a - sp[0];
-
-  /*
-  phase 4
-  00 00 00 34 00 00 00 00 00 00 00 02 00 00 00 01     INV(Cp[1]) * Cp[2] --> Cp[0]
-  */
-  if (vcp0[0].is_zero())
-    throw Processor_Error("Division by zero from register");
-  gfp tmp;
-  tmp.invert(vcp0[0]);
-  tmp.mul(cp2);
-  cp0 = tmp;
-
-  /*
-  phase 5
-  00 00 00 31 00 00 00 05 00 00 00 04 00 00 00 00     Sp[4] * Cp[0] --> Sp[5]
-  00 00 00 26 00 00 00 04 00 00 00 05 00 00 00 00     Sp[5] - Sp[0] --> Sp[4]
-  00 00 00 A0 00 00 00 02 00 00 00 03 00 00 00 04     Sp[3,4] --> Open
-  00 00 00 A1 00 00 00 02 00 00 00 01 00 00 00 02     --> Cp[1,2]
-  00 00 00 31 00 00 00 03 00 00 00 00 00 00 00 01     Sp[0] * Cp[1] --> Sp[3]
-  00 00 00 21 00 00 00 00 00 00 00 02 00 00 00 03     Sp[2] + Sp[3] --> Sp[0]
-  00 00 00 31 00 00 00 02 00 00 00 01 00 00 00 02     Sp[1] * Cp[2] --> Sp[2]
-  00 00 00 21 00 00 00 01 00 00 00 00 00 00 00 02     Sp[0] + Sp[2] --> Sp[1]
-  00 00 00 30 00 00 00 00 00 00 00 01 00 00 00 02     Cp[1] * Cp[2] --> Cp[0]
-  00 00 00 22 00 00 00 00 00 00 00 01 00 00 00 00     Sp[1] + Cp[0] --> Sp[0]
-  00 00 00 A0 00 00 00 01 00 00 00 00                 Sp[0] --> Open
-  00 00 00 A1 00 00 00 01 00 00 00 00                 --> Cp[0]
-  */
-  Share sp5 = sp4 * cp0;
-  sp4 = sp5 - sp[1];
-  vector<gfp> cp34;
-  open({sp3, sp4}, cp34);
-  if (verbose > 1)
-  {
-    cout << "div cp34[0]:" << cp34[0] << endl;
-    cout << "div cp34[1]:" << cp34[1] << endl;
-  }
-
-  //
-  sp3 = sp[1] * cp34[0];
-  sp0 = sp[2] + sp3;
-  sp2 = sp[0] * cp34[1];
-  sp1 = sp0 + sp2;
-  cp0 = cp34[0] * cp34[1];
-  c.add(sp1, cp0, P.get_mac_keys());
+  inv(c, b);
+  mul(c, a, c);
 }
-/*
-void OnlineOp::div(Share &c, const Share &a, const Share &b)
-{
-  
-  //phase 0 triples
 
-  vector<Share> sp(3); // TRIPLE
-  for (int i = 0; i < sp.size(); i++)
-  {
-    sp[i].set_player(P.whoami());
-  }
-  getTuples(sp, TRIPLE);
-
-  vector<Share> sps(2); // SQUARE
-  for (int i = 0; i < sps.size(); i++)
-  {
-    sps[i].set_player(P.whoami());
-  }
-  getTuples(sps, SQUARE);
-
-  
-  //phase 1
-  //00 00 00 50 00 00 00 04 00 00 00 00 00 00 00 05     TRIPLE[a,b,c] --> Sp[4,0,5]
-  //00 00 00 52 00 00 00 03 00 00 00 06                 SQUARE[a,b] --> Sp[3,6]
-  //00 00 00 26 00 00 00 01 00 00 00 03 00 00 00 04     Sp[3] - Sp[4] --> Sp[1]
-  //00 00 00 02 00 00 00 06 00 00 00 A3                 A3 --> Sp[6]
-  //00 00 00 26 00 00 00 02 00 00 00 06 00 00 00 00     Sp[6] - Sp[0] --> Sp[2]
-  //00 00 00 A0 00 00 00 02 00 00 00 01 00 00 00 02     Sp[1,2] --> Open
-  //00 00 00 A1 00 00 00 02 00 00 00 01 00 00 00 02     --> Cp[1,2]
-  
-  gfp cpa, cpb;
-  Share spa, spb, spc;
-  spa.set_player(P.whoami());
-  spb.set_player(P.whoami());
-  spc.set_player(P.whoami());
-  Share sp1 = sps[0] - sp[0];
-  Share sp2 = b - sp[1];
-
-  vector<gfp> cp12;
-  open({sp1, sp2}, cp12);
-  if (verbose > 1)
-  {
-    cout << "div cp12[0]:" << cp12[0] << endl;
-    cout << "div cp12[1]:" << cp12[1] << endl;
-  }
-
-  
-  //phase 2
-  //00 00 00 31 00 00 00 01 00 00 00 00 00 00 00 01     Sp[0] * Cp[1] --> Sp[1]
-  //00 00 00 21 00 00 00 00 00 00 00 05 00 00 00 01     Sp[5] + Sp[1] --> Sp[0]
-  //00 00 00 31 00 00 00 02 00 00 00 04 00 00 00 02     Sp[4] * Cp[2] --> Sp[2]
-  //00 00 00 21 00 00 00 01 00 00 00 00 00 00 00 02     Sp[0] + Sp[2] --> Sp[1]
-  //00 00 00 30 00 00 00 00 00 00 00 01 00 00 00 02     Cp[1] * Cp[2] --> Cp[0]
-  //00 00 00 22 00 00 00 00 00 00 00 01 00 00 00 00     Sp[1] + Cp[0] --> Sp[0]
-  //00 00 00 A0 00 00 00 01 00 00 00 00                 Sp[0] --> Open
-  //00 00 00 A1 00 00 00 01 00 00 00 01                 Open --> Cp[1]
-  
-  sp1 = sp[1] * cp12[0];
-  Share sp0 = sp[2] + sp1;
-  sp2 = sp[0] * cp12[1];
-  sp1 = sp0 + sp2;
-  gfp cp0 = cp12[0] * cp12[1];
-  sp0.add(sp1, cp0, P.get_mac_keys());
-
-  vector<gfp> vcp0;
-  open({sp0}, vcp0);
-  if (verbose > 1)
-  {
-    cout << "div vcp0[0]:" << vcp0[0] << endl;
-  }
-
-  
-  //phase 3
-  //00 00 00 50 00 00 00 01 00 00 00 00 00 00 00 02     TRIPLE[a,b,c] --> Sp[1,0,2]
-  //00 00 00 01 00 00 00 02 00 00 00 01                 1 --> Cp[2]
-  //00 00 00 01 00 00 00 00 00 00 00 01                 1 --> Cp[0]
-  //00 00 00 31 00 00 00 04 00 00 00 03 00 00 00 00     Sp[3] * Cp[0] --> Sp[4]
-  //00 00 00 02 00 00 00 05 00 00 00 A6                 A6 --> Sp[5]
-  //00 00 00 26 00 00 00 03 00 00 00 05 00 00 00 01     Sp[5] - Sp[1] --> Sp[3]
-  
-  getTuples(sp, TRIPLE);
-  gfp cp2 = 1;
-  cp0 = 1;
-  Share sp4 = sps[0] * cp0;
-  Share sp3 = a - sp[0];
-
-  
-  //phase 4
-  //00 00 00 34 00 00 00 00 00 00 00 02 00 00 00 01     INV(Cp[1]) * Cp[2] --> Cp[0]
-  
-  if (vcp0[0].is_zero())
-    throw Processor_Error("Division by zero from register");
-  gfp tmp;
-  tmp.invert(vcp0[0]);
-  tmp.mul(cp2);
-  cp0 = tmp;
-
-  
-  //phase 5
-  //00 00 00 31 00 00 00 05 00 00 00 04 00 00 00 00     Sp[4] * Cp[0] --> Sp[5]
-  //00 00 00 26 00 00 00 04 00 00 00 05 00 00 00 00     Sp[5] - Sp[0] --> Sp[4]
-  //00 00 00 A0 00 00 00 02 00 00 00 03 00 00 00 04     Sp[3,4] --> Open
-  //00 00 00 A1 00 00 00 02 00 00 00 01 00 00 00 02     --> Cp[1,2]
-  //00 00 00 31 00 00 00 03 00 00 00 00 00 00 00 01     Sp[0] * Cp[1] --> Sp[3]
-  //00 00 00 21 00 00 00 00 00 00 00 02 00 00 00 03     Sp[2] + Sp[3] --> Sp[0]
-  //00 00 00 31 00 00 00 02 00 00 00 01 00 00 00 02     Sp[1] * Cp[2] --> Sp[2]
-  //00 00 00 21 00 00 00 01 00 00 00 00 00 00 00 02     Sp[0] + Sp[2] --> Sp[1]
-  //00 00 00 30 00 00 00 00 00 00 00 01 00 00 00 02     Cp[1] * Cp[2] --> Cp[0]
-  //00 00 00 22 00 00 00 00 00 00 00 01 00 00 00 00     Sp[1] + Cp[0] --> Sp[0]
-  //00 00 00 A0 00 00 00 01 00 00 00 00                 Sp[0] --> Open
-  //00 00 00 A1 00 00 00 01 00 00 00 00                 --> Cp[0]
-
-  Share sp5 = sp4 * cp0;
-  sp4 = sp5 - sp[1];
-  vector<gfp> cp34;
-  open({sp3, sp4}, cp34);
-  if (verbose > 1)
-  {
-    cout << "div cp34[0]:" << cp34[0] << endl;
-    cout << "div cp34[1]:" << cp34[1] << endl;
-  }
-
-  //
-  sp3 = sp[1] * cp34[0];
-  sp0 = sp[2] + sp3;
-  sp2 = sp[0] * cp34[1];
-  sp1 = sp0 + sp2;
-  cp0 = cp34[0] * cp34[1];
-  c.add(sp1, cp0, P.get_mac_keys());
-}
-*/
 void OnlineOp::open(const vector<Share> &vs, vector<gfp> &vc)
 {
   vector<int> start;
@@ -547,7 +315,6 @@ void OnlineOp::test_sqr()
     reveal_and_print({res});
   }
   cout << "============================== END ==============================" << endl;
-
 }
 void OnlineOp::test_div()
 {
