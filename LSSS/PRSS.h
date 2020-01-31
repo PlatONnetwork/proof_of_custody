@@ -41,6 +41,7 @@ class PRSS
   void batch_production(Player &P);
 
 public:
+  PRSS(){}
   PRSS(Player &P);
 
   Share next_share(Player &P);

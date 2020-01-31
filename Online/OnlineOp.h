@@ -11,6 +11,7 @@ All rights reserved
 #include "Online/Machine.h"
 #include "System/Player.h"
 #include "Processor/Processor.h"
+#include "LSSS/PRSS.h"
 
 extern vector<sacrificed_data> SacrificeD;
 /*
@@ -28,11 +29,27 @@ enum
 
 class UsedTuples
 {
-    public:
+public:
     unsigned int UsedTriples = 0;
     unsigned int UsedSquares = 0;
     unsigned int UsedBit = 0;
     unsigned int UsedInputMask = 0;
+};
+
+class Complex
+{
+public:
+    Share &real;
+    Share &imag;
+    Complex(Share &_real, Share &_imag) : real(_real), imag(_imag) {}
+};
+
+class Complex_plain
+{
+public:
+    gfp &real;
+    gfp &imag;
+    Complex_plain(gfp &_real, gfp &_imag) : real(_real), imag(_imag) {}
 };
 
 class OnlineOp
@@ -44,13 +61,17 @@ public:
     Player &P;
     offline_control_data &OCD;
     Machine &machine;
+    PRSS prss;
     explicit OnlineOp(Processor &Proc_, int online_num_, Player &P_, offline_control_data &OCD_, Machine &machine_)
         : Proc(Proc_), online_num(online_num_), P(P_), OCD(OCD_), machine(machine_)
     {
+        prss = PRSS(P);
     }
     int verbose = 2;
 
     void getTuples(vector<Share> &sp, int opcode);
+
+    /*Share ops*/
     // c = a + b (b is share)
     void add(Share &c, const Share &a, const Share &b);
     // c = a + b (b is plain)
@@ -63,8 +84,26 @@ public:
     void sqr(Share &aa, const Share &a);
     //ia = a^{-1} mod q
     void inv(Share &ia, const Share &a);
-    // c = a * b^{-1} mod q 
+    // c = a * b^{-1} mod q
     void div(Share &c, const Share &a, const Share &b);
+
+    /*Complex ops*/
+    // c = a + b (b is shared complex)
+    void add(Complex &c, const Complex &a, const Complex &b);
+    // c = a + b (b is plain complex)
+    void add_plain(Complex &c, const Complex &a, const Complex_plain &b);
+    // c = a * b (b is plain complex)
+    void mul_plain(Complex &c, const Complex &a, const Complex_plain &b);
+    // c = a * b (b is shared complex)
+    void mul(Complex &c, const Complex &a, const Complex &b);
+    // aa = a^2
+    void sqr(Complex &aa, const Complex a);
+    //ia = a^{-1} mod (q,x^2+1)
+    void inv(Complex &ia, const Complex a);
+    // c = a * b^{-1} mod (q, x^2+1)
+    void div(Complex &c, const Complex &a, const Complex &b);
+
+    /*open and reveal*/
     // vs --> vc
     void open(const vector<Share> &vs, vector<gfp> &vc);
 
@@ -73,6 +112,7 @@ public:
     void reveal_and_print(const vector<Share> &vs, vector<gfp> &vc);
     void reveal_and_print(const vector<Share> &vs);
 
+    /*inputs*/
     void get_inputs(vector<Share> &inputs);
     void get_inputs_dumy(vector<Share> &inputs);
 

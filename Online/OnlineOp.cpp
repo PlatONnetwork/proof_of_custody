@@ -10,7 +10,6 @@ All rights reserved
 #include "Online.h"
 #include "Processor/Processor.h"
 #include "OnlineOp.h"
-#include "LSSS/PRSS.h"
 
 void OnlineOp::getTuples(vector<Share> &sp, int opcode)
 {
@@ -139,7 +138,6 @@ void OnlineOp::sqr(Share &aa, const Share &a)
 void OnlineOp::inv(Share &ia, const Share &a)
 {
   Share rshare;
-  PRSS prss(P);
   //get random share r
   rshare = prss.next_share(P);
 
@@ -168,6 +166,26 @@ void OnlineOp::div(Share &c, const Share &a, const Share &b)
   mul(c, a, c);
 }
 
+/*Complex ops*/
+// c = a + b (b is shared complex)
+void OnlineOp::add(Complex &c, const Complex &a, const Complex &b)
+{
+  add(c.real, a.real, b.real);
+  add(c.imag, a.imag, b.imag);
+}
+
+// c = a + b (b is plain complex)
+void OnlineOp::add_plain(Complex &c, const Complex &a, const Complex_plain &b)
+{
+  add_plain(c.real, a.real, b.real);
+  add_plain(c.imag, a.imag, b.imag);
+}
+
+// c = a * b (b is plain complex)
+void OnlineOp::mul_plain(Complex &c, const Complex &a, const Complex_plain &b)
+{
+
+}
 void OnlineOp::open(const vector<Share> &vs, vector<gfp> &vc)
 {
   vector<int> start;
