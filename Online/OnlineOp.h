@@ -82,39 +82,39 @@ public:
 
     /*Share ops*/
     // c = a + b (b is share)
-    void add(Share &c, const Share &a, const Share &b);
+    void add(Share &c, Share &a, Share &b);
     // c = a + b (b is plain)
-    void add_plain(Share &c, const Share &a, const gfp &b);
+    void add_plain(Share &c, Share &a, gfp &b);
     // c = a - b (b is share)
-    void sub(Share &c, const Share &a, const Share &b);
+    void sub(Share &c, Share &a, Share &b);
     // c = a * b (b is plain)
-    void mul_plain(Share &c, const Share &a, const gfp &b);
+    void mul_plain(Share &c, Share &a, gfp &b);
     // c = a * b (b is share)
-    void mul(Share &c, const Share &a, const Share &b);
+    void mul(Share &c, Share &a, Share &b);
     // aa = a^2
-    void sqr(Share &aa, const Share &a);
+    void sqr(Share &aa, Share &a);
     //ia = a^{-1} mod q
-    void inv(Share &ia, const Share &a);
+    void inv(Share &ia, Share &a);
     // c = a * b^{-1} mod q
-    void div(Share &c, const Share &a, const Share &b);
+    void div(Share &c, Share &a, Share &b);
 
     /*Complex ops*/
     // c = a + b (b is shared complex)
-    void add(Complex &c, const Complex &a, const Complex &b);
+    void add(Complex &c, Complex &a, Complex &b);
     // c = a + b (b is plain complex)
-    void add_plain(Complex &c, const Complex &a, const Complex_plain &b);
+    void add_plain(Complex &c, Complex &a, Complex_plain &b);
     // c = a - b (b is shared complex)
-    void sub(Complex &c, const Complex &a, const Complex &b);
+    void sub(Complex &c, Complex &a, Complex &b);
     // c = a * b (b is plain complex)
-    void mul_plain(Complex &c, const Complex &a, const Complex_plain &b);
+    void mul_plain(Complex &c, Complex &a, Complex_plain &b);
     // c = a * b (b is shared complex)
-    void mul(Complex &c, const Complex &a, const Complex &b);
+    void mul(Complex &c, Complex &a, Complex &b);
     // aa = a^2
-    void sqr(Complex &aa, const Complex a);
+    void sqr(Complex &aa, Complex a);
     //ia = a^{-1} mod (q,x^2+1)
-    void inv(Complex &ia, const Complex a);
+    void inv(Complex &ia, Complex a);
     // c = a * b^{-1} mod (q, x^2+1)
-    void div(Complex &c, const Complex &a, const Complex &b);
+    void div(Complex &c, Complex &a, Complex &b);
 
     /*open and reveal*/
     // vs --> vc

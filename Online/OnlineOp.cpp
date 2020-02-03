@@ -60,26 +60,26 @@ void OnlineOp::getTuples(vector<Share> &sp, int opcode)
   }
 }
 // c = a + b (b is share)
-void OnlineOp::add(Share &c, const Share &a, const Share &b)
+void OnlineOp::add(Share &c, Share &a, Share &b)
 {
   c = a + b;
 }
 
-void OnlineOp::add_plain(Share &c, const Share &a, const gfp &b)
+void OnlineOp::add_plain(Share &c, Share &a, gfp &b)
 {
   c.add(a, b);
 }
 // c = a - b (b is share)
-void OnlineOp::sub(Share &c, const Share &a, const Share &b)
+void OnlineOp::sub(Share &c, Share &a, Share &b)
 {
   c = a - b;
 }
-void OnlineOp::mul_plain(Share &c, const Share &a, const gfp &b)
+void OnlineOp::mul_plain(Share &c, Share &a, gfp &b)
 {
   c.mul(a, b);
 }
 // a * b = c
-void OnlineOp::mul(Share &c, const Share &a, const Share &b)
+void OnlineOp::mul(Share &c, Share &a, Share &b)
 {
 
   //phase 0: get triples
@@ -111,7 +111,7 @@ void OnlineOp::mul(Share &c, const Share &a, const Share &b)
   add_plain(c, sp[2], cp0);
 }
 // aa = a^2
-void OnlineOp::sqr(Share &aa, const Share &a)
+void OnlineOp::sqr(Share &aa,  Share &a)
 {
 
   //phase 0: get triples
@@ -139,7 +139,7 @@ void OnlineOp::sqr(Share &aa, const Share &a)
   add_plain(aa, sp[1], cp0);
 }
 
-void OnlineOp::inv(Share &ia, const Share &a)
+void OnlineOp::inv(Share &ia, Share &a)
 {
   Share rshare;
   //get random share r
@@ -169,7 +169,7 @@ void OnlineOp::inv(Share &ia, const Share &a)
 }
 
 // c = a * b^{-1} mod q
-void OnlineOp::div(Share &c, const Share &a, const Share &b)
+void OnlineOp::div(Share &c, Share &a, Share &b)
 {
   inv(c, b);
   mul(c, a, c);
@@ -177,39 +177,70 @@ void OnlineOp::div(Share &c, const Share &a, const Share &b)
 
 /*Complex ops*/
 // c = a + b (b is shared complex)
-void OnlineOp::add(Complex &c, const Complex &a, const Complex &b)
+void OnlineOp::add(Complex &c, Complex &a, Complex &b)
 {
   add(c.real, a.real, b.real);
   add(c.imag, a.imag, b.imag);
 }
 
 // c = a + b (b is plain complex)
-void OnlineOp::add_plain(Complex &c, const Complex &a, const Complex_plain &b)
+void OnlineOp::add_plain(Complex &c, Complex &a, Complex_plain &b)
 {
   add_plain(c.real, a.real, b.real);
   add_plain(c.imag, a.imag, b.imag);
 }
 // c = a - b (b is shared complex)
-void OnlineOp::sub(Complex &c, const Complex &a, const Complex &b)
+void OnlineOp::sub(Complex &c, Complex &a, Complex &b)
 {
   sub(c.imag, a.imag, b.imag);
   sub(c.real, a.real, b.real);
 }
 // c = a * b (b is plain complex)
-void OnlineOp::mul_plain(Complex &c, const Complex &a, const Complex_plain &b)
+void OnlineOp::mul_plain(Complex &c, Complex &a, Complex_plain &b)
 {
-  Share tmp;
-  mul_plain(c.real, a.real, b.real);
-  mul_plain(tmp, a.imag, b.imag);
-  sub(c.real, c.real, tmp);
+  Share tmpimag, tmpreal;
+  mul_plain(tmpreal, a.real, b.real);
+  mul_plain(tmpimag, a.imag, b.imag);
+  sub(c.real, tmpreal, tmpimag);
 
-  mul_plain(c.imag, a.real, b.imag);
-  mul_plain(tmp, a.imag, b.real);
-  add(c.imag, c.imag, tmp);
+  mul_plain(tmpreal, a.real, b.imag);
+  mul_plain(tmpimag, a.imag, b.real);
+  add(c.imag, tmpreal, tmpimag);
 }
 // c = a * b (b is shared complex)
-void OnlineOp::mul(Complex &c, const Complex &a, const Complex &b)
+void OnlineOp::mul(Complex &c, Complex &a, Complex &b)
 {
+  cout << "b.real<<\n";
+  reveal_and_print({b.real});
+
+  Share tmpimag, tmpreal;
+  mul(tmpreal, a.real, b.real);
+  mul(tmpimag, a.imag, b.imag);
+  sub(c.real, tmpreal, tmpimag);
+
+  cout << "b.real<<\n";
+  reveal_and_print({b.real});
+
+  mul(tmpreal, a.real, b.imag);
+  cout << "a.real:\n";
+  reveal_and_print({a.real});
+  cout << "b.imag:\n";
+  reveal_and_print({b.imag});
+  cout << "a.real * b.imag\n";
+  reveal_and_print({tmpreal});
+
+  cout << "b.real<<\n";
+  reveal_and_print({b.real});
+
+  mul(tmpimag, a.imag, b.real);
+  cout << "a.imag:\n";
+  reveal_and_print({a.imag});
+  cout << "b.real:\n";
+  reveal_and_print({b.real});
+  cout << "a.imag * b.real\n";
+  reveal_and_print({tmpimag});
+  add(c.imag, tmpreal, tmpimag);
+  /*
   cout<<"inputs of mul op:\n";
   reveal_and_print({a,b});
 
@@ -234,9 +265,10 @@ void OnlineOp::mul(Complex &c, const Complex &a, const Complex &b)
   cout<<"a.imag * b.real\n";
   reveal_and_print({tmp});
   add(c.imag, c.imag, tmp);
+*/
 }
 // aa = a^2
-void OnlineOp::sqr(Complex &aa, const Complex a)
+void OnlineOp::sqr(Complex &aa, Complex a)
 {
   Share tmp;
   sqr(aa.real, a.real);
@@ -248,7 +280,7 @@ void OnlineOp::sqr(Complex &aa, const Complex a)
 }
 
 //ia = a^{-1} mod (q,x^2+1)
-void OnlineOp::inv(Complex &ia, const Complex a)
+void OnlineOp::inv(Complex &ia, Complex a)
 {
   Share rr, ii;
   sqr(rr, a.real);
@@ -258,22 +290,22 @@ void OnlineOp::inv(Complex &ia, const Complex a)
   inv(rr, rr); // rr = (real^2+imag^2)^{-1}
 
   ii = a.imag;
-//  ii.negate(); // ii = -imag
+  //  ii.negate(); // ii = -imag
 
   ia.real = a.real;
   ia.imag = ii;
-//  mul(ia.real, a.real, rr);
-//  mul(ia.imag, ii, rr);
+  //  mul(ia.real, a.real, rr);
+  //  mul(ia.imag, ii, rr);
 }
 
 // c = a * b^{-1} mod (q, x^2+1)
-void OnlineOp::div(Complex &c, const Complex &a, const Complex &b)
+void OnlineOp::div(Complex &c, Complex &a, Complex &b)
 {
-//  inv(c,b);
+  //  inv(c,b);
   c = b;
-  cout<<"[inv(c,b)] c: \n";
+  cout << "[inv(c,b)] c: \n";
   reveal_and_print({c});
-  mul(c,a,c);
+  mul(c, a, c);
 }
 void OnlineOp::open(const vector<Share> &vs, vector<gfp> &vc)
 {
@@ -546,7 +578,7 @@ void OnlineOp::test_complex_mul()
   get_inputs_dumy(inputs1);
   get_inputs_dumy(inputs2);
 
-  reverse(inputs2.begin(),inputs2.end());
+  reverse(inputs2.begin(), inputs2.end());
 
   vector<Complex> input_c(inputs1.size());
   for (int i = 0; i < input_c.size(); i++)
@@ -555,7 +587,7 @@ void OnlineOp::test_complex_mul()
   }
 
   vector<Complex> input_c2 = input_c;
-  reverse(input_c2.begin(),input_c2.end());
+  reverse(input_c2.begin(), input_c2.end());
 
   if (inputs1.size() < 1 || inputs2.size() < 1)
     throw invalid_size();
@@ -624,7 +656,6 @@ void OnlineOp::test_complex_inv()
   cout << "============================== END ==============================" << endl;
 }
 
-
 void OnlineOp::test_complex_div()
 {
   cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
@@ -644,11 +675,11 @@ void OnlineOp::test_complex_div()
 
   Complex res = input_c[0];
   reveal_and_print({res});
-//  reveal_and_print({input_c[1]});
-//  reveal_and_print({input_c[2]});
+  //  reveal_and_print({input_c[1]});
+  //  reveal_and_print({input_c[2]});
   for (int i = 1; i < P.nplayers(); i++)
   {
-    cout<<i<<endl;
+    cout << i << endl;
     div(res, input_c[1], input_c[1]);
     reveal_and_print({res});
   }
