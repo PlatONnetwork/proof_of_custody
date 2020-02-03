@@ -184,7 +184,7 @@ void OnlineOp::add(Complex &c, const Complex &a, const Complex &b)
 }
 
 // c = a + b (b is plain complex)
-void OnlineOp::add_plain(Complex &c, const Complex &a, const Complex_plain &b)
+void OnlineOp::add_plain(Complex &c, const Complex &a, const Complex_Plain &b)
 {
   add_plain(c.real, a.real, b.real);
   add_plain(c.imag, a.imag, b.imag);
@@ -196,7 +196,7 @@ void OnlineOp::sub(Complex &c, const Complex &a, const Complex &b)
   sub(c.real, a.real, b.real);
 }
 // c = a * b (b is plain complex)
-void OnlineOp::mul_plain(Complex &c, const Complex &a, const Complex_plain &b)
+void OnlineOp::mul_plain(Complex &c, const Complex &a, const Complex_Plain &b)
 {
   Share tmpimag, tmpreal, creal;
   mul_plain(tmpreal, a.real, b.real);
@@ -220,33 +220,6 @@ void OnlineOp::mul(Complex &c, const Complex &a, const Complex &b)
   mul(tmpimag, a.imag, b.real);
   add(c.imag, tmpreal, tmpimag);
   c.real = creal;
-
-  /*
-  cout<<"inputs of mul op:\n";
-  reveal_and_print({a,b});
-
-  Share tmp;
-  mul(c.real, a.real, b.real);
-  mul(tmp, a.imag, b.imag);
-  sub(c.real, c.real, tmp);
-
-  mul(c.imag, a.real, b.imag);
-  cout<<"a.real:\n";
-  reveal_and_print({a.real});
-  cout<<"b.imag:\n";
-  reveal_and_print({b.imag});
-  cout<<"a.real * b.imag\n";
-  reveal_and_print({c.imag});
-
-  mul(tmp, a.imag, b.real);
-  cout<<"a.imag:\n";
-  reveal_and_print({a.imag});
-  cout<<"b.real:\n";
-  reveal_and_print({b.real});
-  cout<<"a.imag * b.real\n";
-  reveal_and_print({tmp});
-  add(c.imag, c.imag, tmp);
-*/
 }
 // aa = a^2
 void OnlineOp::sqr(Complex &aa, const Complex &a)
@@ -534,7 +507,7 @@ void OnlineOp::test_complex_mul_plain()
   tmp[1].assign(16);
   tmp[2].assign(-5);
 
-  vector<Complex_plain> cnstnt(input_c.size());
+  vector<Complex_Plain> cnstnt(input_c.size());
   for (int i = 0; i < cnstnt.size(); i++)
   {
     cnstnt[i].setValue(tmp[i], tmp[i]);

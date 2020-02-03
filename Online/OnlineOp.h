@@ -46,13 +46,13 @@ public:
     }
 };
 
-class Complex_plain
+class Complex_Plain
 {
 public:
     gfp real;
     gfp imag;
-    Complex_plain() {}
-    Complex_plain(gfp &_real, gfp &_imag) : real(_real), imag(_imag) {}
+    Complex_Plain() {}
+    Complex_Plain(gfp &_real, gfp &_imag) : real(_real), imag(_imag) {}
     void setValue(gfp &_real, gfp &_imag)
     {
         real = _real;
@@ -102,11 +102,11 @@ public:
     // c = a + b (b is shared complex)
     void add(Complex &c, const Complex &a, const Complex &b);
     // c = a + b (b is plain complex)
-    void add_plain(Complex &c, const Complex &a, const Complex_plain &b);
+    void add_plain(Complex &c, const Complex &a, const Complex_Plain &b);
     // c = a - b (b is shared complex)
     void sub(Complex &c, const Complex &a, const Complex &b);
     // c = a * b (b is plain complex)
-    void mul_plain(Complex &c, const Complex &a, const Complex_plain &b);
+    void mul_plain(Complex &c, const Complex &a, const Complex_Plain &b);
     // c = a * b (b is shared complex)
     void mul(Complex &c, const Complex &a, const Complex &b);
     // aa = a^2
