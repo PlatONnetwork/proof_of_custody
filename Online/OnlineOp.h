@@ -14,10 +14,6 @@ All rights reserved
 #include "LSSS/PRSS.h"
 
 extern vector<sacrificed_data> SacrificeD;
-/*
-void online_phase(int online_num, Player &P, offline_control_data &OCD,
-                  Machine &machine);
-*/
 
 enum
 {
@@ -39,17 +35,29 @@ public:
 class Complex
 {
 public:
-    Share &real;
-    Share &imag;
+    Share real;
+    Share imag;
+    Complex() {}
     Complex(Share &_real, Share &_imag) : real(_real), imag(_imag) {}
+    void setValue(Share &_real, Share &_imag)
+    {
+        real = _real;
+        imag = _imag;
+    }
 };
 
 class Complex_plain
 {
 public:
-    gfp &real;
-    gfp &imag;
+    gfp real;
+    gfp imag;
+    Complex_plain() {}
     Complex_plain(gfp &_real, gfp &_imag) : real(_real), imag(_imag) {}
+    void setValue(gfp &_real, gfp &_imag)
+    {
+        real = _real;
+        imag = _imag;
+    }
 };
 
 class OnlineOp
@@ -62,12 +70,13 @@ public:
     offline_control_data &OCD;
     Machine &machine;
     PRSS prss;
-    explicit OnlineOp(Processor &Proc_, int online_num_, Player &P_, offline_control_data &OCD_, Machine &machine_)
+    explicit OnlineOp(Processor &Proc_, int online_num_, Player &P_,
+                      offline_control_data &OCD_, Machine &machine_)
         : Proc(Proc_), online_num(online_num_), P(P_), OCD(OCD_), machine(machine_)
     {
         prss = PRSS(P);
     }
-    int verbose = 2;
+    int verbose = 0;
 
     void getTuples(vector<Share> &sp, int opcode);
 
@@ -76,6 +85,8 @@ public:
     void add(Share &c, const Share &a, const Share &b);
     // c = a + b (b is plain)
     void add_plain(Share &c, const Share &a, const gfp &b);
+    // c = a - b (b is share)
+    void sub(Share &c, const Share &a, const Share &b);
     // c = a * b (b is plain)
     void mul_plain(Share &c, const Share &a, const gfp &b);
     // c = a * b (b is share)
@@ -92,6 +103,8 @@ public:
     void add(Complex &c, const Complex &a, const Complex &b);
     // c = a + b (b is plain complex)
     void add_plain(Complex &c, const Complex &a, const Complex_plain &b);
+    // c = a - b (b is shared complex)
+    void sub(Complex &c, const Complex &a, const Complex &b);
     // c = a * b (b is plain complex)
     void mul_plain(Complex &c, const Complex &a, const Complex_plain &b);
     // c = a * b (b is shared complex)
@@ -111,6 +124,7 @@ public:
     void reveal(const vector<Share> &vs, vector<gfp> &vc);
     void reveal_and_print(const vector<Share> &vs, vector<gfp> &vc);
     void reveal_and_print(const vector<Share> &vs);
+    void reveal_and_print(const vector<Complex> &vs);
 
     /*inputs*/
     void get_inputs(vector<Share> &inputs);
@@ -123,6 +137,14 @@ public:
     void test_mul();
     void test_sqr();
     void test_div();
+
+    void test_complex_add();
+    void test_complex_sub();
+    void test_complex_mul_plain();
+    void test_complex_mul();
+    void test_complex_sqr();
+    void test_complex_inv();
+    void test_complex_div();
 };
 
 #endif

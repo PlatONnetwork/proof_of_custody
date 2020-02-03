@@ -97,9 +97,19 @@ void online_phase(int online_num, Player &P, offline_control_data &OCD,
     online_op.test_mul();
     online_op.test_sqr();
     online_op.test_div();
+
+    online_op.test_complex_add();
+    online_op.test_complex_sub();
+    online_op.test_complex_mul_plain();
+    online_op.test_complex_mul();
+    online_op.test_complex_sqr();
+    online_op.test_complex_inv();
+    online_op.test_complex_div();
+    
     cout<<"used triples: "<<online_op.UT.UsedTriples<<endl;
     cout<<"used squares: "<<online_op.UT.UsedSquares<<endl;
     cout<<"used bits: "<<online_op.UT.UsedBit<<endl;
+
   }
   
   ///////////////////////
