@@ -69,11 +69,31 @@ void OnlineOp::add_plain(Share &c, const Share &a, const gfp &b)
 {
   c.add(a, b);
 }
+
+void OnlineOp::add_inplace(Share &c, const Share &a)
+{
+  Share tmp;
+  add(tmp, c, a);
+  c = tmp;
+}
 // c = a - b (b is share)
 void OnlineOp::sub(Share &c, const Share &a, const Share &b)
 {
   c = a - b;
 }
+// c = a - b (b is plain)
+void OnlineOp::sub_plain(Share &c, const Share &a, const gfp &b)
+{
+  c.sub(a, b);
+}
+
+void OnlineOp::sub_inplace(Share &c, const Share &a)
+{
+  Share tmp;
+  sub(tmp, c, a);
+  c = tmp;
+}
+
 void OnlineOp::mul_plain(Share &c, const Share &a, const gfp &b)
 {
   c.mul(a, b);
@@ -101,13 +121,20 @@ void OnlineOp::mul(Share &c, const Share &a, const Share &b)
 
   Share tmp;
   mul_plain(tmp, sp[1], vc[0]);
-  add(sp[2], sp[2], tmp);
+  add_inplace(sp[2], tmp);
 
   mul_plain(tmp, sp[0], vc[1]);
-  add(sp[2], sp[2], tmp);
+  add_inplace(sp[2], tmp);
 
   gfp cp0 = vc[0] * vc[1];
   add_plain(c, sp[2], cp0);
+}
+
+void OnlineOp::mul_inplace(Share &c, const Share &a)
+{
+  Share tmp;
+  mul(tmp, c, a);
+  c = tmp;
 }
 // aa = a^2
 void OnlineOp::sqr(Share &aa, const Share &a)
@@ -131,11 +158,18 @@ void OnlineOp::sqr(Share &aa, const Share &a)
 
   Share tmp;
   mul_plain(tmp, sp[0], vc[0]);
-  add(sp[1], sp[1], tmp);
-  add(sp[1], sp[1], tmp);
+  add_inplace(sp[1], tmp);
+  add_inplace(sp[1], tmp);
 
   gfp cp0 = vc[0] * vc[0];
   add_plain(aa, sp[1], cp0);
+}
+
+void OnlineOp::sqr_inplace(Share &a)
+{
+  Share tmp;
+  sqr(tmp, a);
+  a = tmp;
 }
 
 void OnlineOp::inv(Share &ia, const Share &a)
@@ -167,12 +201,25 @@ void OnlineOp::inv(Share &ia, const Share &a)
   mul_plain(ia, rshare, ira);
 }
 
+void OnlineOp::inv_inplace(Share &a)
+{
+  Share tmp;
+  inv(tmp, a);
+  a = tmp;
+}
+
 // c = a * b^{-1} mod q
 void OnlineOp::div(Share &c, const Share &a, const Share &b)
 {
-  Share ib;
-  inv(ib, b);
-  mul(c, a, ib);
+  inv(c, b);
+  mul_inplace(c, a);
+}
+
+void OnlineOp::div_inplace(Share &c, const Share &a)
+{
+  Share tmp;
+  div(tmp, c, a);
+  c = tmp;
 }
 
 /*Complex ops*/
@@ -189,12 +236,34 @@ void OnlineOp::add_plain(Complex &c, const Complex &a, const Complex_Plain &b)
   add_plain(c.real, a.real, b.real);
   add_plain(c.imag, a.imag, b.imag);
 }
+
+void OnlineOp::add_inplace(Complex &c, const Complex &a)
+{
+  Complex tmp;
+  add(tmp, c, a);
+  c = tmp;
+}
+
 // c = a - b (b is shared complex)
 void OnlineOp::sub(Complex &c, const Complex &a, const Complex &b)
 {
   sub(c.imag, a.imag, b.imag);
   sub(c.real, a.real, b.real);
 }
+// c = a - b (b is plain complex)
+void OnlineOp::sub_plain(Complex &c, const Complex &a, const Complex_Plain &b)
+{
+  sub_plain(c.imag, a.imag, b.imag);
+  sub_plain(c.real, a.real, b.real);
+}
+
+void OnlineOp::sub_inplace(Complex &c, const Complex &a)
+{
+  Complex tmp;
+  sub(tmp, c, a);
+  c = tmp;
+}
+
 // c = a * b (b is plain complex)
 void OnlineOp::mul_plain(Complex &c, const Complex &a, const Complex_Plain &b)
 {
@@ -211,52 +280,76 @@ void OnlineOp::mul_plain(Complex &c, const Complex &a, const Complex_Plain &b)
 // c = a * b (b is shared complex)
 void OnlineOp::mul(Complex &c, const Complex &a, const Complex &b)
 {
-  Share tmpimag, tmpreal, creal;
-  mul(tmpreal, a.real, b.real);
-  mul(tmpimag, a.imag, b.imag);
-  sub(creal, tmpreal, tmpimag);
+  Share tmp;
+  mul(c.real, a.real, b.real);
+  mul(tmp, a.imag, b.imag);
+  sub_inplace(c.real, tmp);
 
-  mul(tmpreal, a.real, b.imag);
-  mul(tmpimag, a.imag, b.real);
-  add(c.imag, tmpreal, tmpimag);
-  c.real = creal;
+  mul(c.imag, a.real, b.imag);
+  mul(tmp, a.imag, b.real);
+  add_inplace(c.imag, tmp);
+}
+
+void OnlineOp::mul_inplace(Complex &c, const Complex &a)
+{
+  Complex tmp;
+  mul(tmp, c, a);
+  c = tmp;
 }
 // aa = a^2
 void OnlineOp::sqr(Complex &aa, const Complex &a)
 {
-  Share tmpr2, tmpi2, tmpcross;
-  sqr(tmpr2, a.real);
-  sqr(tmpi2, a.imag);
+  sqr(aa.real, a.real);
+  sqr(aa.imag, a.imag);
+  sub_inplace(aa.real, aa.imag);
 
-  mul(tmpcross, a.real, a.imag);
-  add(aa.imag, tmpcross, tmpcross);
-  sub(aa.real, tmpr2, tmpi2);
+  mul(aa.imag, a.real, a.imag);
+  add_inplace(aa.imag, aa.imag);
+}
+
+void OnlineOp::sqr_inplace(Complex &a)
+{
+  Complex tmp;
+  sqr(tmp, a);
+  a = tmp;
 }
 
 //ia = a^{-1} mod (q,x^2+1)
 void OnlineOp::inv(Complex &ia, const Complex a)
 {
-  Share rr, ii;
-  sqr(rr, a.real);
-  sqr(ii, a.imag);
+  Share rr;
+  sqr(ia.real, a.real);
+  sqr(ia.imag, a.imag);
 
-  add(rr, rr, ii);
+  add_inplace(ia.real, ia.imag);
+  rr = ia.real;
 
-  inv(rr, rr); // rr = (real^2+imag^2)^{-1}
-
-  Share tmpimag = a.imag;
-  tmpimag.negate(); // -imag
+  inv_inplace(rr); // rr = (real^2+imag^2)^{-1}
 
   mul(ia.real, a.real, rr);
-  mul(ia.imag, tmpimag, rr);
+  rr.negate();
+  mul(ia.imag, a.imag, rr);
+}
+
+void OnlineOp::inv_inplace(Complex &a)
+{
+  Complex tmp;
+  inv(tmp, a);
+  a = tmp;
 }
 
 // c = a * b^{-1} mod (q, x^2+1)
 void OnlineOp::div(Complex &c, const Complex &a, const Complex &b)
 {
-  Complex ib;
-  inv(ib, b);
-  mul(c, a, ib);
+  inv(c, b);
+  mul_inplace(c, a);
+}
+
+void OnlineOp::div_inplace(Complex &c, const Complex &a)
+{
+  Complex tmp;
+  div(tmp, c, a);
+  c = tmp;
 }
 void OnlineOp::open(const vector<Share> &vs, vector<gfp> &vc)
 {
@@ -390,7 +483,7 @@ void OnlineOp::test_mul()
   reveal_and_print({res});
   for (int i = 1; i < P.nplayers(); i++)
   {
-    mul(res, inputs[i], res); // 176 * 16 * 5 * ...
+    mul_inplace(res, inputs[i]); // 176 * 16 * 5 * ...
     reveal_and_print({res});
   }
   cout << "============================== END ==============================" << endl;
@@ -410,6 +503,7 @@ void OnlineOp::test_sqr()
   for (int i = 0; i < P.nplayers(); i++)
   {
     sqr(res, inputs[i]);
+    sqr_inplace(res);
     reveal_and_print({res});
   }
   cout << "============================== END ==============================" << endl;
@@ -428,7 +522,7 @@ void OnlineOp::test_div()
   reveal_and_print({res});
   for (int i = 1; i < P.nplayers(); i++)
   {
-    div(res, inputs[i], res); // 176 / 16 / 5 / ...
+    div_inplace(res, inputs[i]); // 176 / 16 / 5 / ...
     reveal_and_print({res});
   }
   cout << "============================== END ==============================" << endl;
@@ -529,7 +623,7 @@ void OnlineOp::test_complex_mul()
   get_inputs_dumy(inputs1);
   get_inputs_dumy(inputs2);
 
-  reverse(inputs2.begin(), inputs2.end());
+  //  reverse(inputs2.begin(), inputs2.end());
 
   vector<Complex> input_c(inputs1.size());
   for (int i = 0; i < input_c.size(); i++)
@@ -543,10 +637,13 @@ void OnlineOp::test_complex_mul()
   if (inputs1.size() < 1 || inputs2.size() < 1)
     throw invalid_size();
 
-  Complex res;
-  for (int i = 0; i < P.nplayers(); i++)
+  Complex res = input_c[0];
+  reveal_and_print({res});
+  for (int i = 1; i < P.nplayers(); i++)
   {
-    mul(res, input_c[i], input_c2[i]);
+    //  mul(res, input_c[i], input_c2[i]);
+    //  reveal_and_print({res});
+    mul_inplace(res, input_c[i]);
     reveal_and_print({res});
   }
   cout << "============================== END ==============================" << endl;
@@ -569,10 +666,11 @@ void OnlineOp::test_complex_sqr()
   if (inputs1.size() < 1 || inputs2.size() < 1)
     throw invalid_size();
 
-  Complex res;
-  for (int i = 0; i < P.nplayers(); i++)
+  Complex res = input_c[1];
+  reveal_and_print({res});
+  for (int i = 1; i < P.nplayers(); i++)
   {
-    sqr(res, input_c[i]);
+    sqr_inplace(res);
     reveal_and_print({res});
   }
   cout << "============================== END ==============================" << endl;
@@ -597,9 +695,11 @@ void OnlineOp::test_complex_inv()
 
   Complex res = input_c[0];
   reveal_and_print({res});
+  inv_inplace(res);
+  reveal_and_print({res});
 
-//  reveal_and_print({input_c[1]});
-//  reveal_and_print({input_c[2]});
+  //  reveal_and_print({input_c[1]});
+  //  reveal_and_print({input_c[2]});
   for (int i = 0; i < P.nplayers(); i++)
   {
     inv(res, input_c[i]);
@@ -632,6 +732,7 @@ void OnlineOp::test_complex_div()
   for (int i = 1; i < P.nplayers(); i++)
   {
     div(res, input_c[i], res);
+    //div_inplace(res,input_c[i]);
     reveal_and_print({res});
   }
   cout << "============================== END ==============================" << endl;

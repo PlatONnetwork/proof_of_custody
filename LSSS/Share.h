@@ -28,7 +28,7 @@ public:
 
   static void init_share_data(const ShareData &S)
   {
-    SD= S;
+    SD = S;
   }
   static string type_string()
   {
@@ -37,9 +37,9 @@ public:
 
   void assign(unsigned int i, vector<gfp> sv, vector<gfp> macs)
   {
-    p= (int) i;
-    a= sv;
-    mac= macs;
+    p = (int)i;
+    a = sv;
+    mac = macs;
   }
 
   // Assign the share value when assigning constant aa
@@ -51,12 +51,12 @@ public:
   Share()
   { // To try and create a run time error to capture Shares
     // without a player assigned
-    p= -1;
+    p = -1;
     mac.resize(SD.nmacs);
   }
   Share(int pp)
   {
-    p= pp;
+    p = pp;
     a.resize(SD.M.shares_per_player(p));
     mac.resize(SD.nmacs);
     assign_zero();
@@ -65,7 +65,7 @@ public:
   // This is for assigning a constant value aa to the Share
   Share(const gfp &aa, int my_num, const vector<gfp> &alphai)
   {
-    p= my_num;
+    p = my_num;
     a.resize(SD.M.shares_per_player(p));
     mac.resize(SD.nmacs);
     assign(aa, alphai);
@@ -73,9 +73,9 @@ public:
   // This one is for when the input sc/macs ARE defintely correct
   Share(unsigned int i, vector<gfp> sv, vector<gfp> macs)
   {
-    p= (int) i;
-    a= sv;
-    mac= macs;
+    p = (int)i;
+    a = sv;
+    mac = macs;
   }
 
   int get_player() const
@@ -102,15 +102,15 @@ public:
   void set_macs(const vector<gfp> &aa);
   void set_share(unsigned int i, const gfp &aa)
   {
-    a[i]= aa;
+    a[i] = aa;
   }
   void set_mac(unsigned int i, const gfp &aa)
   {
-    mac[i]= aa;
+    mac[i] = aa;
   }
   void set_player(int pp)
   {
-    p= pp;
+    p = pp;
     a.resize(SD.M.shares_per_player(p));
     assign_zero();
   }
@@ -118,12 +118,13 @@ public:
 
   /* Arithmetic Routines */
   void mul(const Share &S, const gfp &aa);
-  void add(const Share &S,const gfp &aa);
+  void add(const Share &S, const gfp &aa);
   void add(const Share &S, const gfp &aa, const vector<gfp> &alphai);
   void sub(const Share &S, const gfp &aa, const vector<gfp> &alphai);
   void sub(const gfp &aa, const Share &S, const vector<gfp> &alphai);
   void add(const Share &S1, const Share &S2);
   void sub(const Share &S1, const Share &S2);
+  void sub(const Share &S, const gfp &aa);
   void add(const Share &S1)
   {
     add(*this, S1);
@@ -155,9 +156,9 @@ public:
   }
   Share operator<<(int i) const
   {
-	  Share res;
-	  res.mul(*this, gfp(1) << i);
-	  return res;
+    Share res;
+    res.mul(*this, gfp(1) << i);
+    return res;
   }
   Share &operator+=(const Share &x)
   {
@@ -171,7 +172,7 @@ public:
   }
   Share &operator<<=(int i)
   {
-	  return *this = *this<<i;
+    return *this = *this << i;
   }
 
   // Input and output from a stream
