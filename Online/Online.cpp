@@ -109,7 +109,6 @@ void online_phase(int online_num, Player &P, offline_control_data &OCD,
     cout<<"used triples: "<<online_op.UT.UsedTriples<<endl;
     cout<<"used squares: "<<online_op.UT.UsedSquares<<endl;
     cout<<"used bits: "<<online_op.UT.UsedBit<<endl;
-
   }
   
   ///////////////////////
