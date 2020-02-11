@@ -20,14 +20,14 @@ const static string ModP = "4002409555221667393417789825735904156556882819939007
 
 void getBasePointG1(mclBnG1 &basePoint);
 
-void mclFr_to_G1(mclBnG1 &out, const mclBnFr in);
+void mclFr_to_G1(mclBnG1 &out, const mclBnFr &in);
 
-void print_mclBnFr(const mclBnFr a);
+void print_mclBnFr(const mclBnFr &a);
 
-void print_mclBnG1(const mclBnG1 a);
+void print_mclBnG1(const mclBnG1 &a);
 
-void mclBnFr_to_str(string &str, const mclBnFr a);
-void str_to_mclBnFr(mclBnFr &out, const string str);
+void mclBnFr_to_str(string &str, const mclBnFr &a);
+void str_to_mclBnFr(mclBnFr &out, const string &str);
 
-void mclBnG1_to_str(string &str, const mclBnG1 a);
-void str_to_mclBnG1(mclBnG1 &out, const string str);
+void mclBnG1_to_str(string &str, const mclBnG1 &a);
+void str_to_mclBnG1(mclBnG1 &out, const string &str);

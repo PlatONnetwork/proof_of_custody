@@ -152,7 +152,11 @@ public:
     void reveal_and_print(const vector<Complex> &vs);
 
     /*inputs*/
-    void get_inputs(vector<Share> &inputs);
+    void get_inputs(vector<Share> &inputs_share, vector<gfp> &inputs);
+    void get_inputs(vector<Complex> &inputs_share, vector<Complex_Plain> &inputs);
+    void get_inputs(vector<Share> &inputs_share, vector<long> &inputs);
+    void get_inputs(unsigned int party, Share &sa, gfp &inputs);
+    void get_inputs(unsigned int party, Complex &sa, Complex_Plain &inputs);
     void get_inputs_dumy(vector<Share> &inputs);
 
     // the following apis for testing

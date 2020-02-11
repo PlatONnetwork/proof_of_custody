@@ -10,6 +10,7 @@ All rights reserved
 #include "Online.h"
 #include "Processor/Processor.h"
 #include "OnlineOp.h"
+#include "Group.h"
 
 extern vector<sacrificed_data> SacrificeD;
 
@@ -86,7 +87,7 @@ void online_phase(int online_num, Player &P, offline_control_data &OCD,
   }
 
   ///////////////////////
-  
+
   for (int i = 0; i < 1; i++)
   {
     OnlineOp online_op(Proc, online_num, P, OCD, machine);
@@ -105,12 +106,21 @@ void online_phase(int online_num, Player &P, offline_control_data &OCD,
     online_op.test_complex_sqr();
     online_op.test_complex_inv();
     online_op.test_complex_div();
-    
-    cout<<"used triples: "<<online_op.UT.UsedTriples<<endl;
-    cout<<"used squares: "<<online_op.UT.UsedSquares<<endl;
-    cout<<"used bits: "<<online_op.UT.UsedBit<<endl;
+
+    cout << "used triples: " << online_op.UT.UsedTriples << endl;
+    cout << "used squares: " << online_op.UT.UsedSquares << endl;
+    cout << "used bits: " << online_op.UT.UsedBit << endl;
   }
-  
+
+  G1Op g1op(Proc, online_num, P, OCD, machine);
+  g1op.G1_test_add_aff();
+  g1op.G1_test_add_jac();
+  g1op.G1_test_add_proj();
+
+  G2Op g2op(Proc, online_num, P, OCD, machine);
+  g2op.G2_test_add_aff();
+  g2op.G2_test_add_jac();
+
   ///////////////////////
 
   // Run checks again

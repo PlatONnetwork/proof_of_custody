@@ -531,11 +531,15 @@ void testVSS()
 
   v.rnd_secret();
   v.gen_share(shs, aux);
+  mclBnG1 tmp, tmp1;
   for (int i = 0; i < aux.size(); i++)
   {
     cout << "aux " << i << ": " << endl;
     print_mclBnG1(aux[i]);
   }
+  mclBnG1_add(&tmp, &aux[0], &aux[1]);
+  mclBnG1_add(&tmp1, &tmp, &aux[2]);
+  print_mclBnG1(tmp1);
 
   cout << "secret:\n";
   print_mclBnFr(v.get_secret());

@@ -6,28 +6,28 @@ void getBasePointG1(mclBnG1 &basePoint)
     mclBnG1_setStr(&basePoint, (char *)G1_P.c_str(), G1_P.size(), 10);
 }
 
-void mclFr_to_G1(mclBnG1 &out, const mclBnFr in)
+void mclFr_to_G1(mclBnG1 &out, const mclBnFr &in)
 {
     mclBnG1 basePoint;
     getBasePointG1(basePoint);
     mclBnG1_mul(&out,&basePoint,&in);
 }
 
-void print_mclBnFr(const mclBnFr a)
+void print_mclBnFr(const mclBnFr &a)
 {
     char buf[128];
     mclBnFr_getStr(buf, sizeof(buf), &a, 10);
     printf("%s\n", buf);
 }
 
-void print_mclBnG1(const mclBnG1 a)
+void print_mclBnG1(const mclBnG1 &a)
 {
     char buf[256];
     mclBnG1_getStr(buf, sizeof(buf), &a, 10);
     printf("%s\n", buf);
 }
 
-void mclBnFr_to_str(string &str, const mclBnFr a)
+void mclBnFr_to_str(string &str, const mclBnFr &a)
 {
     str.clear();
     char buf[mclBn_getFrByteSize()];
@@ -35,7 +35,7 @@ void mclBnFr_to_str(string &str, const mclBnFr a)
     str = string(buf, buf + sizeof(buf));
 }
 
-void mclBnG1_to_str(string &str, const mclBnG1 a)
+void mclBnG1_to_str(string &str, const mclBnG1 &a)
 {
     str.clear();
     char buf[mclBn_getG1ByteSize()];
@@ -43,12 +43,12 @@ void mclBnG1_to_str(string &str, const mclBnG1 a)
     str = string(buf, buf + sizeof(buf));
 }
 
-void str_to_mclBnFr(mclBnFr &out, const string str)
+void str_to_mclBnFr(mclBnFr &out, const string &str)
 {
     mclBnFr_deserialize(&out, str.c_str(), mclBn_getFrByteSize());
 }
 
-void str_to_mclBnG1(mclBnG1 &out, const string str)
+void str_to_mclBnG1(mclBnG1 &out, const string &str)
 {
     mclBnG1_deserialize(&out, str.c_str(), mclBn_getG1ByteSize());
 }

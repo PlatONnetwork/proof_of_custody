@@ -62,6 +62,7 @@ public:
 
 class G1Op : public OnlineOp
 {
+public:
     G1Op(Processor &Proc_, int online_num_, Player &P_,
          offline_control_data &OCD_, Machine &machine_)
         : OnlineOp(Proc_, online_num_, P_, OCD_, machine_) {}
@@ -70,25 +71,52 @@ class G1Op : public OnlineOp
                        const G1_Affine_Coordinates &a,
                        const G1_Affine_Coordinates_Plain &b);
 
+    void add_plain_aff_inplace(G1_Affine_Coordinates &c,
+                               const G1_Affine_Coordinates_Plain &a);
+
     void add_aff(G1_Affine_Coordinates &c,
                  const G1_Affine_Coordinates &a,
                  const G1_Affine_Coordinates &b);
+
+    void add_aff_inplace(G1_Affine_Coordinates &c,
+                         const G1_Affine_Coordinates &a);
 
     void add_plain_jac(G1_Jacobian_Coordinates &c,
                        const G1_Jacobian_Coordinates &a,
                        const G1_Jacobian_Coordinates_Plain &b);
 
+    void add_plain_jac_inplace(G1_Jacobian_Coordinates &c,
+                               const G1_Jacobian_Coordinates_Plain &a);
+
     void add_jac(G1_Jacobian_Coordinates &c,
                  const G1_Jacobian_Coordinates &a,
                  const G1_Jacobian_Coordinates &b);
+
+    void add_jac_inplace(G1_Jacobian_Coordinates &c,
+                         const G1_Jacobian_Coordinates &a);
 
     void add_plain_proj(G1_Projective_Coordinates &c,
                         const G1_Projective_Coordinates &a,
                         const G1_Projective_Coordinates_Plain &b);
 
+    void add_plain_proj_inplace(G1_Projective_Coordinates &c,
+                                const G1_Projective_Coordinates_Plain &a);
+
     void add_proj(G1_Projective_Coordinates &c,
                   const G1_Projective_Coordinates &a,
                   const G1_Projective_Coordinates &b);
+
+    void add_proj_inplace(G1_Projective_Coordinates &c,
+                          const G1_Projective_Coordinates &a);
+
+    void reveal_and_print(const G1_Affine_Coordinates ac);
+
+    template <typename T>
+    void reveal_and_print(const T p);
+
+    void G1_test_add_aff();
+    void G1_test_add_jac();
+    void G1_test_add_proj();
 };
 
 class G2_Affine_Coordinates
@@ -151,6 +179,7 @@ public:
 
 class G2Op : public OnlineOp
 {
+public:
     G2Op(Processor &Proc_, int online_num_, Player &P_,
          offline_control_data &OCD_, Machine &machine_)
         : OnlineOp(Proc_, online_num_, P_, OCD_, machine_) {}
@@ -159,23 +188,50 @@ class G2Op : public OnlineOp
                        const G2_Affine_Coordinates &a,
                        const G2_Affine_Coordinates_Plain &b);
 
+    void add_plain_aff_inplace(G2_Affine_Coordinates &c,
+                               const G2_Affine_Coordinates_Plain &a);
+
     void add_aff(G2_Affine_Coordinates &c,
                  const G2_Affine_Coordinates &a,
                  const G2_Affine_Coordinates &b);
+
+    void add_aff_inplace(G2_Affine_Coordinates &c,
+                         const G2_Affine_Coordinates &a);
 
     void add_plain_jac(G2_Jacobian_Coordinates &c,
                        const G2_Jacobian_Coordinates &a,
                        const G2_Jacobian_Coordinates_Plain &b);
 
+    void add_plain_jac_inplace(G2_Jacobian_Coordinates &c,
+                               const G2_Jacobian_Coordinates_Plain &a);
+
     void add_jac(G2_Jacobian_Coordinates &c,
                  const G2_Jacobian_Coordinates &a,
                  const G2_Jacobian_Coordinates &b);
+
+    void add_jac_inplace(G2_Jacobian_Coordinates &c,
+                         const G2_Jacobian_Coordinates &a);
 
     void add_plain_proj(G2_Projective_Coordinates &c,
                         const G2_Projective_Coordinates &a,
                         const G2_Projective_Coordinates_Plain &b);
 
+    void add_plain_proj_inplace(G2_Projective_Coordinates &c,
+                                const G2_Projective_Coordinates_Plain &a);
+
     void add_proj(G2_Projective_Coordinates &c,
                   const G2_Projective_Coordinates &a,
                   const G2_Projective_Coordinates &b);
+
+    void add_proj_inplace(G2_Projective_Coordinates &c,
+                          const G2_Projective_Coordinates &a);
+
+    void reveal_and_print(const G2_Affine_Coordinates ac);
+
+    template <typename T>
+    void reveal_and_print(const T p);
+
+    void G2_test_add_aff();
+    void G2_test_add_jac();
+    void G2_test_add_proj();
 };

@@ -36,6 +36,13 @@ public:
   // Get a private input values from a player on a given channel
   void private_input(unsigned int player, int target, unsigned int channel,
                      Processor &Proc, Player &P, Machine &machine, offline_control_data &OCD);
+  // Get a private input values from a player on a given channel
+  void private_input(unsigned int player, Share &sa, unsigned int channel,
+                     Processor &Proc, Player &P, Machine &machine,
+                     offline_control_data &OCD, gfp &inputs);
+  // Get a private input values from a player on a given channel
+  void private_input(unsigned int player, Share &sa, unsigned int channel,
+                     Processor &Proc, Player &P, Machine &machine, offline_control_data &OCD, vector<gfp> &inputs);
 
   // Get a private input values from a player on a given channel
   void private_input2(unsigned int player, Share &sa, unsigned int channel,

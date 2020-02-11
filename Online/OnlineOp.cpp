@@ -371,7 +371,7 @@ void OnlineOp::reveal_and_print(const vector<Share> &vs, vector<gfp> &vc)
   reveal(vs, vc);
   for (int i = 0; i < vc.size(); i++)
   {
-    cout << __FUNCTION__ << " " << vc[i] << endl;
+    cout << vc[i] << endl;
   }
 }
 void OnlineOp::reveal_and_print(const vector<Share> &vs)
@@ -389,7 +389,63 @@ void OnlineOp::reveal_and_print(const vector<Complex> &vs)
   }
 }
 
-void OnlineOp::get_inputs(vector<Share> &inputs) {}
+void OnlineOp::get_inputs(vector<Share> &inputs_share, vector<gfp> &inputs)
+{
+  if (inputs_share.size() != inputs.size())
+  {
+    inputs_share.resize(inputs.size());
+  }
+  for (int i = 0; i < inputs_share.size(); i++)
+  {
+    inputs_share[i].set_player(P.whoami());
+    Proc.iop.private_input(i, inputs_share[i], 1, Proc, P, machine, OCD, inputs);
+  }
+}
+
+void OnlineOp::get_inputs(vector<Complex> &inputs_share, vector<Complex_Plain> &inputs)
+{
+  if (inputs_share.size() != inputs.size())
+  {
+    inputs_share.resize(inputs.size());
+  }
+
+  vector<gfp> inputs_real(inputs.size()), inputs_imag(inputs.size());
+  for (int i = 0; i < inputs.size(); i++)
+  {
+    inputs_real[i] = inputs[i].real;
+    inputs_imag[i] = inputs[i].imag;
+  }
+
+  for (int i = 0; i < inputs_share.size(); i++)
+  {
+    inputs_share[i].real.set_player(P.whoami());
+    inputs_share[i].imag.set_player(P.whoami());
+    Proc.iop.private_input(i, inputs_share[i].real, 1, Proc, P, machine, OCD, inputs_real);
+    Proc.iop.private_input(i, inputs_share[i].imag, 1, Proc, P, machine, OCD, inputs_imag);
+  }
+}
+
+void OnlineOp::get_inputs(vector<Share> &inputs_share, vector<long> &inputs)
+{
+  vector<gfp> _inputs(inputs.size());
+  for (int i = 0; i < _inputs.size(); i++)
+  {
+    _inputs[i].assign(inputs[i]);
+  }
+  get_inputs(inputs_share, _inputs);
+}
+
+void OnlineOp::get_inputs(unsigned int party, Share &sa, gfp &inputs)
+{
+  Proc.iop.private_input(party, sa, 1, Proc, P, machine, OCD, inputs);
+}
+
+void OnlineOp::get_inputs(unsigned int party, Complex &sa, Complex_Plain &inputs)
+{
+  Proc.iop.private_input(party, sa.real, 1, Proc, P, machine, OCD, inputs.real);
+  Proc.iop.private_input(party, sa.imag, 1, Proc, P, machine, OCD, inputs.imag);
+}
+
 void OnlineOp::get_inputs_dumy(vector<Share> &inputs)
 {
   inputs.resize(P.nplayers());

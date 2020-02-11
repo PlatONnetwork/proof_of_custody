@@ -67,23 +67,10 @@ void Processor_IO::private_input(unsigned int player, int target, unsigned int c
     Proc.get_Sp_ref(target).add(rshares[player], i_epsilon, P.get_mac_keys());
   }
 }
-
-void Processor_IO::private_input2(unsigned int player, Share &sa, unsigned int channel,
-                                  Processor &Proc, Player &P, Machine &machine,
-                                  offline_control_data &OCD)
+void Processor_IO::private_input(unsigned int player, Share &sa, unsigned int channel,
+                                 Processor &Proc, Player &P, Machine &machine,
+                                 offline_control_data &OCD, gfp &inputs)
 {
-  vector<int64_t> inputs_dumy = {176, 16, 5, 3, -9, 3, 7, 2, 3};
-  inputs_dumy.resize(P.nplayers());
-  private_input2(player, sa, channel, Proc, P, machine, OCD, inputs_dumy);
-}
-
-void Processor_IO::private_input2(unsigned int player, Share &sa, unsigned int channel,
-                                  Processor &Proc, Player &P, Machine &machine,
-                                  offline_control_data &OCD, vector<int64_t> &inputs)
-{
-  if (inputs.size() != P.nplayers())
-    throw invalid_size();
-
   gfp i_epsilon;
   int thread = Proc.get_thread_num();
 
@@ -91,7 +78,7 @@ void Processor_IO::private_input2(unsigned int player, Share &sa, unsigned int c
 
   if (player == P.whoami())
   {
-    i_epsilon.assign(inputs[player]);
+    i_epsilon = inputs;
   }
 
   stringstream ss;
@@ -127,6 +114,33 @@ void Processor_IO::private_input2(unsigned int player, Share &sa, unsigned int c
   {
     sa.add(rshares[player], i_epsilon, P.get_mac_keys());
   }
+}
+void Processor_IO::private_input(unsigned int player, Share &sa, unsigned int channel,
+                                 Processor &Proc, Player &P, Machine &machine,
+                                 offline_control_data &OCD, vector<gfp> &inputs)
+{
+  private_input(player, sa, channel, Proc, P, machine, OCD, inputs[P.whoami()]);
+}
+
+void Processor_IO::private_input2(unsigned int player, Share &sa, unsigned int channel,
+                                  Processor &Proc, Player &P, Machine &machine,
+                                  offline_control_data &OCD)
+{
+  vector<int64_t> inputs_dumy = {176, 16, 5, 3, -9, 3, 7, 2, 3};
+  inputs_dumy.resize(P.nplayers());
+  private_input2(player, sa, channel, Proc, P, machine, OCD, inputs_dumy);
+}
+
+void Processor_IO::private_input2(unsigned int player, Share &sa, unsigned int channel,
+                                  Processor &Proc, Player &P, Machine &machine,
+                                  offline_control_data &OCD, vector<int64_t> &inputs)
+{
+  vector<gfp> _inputs(inputs.size());
+  for (int i = 0; i < _inputs.size(); i++)
+  {
+    _inputs[i].assign(inputs[i]);
+  }
+  private_input(player, sa, channel, Proc, P, machine, OCD, _inputs);
 }
 
 void Processor_IO::private_output(unsigned int player, int source, unsigned int channel,
