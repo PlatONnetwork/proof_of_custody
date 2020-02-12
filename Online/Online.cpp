@@ -120,6 +120,7 @@ void online_phase(int online_num, Player &P, offline_control_data &OCD,
   G2Op g2op(Proc, online_num, P, OCD, machine);
   g2op.G2_test_add_aff();
   g2op.G2_test_add_jac();
+  g2op.G2_test_add_proj();
 
   ///////////////////////
 
