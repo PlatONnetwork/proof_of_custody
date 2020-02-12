@@ -87,11 +87,12 @@ public:
     void add_plain(Share &c, const Share &a, const gfp &b);
     // c = c + a;
     void add_inplace(Share &c, const Share &a);
+    void add_plain_inplace(Share &c, const gfp &a);
 
     // c = a - b (b is share)
     void sub(Share &c, const Share &a, const Share &b);
     // c = a - b (b is plain)
-    void sub_plain(Share &c, const Share &a, const gfp &b); 
+    void sub_plain(Share &c, const Share &a, const gfp &b);
     // c = c - a
     void sub_inplace(Share &c, const Share &a);
 
@@ -140,6 +141,11 @@ public:
     // c = a * b^{-1} mod (q, x^2+1)
     void div(Complex &c, const Complex &a, const Complex &b);
     void div_inplace(Complex &c, const Complex &a);
+
+    // out = in[0] + in[1]*key + in[2]*key^2 +...+ in[size-1]*key^{size-1}
+    void uhf(Share &out, const Share &key, const vector<gfp> &in, unsigned int size);
+    void legendre(int &out, const Share &in);
+    int legendre_prf(const Share &key, const Share &in);
 
     /*open and reveal*/
     // vs --> vc

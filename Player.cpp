@@ -676,7 +676,6 @@ int main(int argc, const char *argv[])
   vector<gfp> MacK;
   MacK.resize(0);
   printf("begin runscale\n");
-
   Run_Scale(my_number, no_online_threads, MacK,
             ctx, portnum,
             SD, machine, OCD,

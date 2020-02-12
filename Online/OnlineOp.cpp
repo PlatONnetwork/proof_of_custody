@@ -6,6 +6,7 @@ All rights reserved
 */
 
 #include <unistd.h>
+#include <math.h>
 
 #include "Online.h"
 #include "Processor/Processor.h"
@@ -76,6 +77,12 @@ void OnlineOp::add_inplace(Share &c, const Share &a)
   add(tmp, c, a);
   c = tmp;
 }
+
+void OnlineOp::add_plain_inplace(Share &c, const gfp &a)
+{
+  add_plain(c, c, a);
+}
+
 // c = a - b (b is share)
 void OnlineOp::sub(Share &c, const Share &a, const Share &b)
 {
@@ -351,6 +358,47 @@ void OnlineOp::div_inplace(Complex &c, const Complex &a)
   div(tmp, c, a);
   c = tmp;
 }
+
+void OnlineOp::uhf(Share &out, const Share &key, const vector<gfp> &in, unsigned int size)
+{
+  if (in.size() != size)
+  {
+    throw bad_value();
+  }
+
+  mul_plain(out, key, in[size - 1]);
+  add_plain_inplace(out, in[size - 2]);
+  for (int i = size - 3; i >= 0; i--)
+  {
+    mul_inplace(out, key);
+    add_plain_inplace(out, in[i]);
+  }
+}
+
+void OnlineOp::legendre(int &out, const Share &in)
+{
+  vector<Share> s(2);
+  getTuples(s, SQUARE);
+
+  mul_inplace(s[1], in);
+
+  vector<gfp> c;
+  open({s[1]}, c);
+
+  bigint bn;
+  to_bigint(bn, c[0]);
+  out = mpz_legendre(bn.get_mpz_t(), gfp::pr().get_mpz_t());
+}
+
+int OnlineOp::legendre_prf(const Share &key, const Share &in)
+{
+  Share tmp;
+  add(tmp, key, in);
+  int res;
+  legendre(res, tmp);
+  res = ceil(double(res + 1) / 2);
+}
+
 void OnlineOp::open(const vector<Share> &vs, vector<gfp> &vc)
 {
   vector<int> start;
