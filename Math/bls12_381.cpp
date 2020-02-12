@@ -1,5 +1,6 @@
 #include "bls12_381.h"
 #include <stdio.h>
+#include "Exceptions/Exceptions.h"
 
 void getBasePointG1(mclBnG1 &basePoint)
 {
@@ -10,7 +11,7 @@ void mclFr_to_G1(mclBnG1 &out, const mclBnFr &in)
 {
     mclBnG1 basePoint;
     getBasePointG1(basePoint);
-    mclBnG1_mul(&out,&basePoint,&in);
+    mclBnG1_mul(&out, &basePoint, &in);
 }
 
 void print_mclBnFr(const mclBnFr &a)
@@ -51,4 +52,39 @@ void str_to_mclBnFr(mclBnFr &out, const string &str)
 void str_to_mclBnG1(mclBnG1 &out, const string &str)
 {
     mclBnG1_deserialize(&out, str.c_str(), mclBn_getG1ByteSize());
+}
+
+void mclBnG2_to_str(vector<string> &out, const mclBnG2 &a)
+{
+    if (out.size() != 4)
+    {
+        out.resize(4);
+    }
+    char buf[512];
+    int len = mclBnG2_getStr(buf, 512, &a, 10);
+    string str(buf + 2, buf + len);
+    len = len - 2;
+
+    int l;
+
+    for (int i = 0; i < out.size() - 1; i++)
+    {
+        l = str.find(" ");
+        out[i] = str.substr(0, l);
+        str = str.substr(l + 1);
+    }
+    out.back() = str;
+}
+
+void mclBnG2_to_gfp(vector<gfp> &out, const mclBnG2 &a)
+{
+    vector<string> str;
+    mclBnG2_to_str(str, a);
+    out.resize(str.size());
+    
+    for (int i = 0; i < out.size(); i++)
+    {
+        bigint bn(str[i], 10);
+        to_gfp(out[i], bn);
+    }
 }

@@ -592,7 +592,7 @@ void testBLS(Player &P)
 
   //DKG TEST
   BLS dbls(3, 1);
-  dbls.d_keygen(P);
+  dbls.dstb_keygen(P);
   cout << "vk is: " << endl;
   print_mclBnG1(dbls.vk);
   cout << "secret share is: " << endl;
@@ -656,9 +656,9 @@ int main(int argc, const char *argv[])
        verbose);
 
   vector<unsigned int> portnum1(SD.n);
-  for(int i = 0; i < SD.n; i++)
+  for (int i = 0; i < SD.n; i++)
   {
-    portnum1[i] = 50000+SD.n+i; 
+    portnum1[i] = 50000 + SD.n + i;
   }
   int ssocket;
   vector<vector<vector<int>>> csockets(1, vector<vector<int>>(SD.n, vector<int>(3)));
@@ -667,9 +667,9 @@ int main(int argc, const char *argv[])
   P.Init(my_number, SD, 0, ctx, csockets[0], verbose);
 
   cout << "Number of Players: " << P.nplayers() << endl;
-    testTool(P);
-    testVSS();
-    testBLS(P);
+  testTool(P);
+  testVSS();
+  testBLS(P);
 
   Close_Connections(ssocket, csockets, my_number);
 

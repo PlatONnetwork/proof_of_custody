@@ -1,6 +1,7 @@
 #pragma once
 #include "Math/bls12_381.h"
 #include "System/Player.h"
+#include "Group.h"
 
 typedef mclBnFr bls_sk;
 typedef mclBnG1 bls_vk;
@@ -47,8 +48,8 @@ public:
     int verify(const bls_sigma _sigma, const string msg);
 
     //distributed keygen,sign algorithms
-    void d_keygen(Player &P);
-    void d_sign(const string msg);
-
-    void combine_sigma();
+    void dstb_keygen(Player &P);
+    void dstb_sign(G2_Affine_Coordinates &out, const string msg,
+                   Processor &Proc, int online_num, Player &P,
+                   offline_control_data &OCD, Machine &machine);
 };

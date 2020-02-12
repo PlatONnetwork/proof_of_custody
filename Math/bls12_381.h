@@ -10,6 +10,7 @@ extern "C"{
 }
 #endif
 
+#include "gfp.h"
 #include <string>
 using namespace std;
 using std::string;
@@ -31,3 +32,6 @@ void str_to_mclBnFr(mclBnFr &out, const string &str);
 
 void mclBnG1_to_str(string &str, const mclBnG1 &a);
 void str_to_mclBnG1(mclBnG1 &out, const string &str);
+
+void mclBnG2_to_str(vector<string> &out, const mclBnG2 &a);
+void mclBnG2_to_gfp(vector<gfp> &out, const mclBnG2 &a);

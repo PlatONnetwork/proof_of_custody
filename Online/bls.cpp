@@ -1,6 +1,7 @@
 #include "bls.h"
 #include "vss.h"
 #include "Tools/Crypto.h"
+#include "Group.h"
 
 void BLS::keygen()
 {
@@ -34,7 +35,7 @@ int BLS::verify(const bls_sigma _sigma, const string msg)
     return ret;
 }
 
-void BLS::d_keygen(Player &P)
+void BLS::dstb_keygen(Player &P)
 {
     VSS v(nparty, threshold);
     vector<bls_sk> shs;
@@ -45,7 +46,7 @@ void BLS::d_keygen(Player &P)
     sk = shs[P.whoami()];
     vk = aux[0];
 
-    cout<<aux.size()<<endl;
+    cout << aux.size() << endl;
 
     vector<bls_sk> tmp_shares(P.nplayers());
 
@@ -167,7 +168,7 @@ void BLS::d_keygen(Player &P)
             }
         }
     }
-/*
+    /*
     for (int i = 0; i < P.nplayers(); i++)
     {
         cout << "print aux_tmp " << i << endl;
@@ -180,11 +181,43 @@ void BLS::d_keygen(Player &P)
 */
 }
 
-void BLS::d_sign(const string msg)
+void mclBnG2_to_Complex_Plain(vector<Complex_Plain> &cp, const bls_sigma &s)
 {
-    sign(msg);
+    cp.resize(2);
+
+    vector<gfp> vg;
+    mclBnG2_to_gfp(vg, s);
+
+    cp[0].real = vg[0];
+    cp[0].imag = vg[1];
+    cp[1].real = vg[2];
+    cp[1].imag = vg[3];
 }
 
-void BLS::combine_sigma()
+void BLS::dstb_sign(G2_Affine_Coordinates &out, const string msg,
+                    Processor &Proc, int online_num, Player &P,
+                    offline_control_data &OCD, Machine &machine)
 {
+    sign(msg);
+    vector<Complex_Plain> s;
+    mclBnG2_to_Complex_Plain(s, sigma);
+
+    vector<G2_Affine_Coordinates> ac(P.nplayers());
+
+    G2Op g2op(Proc, online_num, P, OCD, machine);
+
+    for (int i = 0; i < ac.size(); i++)
+    {
+        if (i = P.whoami())
+        {
+            g2op.get_inputs(i, ac[i].x, s[0]);
+            g2op.get_inputs(i, ac[i].y, s[1]);
+        }
+    }
+
+    out = ac[0];
+    for (int i = 1; i < ac.size(); i++)
+    {
+        g2op.add_aff_inplace(out, ac[i]);
+    }
 }
