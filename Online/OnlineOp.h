@@ -180,6 +180,9 @@ public:
     void test_complex_sqr();
     void test_complex_inv();
     void test_complex_div();
+
+    void test_uhf();
+    void test_legendre();
 };
 
 #endif

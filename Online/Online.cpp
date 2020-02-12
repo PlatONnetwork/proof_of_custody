@@ -88,10 +88,10 @@ void online_phase(int online_num, Player &P, offline_control_data &OCD,
 
   ///////////////////////
 
-  for (int i = 0; i < 1; i++)
-  {
     OnlineOp online_op(Proc, online_num, P, OCD, machine);
-    vector<Share> inputs_dumy;
+    online_op.test_uhf();
+    online_op.test_legendre();
+/*
     online_op.test_add();
     online_op.test_add_plain();
     online_op.test_mul_plain();
@@ -110,7 +110,7 @@ void online_phase(int online_num, Player &P, offline_control_data &OCD,
     cout << "used triples: " << online_op.UT.UsedTriples << endl;
     cout << "used squares: " << online_op.UT.UsedSquares << endl;
     cout << "used bits: " << online_op.UT.UsedBit << endl;
-  }
+  
 
   G1Op g1op(Proc, online_num, P, OCD, machine);
   g1op.G1_test_add_aff();
@@ -122,6 +122,7 @@ void online_phase(int online_num, Player &P, offline_control_data &OCD,
   g2op.G2_test_add_jac();
   g2op.G2_test_add_proj();
 
+  */
   ///////////////////////
 
   // Run checks again

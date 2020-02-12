@@ -397,6 +397,7 @@ int OnlineOp::legendre_prf(const Share &key, const Share &in)
   int res;
   legendre(res, tmp);
   res = ceil(double(res + 1) / 2);
+  return res;
 }
 
 void OnlineOp::open(const vector<Share> &vs, vector<gfp> &vc)
@@ -840,4 +841,52 @@ void OnlineOp::test_complex_div()
     reveal_and_print({res});
   }
   cout << "============================== END ==============================" << endl;
+}
+
+void OnlineOp::test_uhf()
+{
+  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
+  gfp k;
+  k.assign(2);
+  Share key;
+  get_inputs(0, key, k);
+  vector<gfp> in(4);
+  for (int i = 0; i < in.size(); i++)
+  {
+    in[i].assign(i + 1);
+  }
+
+  Share out;
+  uhf(out, key, in, in.size());
+
+  reveal_and_print({out});
+}
+
+void OnlineOp::test_legendre()
+{
+  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
+  string k("123"), d("-12456789");
+
+  bigint key(k, 10);
+  bigint data(d, 10);
+
+  gfp key_p, data_p;
+  to_gfp(key_p, key);
+  to_gfp(data_p, data);
+
+  Share key_s, data_s;
+  get_inputs(0, key_s, key_p);
+  get_inputs(0, data_s, data_p);
+
+  int res_s = legendre_prf(key_s, data_s);
+//  int res_s;
+//  legendre(res_s,data_s);
+
+  bigint in = key + data;
+
+  int res = mpz_legendre(in.get_mpz_t(), gfp::pr().get_mpz_t());
+  res = ceil(double(res + 1) / 2);
+
+  cout << "mpc leg value: " << res_s << endl;
+  cout << "plain leg value: " << res << endl;
 }
