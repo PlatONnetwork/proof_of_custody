@@ -52,6 +52,156 @@ public:
   Machine *machine; // Pointer to the machine
 };
 
+void testTool(Player &P)
+{
+  mclBn_init(MCL_BLS12_381, MCLBN_COMPILED_TIME_VAR);
+
+  string str;
+  mclBnFr tmpfr;
+  mclBnG1 basePoint, tmpG1;
+  mclBnFr_setByCSPRNG(&tmpfr);
+  print_mclBnFr(tmpfr);
+  mclBnFr_to_str(str, tmpfr);
+  str_to_mclBnFr(tmpfr, str);
+  print_mclBnFr(tmpfr);
+  cout << str.size() << endl;
+
+  mclBnG1_setStr(&basePoint, (char *)G1_P.c_str(), G1_P.size(), 10);
+  mclBnG1_mul(&tmpG1, &basePoint, &tmpfr);
+  print_mclBnG1(tmpG1);
+  mclBnG1_to_str(str, tmpG1);
+  str_to_mclBnG1(tmpG1, str);
+  print_mclBnG1(tmpG1);
+  cout << str.size() << endl;
+
+  cout << "test Player:\n";
+  string ss;
+  if (P.whoami() == 0)
+  {
+    ss = str;
+    P.send_to_player(1, ss, 1);
+  }
+
+  if (P.whoami() == 1)
+  {
+    P.receive_from_player(0, ss, 1, false);
+  }
+
+  mclBnFr tmp;
+  str_to_mclBnFr(tmp, ss);
+  print_mclBnFr(tmp);
+}
+
+void testVSS()
+{
+  VSS v(3, 1);
+  vector<mclBnFr> shs;
+  vector<mclBnG1> aux;
+
+  v.rnd_secret();
+  v.gen_share(shs, aux);
+  mclBnG1 tmp, tmp1;
+  for (int i = 0; i < aux.size(); i++)
+  {
+    cout << "aux " << i << ": " << endl;
+    print_mclBnG1(aux[i]);
+  }
+  mclBnG1_add(&tmp, &aux[0], &aux[1]);
+  mclBnG1_add(&tmp1, &tmp, &aux[2]);
+  print_mclBnG1(tmp1);
+
+  cout << "secret:\n";
+  print_mclBnFr(v.get_secret());
+
+  cout << "recovered secret:\n";
+  mclBnFr out;
+  recover_share(out, shs);
+  print_mclBnFr(out);
+
+  int count = 0;
+
+  for (int i = 0; i < v.nparty; i++)
+  {
+    if (!v.verify_share(shs[i], aux, i + 1))
+    {
+      count++;
+    }
+  }
+
+  if (!count)
+  {
+    cout << "VSS Correct!" << endl;
+  }
+  else
+  {
+    cout << count << " VSS Errors!" << endl;
+  }
+}
+
+void testBLS(Player &P)
+{
+
+  BLS bls1;
+  cout << "Fr Size: " << mclBn_getFrByteSize() << endl;
+  cout << "G1 Size: " << mclBn_getG1ByteSize() << endl;
+  const string msg = "1234567890";
+  bls1.keygen();
+  bls1.sign(msg);
+
+  BLS bls2;
+  bls2.set_vk(bls1.vk);
+  if (bls2.verify(bls1.sigma, msg))
+  {
+    cout << "Normal BLS Correct!" << endl;
+  }
+  else
+  {
+    cout << "Normal BLS Wrong!" << endl;
+  }
+
+  //DKG TEST
+  BLS dbls(3, 1);
+  dbls.dstb_keygen(P);
+  cout << "vk is: " << endl;
+  print_mclBnG1(dbls.vk);
+  cout << "secret share is: " << endl;
+  print_mclBnFr(dbls.get_sk());
+
+  vector<bls_sk> shares(P.nplayers());
+  shares[P.whoami()] = dbls.get_sk();
+  string ss;
+  mclBnFr out;
+  mclBnG1 outG1;
+
+  if (P.whoami() != 0)
+  {
+    mclBnFr_to_str(ss, dbls.get_sk());
+    P.send_to_player(0, ss, 1);
+  }
+  else
+  {
+    for (int i = 1; i < P.nplayers(); i++)
+    {
+      P.receive_from_player(i, ss, 1, false);
+      str_to_mclBnFr(shares[i], ss);
+    }
+
+    recover_share(out, shares);
+    cout << "recovered secret key is: " << endl;
+    print_mclBnFr(out);
+    mclFr_to_G1(outG1, out);
+
+    if (mclBnG1_isEqual(&outG1, &dbls.vk))
+    {
+      cout << "DKG test correct!\n";
+    }
+    else
+    {
+      cout << "DKG test wrong!\n";
+    }
+  }
+}
+
 // We have 5 threads per online phase
 //   - Online
 //   - Sacrifice (and input tuple production)
@@ -113,7 +263,13 @@ void Run_Scale(unsigned int my_number, unsigned int no_online_threads, const vec
   printf("All connections now done\n");
 
   global_time.start();
-
+  
+  Player P(my_number, SD, 0, ctx, csockets[0], MacK, verbose - 1);
+  
+  testTool(P);
+  testVSS();
+  testBLS(P);
+  
   printf("Setting up threads\n");
   fflush(stdout);
   threads.resize(tnthreads);
@@ -169,7 +325,6 @@ void Run_Scale(unsigned int my_number, unsigned int no_online_threads, const vec
   cout << "Produced a total of " << total_squares << " squares" << endl;
   cout << "Produced a total of " << total_bits << " bits" << endl;
   cout << "Produced a total of " << total_inputs << " inputs" << endl;
-
 }
 
 void *Main_Func(void *ptr)
@@ -185,7 +340,6 @@ void *Main_Func(void *ptr)
 
   printf("Set up player %d in thread %d \n", me, num);
   fflush(stdout);
-  
 
   if (num < 10000)
   {
