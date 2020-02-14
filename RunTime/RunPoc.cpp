@@ -1,15 +1,5 @@
-/*
-Copyright (c) 2017, The University of Bristol, Senate House, Tyndall Avenue, Bristol, BS8 1TH, United Kingdom.
-Copyright (c) 2019, COSIC-KU Leuven, Kasteelpark Arenberg 10, bus 2452, B-3001 Leuven-Heverlee, Belgium.
+#include "RunPoc.h"
 
-All rights reserved
-*/
-/* This file holds the main SCALE runtime in a
- * single function call, to allow programmatic
- * setup of SCALE outside of using Player.x
- */
-
-#include "System/RunTime.h"
 #include "Offline/offline_phases.h"
 #include "Online/Online.h"
 #include "System/Networking.h"
@@ -27,13 +17,147 @@ All rights reserved
 #include <vector>
 #include <stdio.h>
 
-#include "Online/bls.h"
-#include "Online/vss.h"
 
 #ifdef BENCH_MEMORY
 #include <sys/resource.h>
 #endif
 using namespace std;
+
+void Init(int argc, char *argv[],Config_Info &CI)
+{
+  if (argc != 2)
+  {
+    cerr << "ERROR: incorrect number of arguments to Player.x\n";
+  }
+  else
+  {
+    CI.my_number = (unsigned int)atoi(argv[1]);
+  }
+
+  string memtype = "empty";
+  unsigned int portnumbase = 5000;
+  CI.verbose = -1;
+
+  /*************************************
+   *  Setup offline_control_data OCD   *
+   *************************************/
+  //  offline_control_data OCD;
+  CI.OCD.minm = 0;
+  CI.OCD.mins = 0;
+  CI.OCD.minb = 0;
+  CI.OCD.maxm = 0;
+  CI.OCD.maxs = 0;
+  CI.OCD.maxb = 0;
+  CI.OCD.maxI = 0;
+
+  cout << "(Min,Max) number of ...\n";
+  cout << "\t(" << CI.OCD.minm << ",";
+  if (CI.OCD.maxm == 0)
+  {
+    cout << "infty";
+  }
+  else
+  {
+    cout << CI.OCD.maxm;
+  }
+  cout << ") multiplication triples" << endl;
+
+  cout << "\t(" << CI.OCD.mins << ",";
+  if (CI.OCD.maxs == 0)
+  {
+    cout << "infty";
+  }
+  else
+  {
+    cout << CI.OCD.maxs;
+  }
+  cout << ") square pairs" << endl;
+
+  cout << "\t(" << CI.OCD.minb << ",";
+  if (CI.OCD.maxb == 0)
+  {
+    cout << "infty";
+  }
+  else
+  {
+    cout << CI.OCD.maxb;
+  }
+  cout << ") bits" << endl;
+
+  /*************************************
+   *     Initialise the system data    *
+   *************************************/
+  CI.SD = SystemData("Data/NetworkData.txt");
+
+  if (CI.my_number >= CI.SD.n)
+  {
+    throw data_mismatch();
+  }
+
+  /*************************************
+   *    Initialize the portnums        *
+   *************************************/
+  //  vector<unsigned int> portnum(SD.n);
+  CI.portnum.resize(CI.SD.n);
+
+  for (unsigned int i = 0; i < CI.SD.n; i++)
+  {
+    CI.portnum[i] = portnumbase + i;
+  }
+
+  /*************************************
+   * Initialise the secret sharing     *
+   * data and the gfp field data       *
+   *************************************/
+  ifstream inp("Data/SharingData.txt");
+  if (inp.fail())
+  {
+    throw file_error("Data/SharingData.txt");
+  }
+  bigint p;
+  inp >> p;
+  cout << "\n\np=" << p << endl;
+  gfp::init_field(p);
+  ShareData ShD;
+  inp >> ShD;
+  inp.close();
+  if (ShD.M.nplayers() != CI.SD.n)
+  {
+    throw data_mismatch();
+  }
+  if (CI.SD.fake_offline == 1)
+  {
+    ShD.Otype = Fake;
+  }
+  Share::init_share_data(ShD);
+
+  /* Initialize SSL */
+  Init_SSL_CTX(CI.ctx, CI.my_number, CI.SD);
+
+  /* Initialize the machine */
+  //  Machine machine;
+  if (CI.verbose < 0)
+  {
+    CI.machine.set_verbose();
+    CI.verbose = 0;
+  }
+  CI.machine.SetUp_Memory(CI.my_number, memtype);
+
+  // Here you configure the IO in the machine
+  //  - This depends on what IO machinary you are using
+  //  - Here we are just using the simple IO class
+  unique_ptr<Input_Output_Simple> io(new Input_Output_Simple);
+  io->init(cin, cout, true);
+  CI.machine.Setup_IO(std::move(io));
+
+  // Load the initial tapes for the first program into the schedule
+  //  unsigned int no_online_threads = 1;
+  CI.no_online_threads = 1;
+}
+//---------------------------//
+//---------------------------//
+
+
 
 class thread_info
 {
@@ -52,155 +176,6 @@ public:
   Machine *machine; // Pointer to the machine
 };
 
-void testTool(Player &P)
-{
-  mclBn_init(MCL_BLS12_381, MCLBN_COMPILED_TIME_VAR);
-
-  string str;
-  mclBnFr tmpfr;
-  mclBnG1 basePoint, tmpG1;
-  mclBnFr_setByCSPRNG(&tmpfr);
-  print_mclBnFr(tmpfr);
-  mclBnFr_to_str(str, tmpfr);
-  str_to_mclBnFr(tmpfr, str);
-  print_mclBnFr(tmpfr);
-  cout << str.size() << endl;
-
-  mclBnG1_setStr(&basePoint, (char *)G1_P.c_str(), G1_P.size(), 10);
-  mclBnG1_mul(&tmpG1, &basePoint, &tmpfr);
-  print_mclBnG1(tmpG1);
-  mclBnG1_to_str(str, tmpG1);
-  str_to_mclBnG1(tmpG1, str);
-  print_mclBnG1(tmpG1);
-  cout << str.size() << endl;
-
-  cout << "test Player:\n";
-  string ss;
-  if (P.whoami() == 0)
-  {
-    ss = str;
-    P.send_to_player(1, ss, 1);
-  }
-
-  if (P.whoami() == 1)
-  {
-    P.receive_from_player(0, ss, 1, false);
-  }
-
-  mclBnFr tmp;
-  str_to_mclBnFr(tmp, ss);
-  print_mclBnFr(tmp);
-}
-
-void testVSS()
-{
-  VSS v(3, 1);
-  vector<mclBnFr> shs;
-  vector<mclBnG1> aux;
-
-  v.rnd_secret();
-  v.gen_share(shs, aux);
-  mclBnG1 tmp, tmp1;
-  for (int i = 0; i < aux.size(); i++)
-  {
-    cout << "aux " << i << ": " << endl;
-    print_mclBnG1(aux[i]);
-  }
-  mclBnG1_add(&tmp, &aux[0], &aux[1]);
-  mclBnG1_add(&tmp1, &tmp, &aux[2]);
-  print_mclBnG1(tmp1);
-
-  cout << "secret:\n";
-  print_mclBnFr(v.get_secret());
-
-  cout << "recovered secret:\n";
-  mclBnFr out;
-  recover_share(out, shs);
-  print_mclBnFr(out);
-
-  int count = 0;
-
-  for (int i = 0; i < v.nparty; i++)
-  {
-    if (!v.verify_share(shs[i], aux, i + 1))
-    {
-      count++;
-    }
-  }
-
-  if (!count)
-  {
-    cout << "VSS Correct!" << endl;
-  }
-  else
-  {
-    cout << count << " VSS Errors!" << endl;
-  }
-}
-
-void testBLS(Player &P)
-{
-
-  BLS bls1;
-  cout << "Fr Size: " << mclBn_getFrByteSize() << endl;
-  cout << "G1 Size: " << mclBn_getG1ByteSize() << endl;
-  const string msg = "1234567890";
-  bls1.keygen();
-  bls1.sign(msg);
-
-  BLS bls2;
-  bls2.set_vk(bls1.vk);
-  if (bls2.verify(bls1.sigma, msg))
-  {
-    cout << "Normal BLS Correct!" << endl;
-  }
-  else
-  {
-    cout << "Normal BLS Wrong!" << endl;
-  }
-
-  //DKG TEST
-  BLS dbls(3, 1);
-  dbls.dstb_keygen(P);
-  cout << "vk is: " << endl;
-  print_mclBnG1(dbls.vk);
-  cout << "secret share is: " << endl;
-  print_mclBnFr(dbls.get_sk());
-
-  vector<bls_sk> shares(P.nplayers());
-  shares[P.whoami()] = dbls.get_sk();
-  string ss;
-  mclBnFr out;
-  mclBnG1 outG1;
-
-  if (P.whoami() != 0)
-  {
-    mclBnFr_to_str(ss, dbls.get_sk());
-    P.send_to_player(0, ss, 1);
-  }
-  else
-  {
-    for (int i = 1; i < P.nplayers(); i++)
-    {
-      P.receive_from_player(i, ss, 1, false);
-      str_to_mclBnFr(shares[i], ss);
-    }
-
-    recover_share(out, shares);
-    cout << "recovered secret key is: " << endl;
-    print_mclBnFr(out);
-    mclFr_to_G1(outG1, out);
-
-    if (mclBnG1_isEqual(&outG1, &dbls.vk))
-    {
-      cout << "DKG test correct!\n";
-    }
-    else
-    {
-      cout << "DKG test wrong!\n";
-    }
-  }
-}
 
 // We have 5 threads per online phase
 //   - Online
@@ -239,37 +214,43 @@ vector<sacrificed_data> SacrificeD;
  * for a future application
  *
  */
-void Run_Scale(unsigned int my_number, unsigned int no_online_threads, const vector<gfp> &MacK,
+
+void Run_Poc(BLS &bls, Config_Info &CI)
+{
+
+/*
+unsigned int my_number, unsigned int no_online_threads, const vector<gfp> &MacK,
                SSL_CTX *ctx, const vector<unsigned int> &portnum,
                const SystemData &SD,
                Machine &machine, offline_control_data &OCD, int verbose)
-{
-  machine.SetUp_Threads(no_online_threads);
-  OCD.resize(no_online_threads, SD.n, my_number);
+*/
 
-  SacrificeD.resize(no_online_threads);
-  for (unsigned int i = 0; i < no_online_threads; i++)
+  CI.machine.SetUp_Threads(CI.no_online_threads);
+  CI.OCD.resize(CI.no_online_threads, CI.SD.n, CI.my_number);
+
+  SacrificeD.resize(CI.no_online_threads);
+  for (unsigned int i = 0; i < CI.no_online_threads; i++)
   {
-    SacrificeD[i].initialize(SD.n);
+    SacrificeD[i].initialize(CI.SD.n);
   }
 
-  unsigned int nthreads = 5 * no_online_threads;
+  unsigned int nthreads = 5 * CI.no_online_threads;
   unsigned int tnthreads = nthreads;
 
   /* Initialize the networking TCP sockets */
   int ssocket;
-  vector<vector<vector<int>>> csockets(tnthreads, vector<vector<int>>(SD.n, vector<int>(3)));
-  Get_Connections(ssocket, csockets, portnum, my_number, SD, verbose - 2);
+  vector<vector<vector<int>>> csockets(tnthreads+1, vector<vector<int>>(CI.SD.n, vector<int>(3)));
+  Get_Connections(ssocket, csockets, CI.portnum, CI.my_number, CI.SD, CI.verbose);
   printf("All connections now done\n");
 
   global_time.start();
   
-  Player P(my_number, SD, 0, ctx, csockets[0], MacK, verbose - 1);
-  
-  testTool(P);
-  testVSS();
-  testBLS(P);
-  
+  vector<gfp> MacK(0);
+
+  Player P(CI.my_number, CI.SD, tnthreads, CI.ctx, csockets[tnthreads], MacK, CI.verbose);
+  poc_Setup(bls,P);
+
+//--------------------------//
   printf("Setting up threads\n");
   fflush(stdout);
   threads.resize(tnthreads);
@@ -280,15 +261,15 @@ void Run_Scale(unsigned int my_number, unsigned int no_online_threads, const vec
     {
       tinfo[i].thread_num = i;
     }
-    tinfo[i].SD = &SD;
-    tinfo[i].OCD = &OCD;
-    tinfo[i].ctx = ctx;
+    tinfo[i].SD = &CI.SD;
+    tinfo[i].OCD = &CI.OCD;
+    tinfo[i].ctx = CI.ctx;
     tinfo[i].MacK = MacK;
-    tinfo[i].me = my_number;
-    tinfo[i].no_online_threads = no_online_threads;
+    tinfo[i].me = CI.my_number;
+    tinfo[i].no_online_threads = CI.no_online_threads;
     tinfo[i].csockets = csockets[i];
-    tinfo[i].machine = &machine;
-    tinfo[i].verbose = verbose;
+    tinfo[i].machine = &CI.machine;
+    tinfo[i].verbose = CI.verbose;
     if (pthread_create(&threads[i], NULL, Main_Func, &tinfo[i]))
     {
       throw C_problem("Problem spawning thread");
@@ -296,10 +277,10 @@ void Run_Scale(unsigned int my_number, unsigned int no_online_threads, const vec
   }
 
   // Get all online threads in sync
-  machine.Synchronize();
+  CI.machine.Synchronize();
 
   // Now run the programs
-  machine.run();
+  CI.machine.run();
 
   printf("Waiting for all clients to finish\n");
   fflush(stdout);
@@ -308,24 +289,25 @@ void Run_Scale(unsigned int my_number, unsigned int no_online_threads, const vec
     pthread_join(threads[i], NULL);
   }
 
-  Close_Connections(ssocket, csockets, my_number);
+  Close_Connections(ssocket, csockets, CI.my_number);
 
   global_time.stop();
   cout << "Total Time (with thread locking) = " << global_time.elapsed() << " seconds" << endl;
 
   long long total_triples = 0, total_squares = 0, total_bits = 0, total_inputs = 0;
-  for (size_t i = 0; i < no_online_threads; i++)
+  for (size_t i = 0; i < CI.no_online_threads; i++)
   {
-    total_triples += OCD.totm[i];
-    total_squares += OCD.tots[i];
-    total_bits += OCD.totb[i];
-    total_inputs += OCD.totI[i];
+    total_triples += CI.OCD.totm[i];
+    total_squares += CI.OCD.tots[i];
+    total_bits += CI.OCD.totb[i];
+    total_inputs += CI.OCD.totI[i];
   }
   cout << "Produced a total of " << total_triples << " triples" << endl;
   cout << "Produced a total of " << total_squares << " squares" << endl;
   cout << "Produced a total of " << total_bits << " bits" << endl;
   cout << "Produced a total of " << total_inputs << " inputs" << endl;
 }
+
 
 void *Main_Func(void *ptr)
 {

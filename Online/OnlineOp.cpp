@@ -118,11 +118,6 @@ void OnlineOp::mul(Share &c, const Share &a, const Share &b)
   Share rho = b - sp[1];     // rho = y - b
   vector<gfp> vc;
   open({epsilon, rho}, vc);
-  if (verbose > 1)
-  {
-    cout << "mul vc[0]:" << vc[0] << endl;
-    cout << "mul vc[1]:" << vc[1] << endl;
-  }
 
   //phase 2 get mul share
 
@@ -156,10 +151,6 @@ void OnlineOp::sqr(Share &aa, const Share &a)
   Share epsilon = a - sp[0]; // epsilon = x - a
   vector<gfp> vc;
   open({epsilon}, vc);
-  if (verbose > 1)
-  {
-    cout << "sqr vc[0]:" << vc[0] << endl;
-  }
 
   //phase 2 get squre share
 
@@ -185,11 +176,6 @@ void OnlineOp::inv(Share &ia, const Share &a)
   //get random share r
   rshare = prss.next_share(P);
 
-  if (verbose > 1)
-  {
-    cout << "random share\n";
-    reveal_and_print({rshare});
-  }
   Share c;
   //get share of r*a;
   mul(c, rshare, a);
@@ -438,410 +424,19 @@ void OnlineOp::reveal_and_print(const vector<Complex> &vs)
   }
 }
 
-void OnlineOp::get_inputs(vector<Share> &inputs_share, vector<gfp> &inputs)
-{
-  if (inputs_share.size() != inputs.size())
-  {
-    inputs_share.resize(inputs.size());
-  }
-  for (int i = 0; i < inputs_share.size(); i++)
-  {
-    inputs_share[i].set_player(P.whoami());
-    Proc.iop.private_input(i, inputs_share[i], 1, Proc, P, machine, OCD, inputs);
-  }
-}
-
-void OnlineOp::get_inputs(vector<Complex> &inputs_share, vector<Complex_Plain> &inputs)
-{
-  if (inputs_share.size() != inputs.size())
-  {
-    inputs_share.resize(inputs.size());
-  }
-
-  vector<gfp> inputs_real(inputs.size()), inputs_imag(inputs.size());
-  for (int i = 0; i < inputs.size(); i++)
-  {
-    inputs_real[i] = inputs[i].real;
-    inputs_imag[i] = inputs[i].imag;
-  }
-
-  for (int i = 0; i < inputs_share.size(); i++)
-  {
-    inputs_share[i].real.set_player(P.whoami());
-    inputs_share[i].imag.set_player(P.whoami());
-    Proc.iop.private_input(i, inputs_share[i].real, 1, Proc, P, machine, OCD, inputs_real);
-    Proc.iop.private_input(i, inputs_share[i].imag, 1, Proc, P, machine, OCD, inputs_imag);
-  }
-}
-
-void OnlineOp::get_inputs(vector<Share> &inputs_share, vector<long> &inputs)
-{
-  vector<gfp> _inputs(inputs.size());
-  for (int i = 0; i < _inputs.size(); i++)
-  {
-    _inputs[i].assign(inputs[i]);
-  }
-  get_inputs(inputs_share, _inputs);
-}
-
 void OnlineOp::get_inputs(unsigned int party, Share &sa, gfp &inputs)
 {
   Proc.iop.private_input(party, sa, 1, Proc, P, machine, OCD, inputs);
+  UT.UsedInputMask++;
 }
 
 void OnlineOp::get_inputs(unsigned int party, Complex &sa, Complex_Plain &inputs)
 {
-  Proc.iop.private_input(party, sa.real, 1, Proc, P, machine, OCD, inputs.real);
-  Proc.iop.private_input(party, sa.imag, 1, Proc, P, machine, OCD, inputs.imag);
-}
-
-void OnlineOp::get_inputs_dumy(vector<Share> &inputs)
-{
-  inputs.resize(P.nplayers());
-  for (int i = 0; i < inputs.size(); i++)
-  {
-    inputs[i].set_player(P.whoami());
-  }
-
-  vector<int64_t> inputs_dumy = {176, 16, -5, 3, -9, 3, 7, 2, 3};
-  inputs_dumy.resize(P.nplayers());
-  for (int i = 0; i < inputs.size(); i++)
-  {
-    Proc.iop.private_input2(i, inputs[i], 1, Proc, P, machine, OCD, inputs_dumy);
-  }
+  get_inputs(party,sa.real,inputs.real);
+  get_inputs(party,sa.imag,inputs.imag);
 }
 
 // the following apis for testing
-void OnlineOp::test_add()
-{
-  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
-
-  vector<Share> inputs;
-  get_inputs_dumy(inputs);
-
-  if (inputs.size() < 1)
-    throw invalid_size();
-
-  Share res = inputs[0];
-  reveal_and_print({res});
-  for (int i = 1; i < P.nplayers(); i++)
-  {
-    res += inputs[i]; // 176 + 16 + 5 + ...
-    reveal_and_print({res});
-  }
-  cout << "============================== END ==============================" << endl;
-}
-void OnlineOp::test_add_plain()
-{
-  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
-
-  vector<Share> inputs;
-  get_inputs_dumy(inputs);
-
-  if (inputs.size() < 1)
-    throw invalid_size();
-
-  gfp tmp;
-  tmp.assign(10);
-  Share res;
-  res.set_player(P.whoami());
-  for (int i = 0; i < P.nplayers(); i++)
-  {
-    add_plain(res, inputs[i], tmp);
-    reveal_and_print({res});
-  }
-  cout << "============================== END ==============================" << endl;
-}
-
-void OnlineOp::test_mul_plain()
-{
-  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
-
-  vector<Share> inputs;
-  get_inputs_dumy(inputs);
-
-  if (inputs.size() < 1)
-    throw invalid_size();
-
-  gfp tmp;
-  tmp.assign(10);
-  Share res;
-  res.set_player(P.whoami());
-  for (int i = 0; i < P.nplayers(); i++)
-  {
-    mul_plain(res, inputs[i], tmp);
-    reveal_and_print({res});
-  }
-  cout << "============================== END ==============================" << endl;
-}
-void OnlineOp::test_mul()
-{
-  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
-
-  vector<Share> inputs;
-  get_inputs_dumy(inputs);
-
-  if (inputs.size() < 1)
-    throw invalid_size();
-
-  Share res = inputs[0];
-  reveal_and_print({res});
-  for (int i = 1; i < P.nplayers(); i++)
-  {
-    mul_inplace(res, inputs[i]); // 176 * 16 * 5 * ...
-    reveal_and_print({res});
-  }
-  cout << "============================== END ==============================" << endl;
-}
-void OnlineOp::test_sqr()
-{
-  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
-
-  vector<Share> inputs;
-  get_inputs_dumy(inputs);
-
-  if (inputs.size() < 1)
-    throw invalid_size();
-
-  Share res;
-  res.set_player(P.whoami());
-  for (int i = 0; i < P.nplayers(); i++)
-  {
-    sqr(res, inputs[i]);
-    sqr_inplace(res);
-    reveal_and_print({res});
-  }
-  cout << "============================== END ==============================" << endl;
-}
-void OnlineOp::test_div()
-{
-  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
-
-  vector<Share> inputs;
-  get_inputs_dumy(inputs);
-
-  if (inputs.size() < 1)
-    throw invalid_size();
-
-  Share res = inputs[0];
-  reveal_and_print({res});
-  for (int i = 1; i < P.nplayers(); i++)
-  {
-    div_inplace(res, inputs[i]); // 176 / 16 / 5 / ...
-    reveal_and_print({res});
-  }
-  cout << "============================== END ==============================" << endl;
-}
-void OnlineOp::test_complex_add()
-{
-  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
-
-  vector<Share> inputs1, inputs2;
-  get_inputs_dumy(inputs1);
-  get_inputs_dumy(inputs2);
-
-  vector<Complex> input_c(inputs1.size());
-  for (int i = 0; i < input_c.size(); i++)
-  {
-    input_c[i].setValue(inputs1[i], inputs2[i]);
-  }
-
-  if (inputs1.size() < 1 || inputs2.size() < 1)
-    throw invalid_size();
-
-  Complex res = input_c[0];
-  reveal_and_print({res});
-  for (int i = 1; i < P.nplayers(); i++)
-  {
-    add(res, input_c[i], res);
-    reveal_and_print({res});
-  }
-  cout << "============================== END ==============================" << endl;
-}
-void OnlineOp::test_complex_sub()
-{
-  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
-
-  vector<Share> inputs1, inputs2;
-  get_inputs_dumy(inputs1);
-  get_inputs_dumy(inputs2);
-
-  vector<Complex> input_c(inputs1.size());
-  for (int i = 0; i < input_c.size(); i++)
-  {
-    input_c[i].setValue(inputs1[i], inputs2[i]);
-  }
-
-  if (inputs1.size() < 1 || inputs2.size() < 1)
-    throw invalid_size();
-
-  Complex res = input_c[0];
-  reveal_and_print({res});
-  for (int i = 1; i < P.nplayers(); i++)
-  {
-    sub(res, input_c[i], res);
-    reveal_and_print({res});
-  }
-  cout << "============================== END ==============================" << endl;
-}
-void OnlineOp::test_complex_mul_plain()
-{
-  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
-
-  vector<Share> inputs1, inputs2;
-  get_inputs_dumy(inputs1);
-  get_inputs_dumy(inputs2);
-
-  vector<Complex> input_c(inputs1.size());
-  for (int i = 0; i < input_c.size(); i++)
-  {
-    input_c[i].setValue(inputs1[i], inputs2[i]);
-  }
-
-  if (inputs1.size() < 1 || inputs2.size() < 1)
-    throw invalid_size();
-
-  vector<gfp> tmp(input_c.size());
-  tmp[0].assign(176);
-  tmp[1].assign(16);
-  tmp[2].assign(-5);
-
-  vector<Complex_Plain> cnstnt(input_c.size());
-  for (int i = 0; i < cnstnt.size(); i++)
-  {
-    cnstnt[i].setValue(tmp[i], tmp[i]);
-  }
-
-  Complex res;
-  for (int i = 0; i < P.nplayers(); i++)
-  {
-    mul_plain(res, input_c[i], cnstnt[i]);
-    reveal_and_print({res});
-  }
-  cout << "============================== END ==============================" << endl;
-}
-void OnlineOp::test_complex_mul()
-{
-  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
-
-  vector<Share> inputs1, inputs2;
-  get_inputs_dumy(inputs1);
-  get_inputs_dumy(inputs2);
-
-  //  reverse(inputs2.begin(), inputs2.end());
-
-  vector<Complex> input_c(inputs1.size());
-  for (int i = 0; i < input_c.size(); i++)
-  {
-    input_c[i].setValue(inputs1[i], inputs2[i]);
-  }
-
-  vector<Complex> input_c2 = input_c;
-  reverse(input_c2.begin(), input_c2.end());
-
-  if (inputs1.size() < 1 || inputs2.size() < 1)
-    throw invalid_size();
-
-  Complex res = input_c[0];
-  reveal_and_print({res});
-  for (int i = 1; i < P.nplayers(); i++)
-  {
-    //  mul(res, input_c[i], input_c2[i]);
-    //  reveal_and_print({res});
-    mul_inplace(res, input_c[i]);
-    reveal_and_print({res});
-  }
-  cout << "============================== END ==============================" << endl;
-}
-
-void OnlineOp::test_complex_sqr()
-{
-  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
-
-  vector<Share> inputs1, inputs2;
-  get_inputs_dumy(inputs1);
-  get_inputs_dumy(inputs2);
-
-  vector<Complex> input_c(inputs1.size());
-  for (int i = 0; i < input_c.size(); i++)
-  {
-    input_c[i].setValue(inputs1[i], inputs2[i]);
-  }
-
-  if (inputs1.size() < 1 || inputs2.size() < 1)
-    throw invalid_size();
-
-  Complex res = input_c[1];
-  reveal_and_print({res});
-  for (int i = 1; i < P.nplayers(); i++)
-  {
-    sqr_inplace(res);
-    reveal_and_print({res});
-  }
-  cout << "============================== END ==============================" << endl;
-}
-
-void OnlineOp::test_complex_inv()
-{
-  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
-
-  vector<Share> inputs1, inputs2;
-  get_inputs_dumy(inputs1);
-  get_inputs_dumy(inputs2);
-
-  vector<Complex> input_c(inputs1.size());
-  for (int i = 0; i < input_c.size(); i++)
-  {
-    input_c[i].setValue(inputs1[i], inputs2[i]);
-  }
-
-  if (inputs1.size() < 1 || inputs2.size() < 1)
-    throw invalid_size();
-
-  Complex res = input_c[0];
-  reveal_and_print({res});
-  inv_inplace(res);
-  reveal_and_print({res});
-
-  //  reveal_and_print({input_c[1]});
-  //  reveal_and_print({input_c[2]});
-  for (int i = 0; i < P.nplayers(); i++)
-  {
-    inv(res, input_c[i]);
-    reveal_and_print({res});
-  }
-  cout << "============================== END ==============================" << endl;
-}
-
-void OnlineOp::test_complex_div()
-{
-  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
-
-  vector<Share> inputs1, inputs2;
-  get_inputs_dumy(inputs1);
-  get_inputs_dumy(inputs2);
-
-  vector<Complex> input_c(inputs1.size());
-  for (int i = 0; i < input_c.size(); i++)
-  {
-    input_c[i].setValue(inputs1[i], inputs2[i]);
-  }
-
-  if (inputs1.size() < 1 || inputs2.size() < 1)
-    throw invalid_size();
-
-  Complex res = input_c[0];
-  reveal_and_print({res});
-  //  reveal_and_print({input_c[1]});
-  //  reveal_and_print({input_c[2]});
-  for (int i = 1; i < P.nplayers(); i++)
-  {
-    div(res, input_c[i], res);
-    //div_inplace(res,input_c[i]);
-    reveal_and_print({res});
-  }
-  cout << "============================== END ==============================" << endl;
-}
 
 void OnlineOp::test_uhf()
 {
@@ -879,8 +474,6 @@ void OnlineOp::test_legendre()
   get_inputs(0, data_s, data_p);
 
   int res_s = legendre_prf(key_s, data_s);
-//  int res_s;
-//  legendre(res_s,data_s);
 
   bigint in = key + data;
 

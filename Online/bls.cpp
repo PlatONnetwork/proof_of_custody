@@ -46,8 +46,6 @@ void BLS::dstb_keygen(Player &P)
     sk = shs[P.whoami()];
     vk = aux[0];
 
-    cout << aux.size() << endl;
-
     vector<bls_sk> tmp_shares(P.nplayers());
 
     vector<vector<bls_vk>> aux_tmp(P.nplayers(), vector<bls_vk>(aux.size()));

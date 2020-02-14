@@ -33,6 +33,8 @@ public:
   int fake_offline;
   int fake_sacrifice;
 
+  SystemData(){}
+  
   SystemData(unsigned int numplayers, const string &RootCertName,
              const vector<string> &IP_Numbers,
              const vector<string> &PlayerCertFiles,

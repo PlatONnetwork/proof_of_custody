@@ -40,6 +40,7 @@ file(GLOB online Online/*.cpp)
 file(GLOB processor Processor/*.cpp)
 file(GLOB system System/*.cpp)
 file(GLOB tools Tools/*.cpp)
+file(GLOB runtime RunTime/*.cpp)
 
 # scale
 add_library(scale STATIC
@@ -53,6 +54,7 @@ add_library(scale STATIC
         ${processor}
         ${system}
         ${tools}
+        ${runtime}
         )
 
 target_link_libraries(scale PRIVATE
@@ -62,8 +64,10 @@ target_link_libraries(scale PRIVATE
         mclbn384_256
         )
 
-add_executable(Player.x Player.cpp)
-target_link_libraries(Player.x PRIVATE scale)
+#add_executable(Player.x Player.cpp)
+add_executable(main.x main.cpp)
+
+target_link_libraries(main.x PRIVATE scale)
 
 add_executable(Setup.x Setup.cpp)
 target_link_libraries(Setup.x PRIVATE OpenSSL::Crypto OpenSSL::SSL scale)

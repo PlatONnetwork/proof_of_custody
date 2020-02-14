@@ -122,26 +122,6 @@ void Processor_IO::private_input(unsigned int player, Share &sa, unsigned int ch
   private_input(player, sa, channel, Proc, P, machine, OCD, inputs[P.whoami()]);
 }
 
-void Processor_IO::private_input2(unsigned int player, Share &sa, unsigned int channel,
-                                  Processor &Proc, Player &P, Machine &machine,
-                                  offline_control_data &OCD)
-{
-  vector<int64_t> inputs_dumy = {176, 16, 5, 3, -9, 3, 7, 2, 3};
-  inputs_dumy.resize(P.nplayers());
-  private_input2(player, sa, channel, Proc, P, machine, OCD, inputs_dumy);
-}
-
-void Processor_IO::private_input2(unsigned int player, Share &sa, unsigned int channel,
-                                  Processor &Proc, Player &P, Machine &machine,
-                                  offline_control_data &OCD, vector<int64_t> &inputs)
-{
-  vector<gfp> _inputs(inputs.size());
-  for (int i = 0; i < _inputs.size(); i++)
-  {
-    _inputs[i].assign(inputs[i]);
-  }
-  private_input(player, sa, channel, Proc, P, machine, OCD, _inputs);
-}
 
 void Processor_IO::private_output(unsigned int player, int source, unsigned int channel,
                                   Processor &Proc, Player &P,

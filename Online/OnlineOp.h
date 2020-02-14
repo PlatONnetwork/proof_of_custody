@@ -76,7 +76,6 @@ public:
     {
         prss = PRSS(P);
     }
-    int verbose = 0;
 
     void getTuples(vector<Share> &sp, int opcode);
 
@@ -158,28 +157,10 @@ public:
     void reveal_and_print(const vector<Complex> &vs);
 
     /*inputs*/
-    void get_inputs(vector<Share> &inputs_share, vector<gfp> &inputs);
-    void get_inputs(vector<Complex> &inputs_share, vector<Complex_Plain> &inputs);
-    void get_inputs(vector<Share> &inputs_share, vector<long> &inputs);
     void get_inputs(unsigned int party, Share &sa, gfp &inputs);
     void get_inputs(unsigned int party, Complex &sa, Complex_Plain &inputs);
-    void get_inputs_dumy(vector<Share> &inputs);
 
     // the following apis for testing
-    void test_add();
-    void test_add_plain();
-    void test_mul_plain();
-    void test_mul();
-    void test_sqr();
-    void test_div();
-
-    void test_complex_add();
-    void test_complex_sub();
-    void test_complex_mul_plain();
-    void test_complex_mul();
-    void test_complex_sqr();
-    void test_complex_inv();
-    void test_complex_div();
 
     void test_uhf();
     void test_legendre();

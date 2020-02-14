@@ -1,18 +1,18 @@
 #include "poc.h"
 
-void pocSetup(BLS &bls, Player &P)
+void poc_Setup(BLS &bls, Player &P)
 {
     bls.dstb_keygen(P);
 }
 
-void pocEphemKey(G2_Affine_Coordinates &ac, BLS &bls, const string msg,
+void poc_EphemKey(G2_Affine_Coordinates &ac, BLS &bls, const string msg,
                  Processor &Proc, int online_num, Player &P,
                  offline_control_data &OCD, Machine &machine)
 {
     bls.dstb_sign(ac, msg, Proc, online_num, P, OCD, machine);
 }
 
-int pocGenProof(const vector<Share> keys, const vector<gfp> msg,
+int poc_GenProof(const vector<Share> keys, const vector<gfp> msg,
                 Processor &Proc, int online_num, Player &P,
                 offline_control_data &OCD, Machine &machine)
 {
