@@ -44,7 +44,6 @@ void online_phase(int online_num, Player &P, offline_control_data &OCD,
     {
       sleep(1);
     }
-    sleep(3);
   }
   printf("Starting online phase\n");
 

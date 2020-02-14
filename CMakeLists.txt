@@ -4,7 +4,7 @@ if (${CMAKE_VERSION} VERSION_LESS 3.12)
     cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 endif ()
 
-project(SCALE_MAMBA VERSION 1.0 DESCRIPTION "SCALE MAMBA" LANGUAGES CXX)
+project(PROOF_OF_CUSTODY VERSION 1.0 DESCRIPTION "POC" LANGUAGES CXX)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
 set(CMAKE_CXX_STANDARD 11)
@@ -42,8 +42,8 @@ file(GLOB system System/*.cpp)
 file(GLOB tools Tools/*.cpp)
 file(GLOB runtime RunTime/*.cpp)
 
-# scale
-add_library(scale STATIC
+# poc
+add_library(poc STATIC
         ${exceptions}
         ${io}
         ${lsss}
@@ -57,17 +57,16 @@ add_library(scale STATIC
         ${runtime}
         )
 
-target_link_libraries(scale PRIVATE
+target_link_libraries(poc PRIVATE
         Threads::Threads OpenSSL::Crypto OpenSSL::SSL
         ${CRYPTOPP_LIBRARIES} ${MPIR_LIBRARIES} ${MPIRXX_LIBRARIES}
         mcl
         mclbn384_256
         )
 
-#add_executable(Player.x Player.cpp)
 add_executable(main.x main.cpp)
 
-target_link_libraries(main.x PRIVATE scale)
+target_link_libraries(main.x PRIVATE poc)
 
 add_executable(Setup.x Setup.cpp)
-target_link_libraries(Setup.x PRIVATE OpenSSL::Crypto OpenSSL::SSL scale)
+target_link_libraries(Setup.x PRIVATE OpenSSL::Crypto OpenSSL::SSL poc)

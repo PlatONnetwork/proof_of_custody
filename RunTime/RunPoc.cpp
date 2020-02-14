@@ -17,13 +17,12 @@
 #include <vector>
 #include <stdio.h>
 
-
 #ifdef BENCH_MEMORY
 #include <sys/resource.h>
 #endif
 using namespace std;
 
-void Init(int argc, char *argv[],Config_Info &CI)
+void Init(int argc, char *argv[], Config_Info &CI)
 {
   if (argc != 2)
   {
@@ -157,8 +156,6 @@ void Init(int argc, char *argv[],Config_Info &CI)
 //---------------------------//
 //---------------------------//
 
-
-
 class thread_info
 {
 public:
@@ -175,7 +172,6 @@ public:
 
   Machine *machine; // Pointer to the machine
 };
-
 
 // We have 5 threads per online phase
 //   - Online
@@ -218,13 +214,6 @@ vector<sacrificed_data> SacrificeD;
 void Run_Poc(BLS &bls, Config_Info &CI)
 {
 
-/*
-unsigned int my_number, unsigned int no_online_threads, const vector<gfp> &MacK,
-               SSL_CTX *ctx, const vector<unsigned int> &portnum,
-               const SystemData &SD,
-               Machine &machine, offline_control_data &OCD, int verbose)
-*/
-
   CI.machine.SetUp_Threads(CI.no_online_threads);
   CI.OCD.resize(CI.no_online_threads, CI.SD.n, CI.my_number);
 
@@ -239,18 +228,18 @@ unsigned int my_number, unsigned int no_online_threads, const vector<gfp> &MacK,
 
   /* Initialize the networking TCP sockets */
   int ssocket;
-  vector<vector<vector<int>>> csockets(tnthreads+1, vector<vector<int>>(CI.SD.n, vector<int>(3)));
+  vector<vector<vector<int>>> csockets(tnthreads + 1, vector<vector<int>>(CI.SD.n, vector<int>(3)));
   Get_Connections(ssocket, csockets, CI.portnum, CI.my_number, CI.SD, CI.verbose);
   printf("All connections now done\n");
 
   global_time.start();
-  
+
   vector<gfp> MacK(0);
 
   Player P(CI.my_number, CI.SD, tnthreads, CI.ctx, csockets[tnthreads], MacK, CI.verbose);
-  poc_Setup(bls,P);
+  poc_Setup(bls, P);
 
-//--------------------------//
+  //--------------------------//
   printf("Setting up threads\n");
   fflush(stdout);
   threads.resize(tnthreads);
@@ -307,7 +296,6 @@ unsigned int my_number, unsigned int no_online_threads, const vector<gfp> &MacK,
   cout << "Produced a total of " << total_bits << " bits" << endl;
   cout << "Produced a total of " << total_inputs << " inputs" << endl;
 }
-
 
 void *Main_Func(void *ptr)
 {

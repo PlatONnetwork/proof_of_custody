@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Online/OnlineOP.h"
 #include "Online/bls.h"
 #include <string>

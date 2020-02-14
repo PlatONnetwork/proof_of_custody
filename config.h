@@ -14,7 +14,9 @@ All rights reserved
  */
 // #define sz_offline_batch 60000
 #define sz_offline_batch 6000
+//#define sz_offline_batch 1024
 #define sz_IO_batch 10000
+//#define sz_IO_batch 100
 
 /* The max number of triples etc in the sacrifice production queue 
  * where we stop producing stuff.
