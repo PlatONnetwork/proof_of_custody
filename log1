@@ -20,24 +20,24 @@ p=400240955522166739341778982573590415655688281993900788533205813612403165049083
 Begin of prog
 All connections now done
 Setting up threads
-I am player 1 in thread 0
 Waiting for thread 0 to be ready
-I am player 1 in thread 1
-I am player 1 in thread 4
 I am player 1 in thread 3
+I am player 1 in thread 4
+I am player 1 in thread 0
 I am player 1 in thread 2
+I am player 1 in thread 1
+Set up player 1 in thread 2 
+Set up player 1 in thread 1 
+Set up player 1 in thread 3 
+Set up player 1 in thread 0 
 Set up player 1 in thread 4 
 Doing online for player 1 in online thread 0
 Signal online thread ready 0
-	Thread 0 terminating
 Starting online phase
-Set up player 1 in thread 1 
+	Thread 0 terminating
 Waiting for all clients to finish
 Waiting for all clients to finish
-Set up player 1 in thread 2 
-Set up player 1 in thread 0 
 ============================== BEG test_uhf ==============================
-Set up player 1 in thread 3 
 49
 ============================== BEG test_legendre ==============================
 mpc leg value: 0
@@ -48,11 +48,11 @@ Exiting mult phase : thread = 0
 Exiting bit phase: thread = 0
 Exiting square phase: thread = 0
 Exiting inputs phase : thread = 0
-Total Time (with thread locking) = 3.11774 seconds
+Total Time (with thread locking) = 3.00762 seconds
 Produced a total of 5632 triples
 Produced a total of 6144 squares
 Produced a total of 5632 bits
 Produced a total of 30000 inputs
-40344265297846603118077961634292675299869512457969640944173954737118152887496
-1 822040084478154209188101492579524643688596463803257947992619248906898536112127492614651115221979439527650336907987 574451722729839623383558444222184750200458376427218340137553782231746481258570087862474094466522976027305456537027
+30626798625131496487167637370096521694735544207880709399479820843144390297200
+1 1335050199396028559985388774461487728623002958758681316779852457769502698150775906579148209227125558155212068551861 1110895327497931449399433100623984646650797436910929892612580918914530646614527593000443816171193310810705663184141
 End of prog
