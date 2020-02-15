@@ -203,7 +203,7 @@ void BLS::dstb_sign(G2_Affine_Coordinates &out, const string msg,
     vector<G2_Affine_Coordinates> ac(P.nplayers());
 
     G2Op g2op(Proc, online_num, P, OCD, machine);
-
+    cout<<"reach here 1\n";
     for (int i = 0; i < ac.size(); i++)
     {
         if (i = P.whoami())
@@ -212,6 +212,7 @@ void BLS::dstb_sign(G2_Affine_Coordinates &out, const string msg,
             g2op.get_inputs(i, ac[i].y, s[1]);
         }
     }
+    cout<<"reach here 2\n";
 
     out = ac[0];
     for (int i = 1; i < ac.size(); i++)

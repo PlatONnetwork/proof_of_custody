@@ -7,23 +7,21 @@
 
 #include <openssl/ssl.h>
 
-class Config_Info
-{
-public:
-    unsigned int my_number;
-    unsigned int no_online_threads;
-    SSL_CTX *ctx;
-    vector<unsigned int> portnum;
-    SystemData SD;
-    Machine machine;
-    offline_control_data OCD;
-    int verbose;
-    Config_Info() {}
-};
-
+//vector<sacrificed_data> SacrificeD;
 /*
 * Initate the configure information
 */
+void Run_Init(int argc, char *argv[], Config_Info &CI);
+void Run_Clear(Config_Info &CI);
+
+void Run_PocSetup(BLS &bls, Config_Info &CI);
+
+void Run_PocEphemKey(vector<Share> &ek, BLS bls, const string msg, Config_Info &CI);
+
+void Run_PocGenProof(Config_Info &CI);
+
+//-----------------the following will be removed------------------//
+
 void Init(int argc, char *argv[], Config_Info &CI);
 
 /*

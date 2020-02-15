@@ -93,7 +93,7 @@ public:
 
 public:
   friend class Instruction;
-
+  Processor() {}
   Processor(int online_thread_num, unsigned int nplayers, Player &P);
   ~Processor();
 

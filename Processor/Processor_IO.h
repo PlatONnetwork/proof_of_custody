@@ -28,6 +28,7 @@ class Processor_IO
   vector<Share> rshares;
 
 public:
+  Processor_IO(){}
   Processor_IO(unsigned int nplayers)
       : rshares(nplayers)
   {

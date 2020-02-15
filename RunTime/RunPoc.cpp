@@ -22,6 +22,253 @@
 #endif
 using namespace std;
 
+class thread_info
+{
+public:
+  int thread_num;
+  const SystemData *SD;
+  offline_control_data *OCD;
+  SSL_CTX *ctx;
+  int me;
+  unsigned int no_online_threads;
+  vector<vector<int>> csockets;
+  vector<gfp> MacK;
+
+  int verbose;
+
+  Machine *machine; // Pointer to the machine
+};
+
+// We have 5 threads per online phase
+//   - Online
+//   - Sacrifice (and input tuple production)
+//   - Mult Triple Production
+//   - Square Pair Production
+//   - Bit Production
+vector<pthread_t> threads;
+
+Timer global_time;
+
+// Forward declarations to make code easier to read
+void *Main_Func(void *ptr);
+
+vector<sacrificed_data> SacrificeD;
+
+/* Global data structure to hold the OT stuff */
+//OT_Thread_Data OTD;
+
+/* Before calling this we assume various things have
+ * been set up. In particular the following functions have
+ * been called
+ *
+ *    Init_SSL_CTX
+ *    gfp::init_field
+ *    Share::init_share_data
+ *    machine.SetUp_Memory
+ *    machine.IO.init
+ *    FHE data has been initialized if needed
+ *
+ * We also assume the machine.schedule has been initialised
+ * with some stringstream tapes and a stringstream to a schedule file
+ *
+ * This function assumes that afterwards we sort out 
+ * closing down SSL and Dump'ing memory if need be
+ * for a future application
+ *
+ */
+
+void Run_Init(int argc, char *argv[], Config_Info &CI)
+{
+  if (argc != 2)
+  {
+    cerr << "ERROR: incorrect number of arguments to Player.x\n";
+  }
+  else
+  {
+    CI.my_number = (unsigned int)atoi(argv[1]);
+  }
+
+  string memtype = "empty";
+  unsigned int portnumbase = 5000;
+  CI.verbose = -1;
+
+  /*************************************
+   *  Setup offline_control_data OCD   *
+   *************************************/
+  //  offline_control_data OCD;
+  CI.OCD.minm = 0;
+  CI.OCD.mins = 0;
+  CI.OCD.minb = 0;
+  CI.OCD.maxm = 0;
+  CI.OCD.maxs = 0;
+  CI.OCD.maxb = 0;
+  CI.OCD.maxI = 0;
+
+  cout << "(Min,Max) number of ...\n";
+  cout << "\t(" << CI.OCD.minm << ",";
+  if (CI.OCD.maxm == 0)
+  {
+    cout << "infty";
+  }
+  else
+  {
+    cout << CI.OCD.maxm;
+  }
+  cout << ") multiplication triples" << endl;
+
+  cout << "\t(" << CI.OCD.mins << ",";
+  if (CI.OCD.maxs == 0)
+  {
+    cout << "infty";
+  }
+  else
+  {
+    cout << CI.OCD.maxs;
+  }
+  cout << ") square pairs" << endl;
+
+  cout << "\t(" << CI.OCD.minb << ",";
+  if (CI.OCD.maxb == 0)
+  {
+    cout << "infty";
+  }
+  else
+  {
+    cout << CI.OCD.maxb;
+  }
+  cout << ") bits" << endl;
+
+  /*************************************
+   *     Initialise the system data    *
+   *************************************/
+  CI.SD = SystemData("Data/NetworkData.txt");
+
+  if (CI.my_number >= CI.SD.n)
+  {
+    throw data_mismatch();
+  }
+
+  /*************************************
+   *    Initialize the portnums        *
+   *************************************/
+  //  vector<unsigned int> portnum(SD.n);
+  CI.portnum.resize(CI.SD.n);
+
+  for (unsigned int i = 0; i < CI.SD.n; i++)
+  {
+    CI.portnum[i] = portnumbase + i;
+  }
+
+  /*************************************
+   * Initialise the secret sharing     *
+   * data and the gfp field data       *
+   *************************************/
+  ifstream inp("Data/SharingData.txt");
+  if (inp.fail())
+  {
+    throw file_error("Data/SharingData.txt");
+  }
+  bigint p;
+  inp >> p;
+  cout << "\n\np=" << p << endl;
+  gfp::init_field(p);
+  ShareData ShD;
+  inp >> ShD;
+  inp.close();
+  if (ShD.M.nplayers() != CI.SD.n)
+  {
+    throw data_mismatch();
+  }
+  if (CI.SD.fake_offline == 1)
+  {
+    ShD.Otype = Fake;
+  }
+  Share::init_share_data(ShD);
+
+  /* Initialize SSL */
+  Init_SSL_CTX(CI.ctx, CI.my_number, CI.SD);
+
+  /* Initialize the machine */
+  //  Machine machine;
+  if (CI.verbose < 0)
+  {
+    CI.machine.set_verbose();
+    CI.verbose = 0;
+  }
+  CI.machine.SetUp_Memory(CI.my_number, memtype);
+
+  // Here you configure the IO in the machine
+  //  - This depends on what IO machinary you are using
+  //  - Here we are just using the simple IO class
+  unique_ptr<Input_Output_Simple> io(new Input_Output_Simple);
+  io->init(cin, cout, true);
+  CI.machine.Setup_IO(std::move(io));
+
+  // Load the initial tapes for the first program into the schedule
+  //  unsigned int no_online_threads = 1;
+  CI.no_online_threads = 1;
+
+  CI.machine.SetUp_Threads(CI.no_online_threads);
+  CI.OCD.resize(CI.no_online_threads, CI.SD.n, CI.my_number);
+
+  SacrificeD.resize(CI.no_online_threads);
+  for (unsigned int i = 0; i < CI.no_online_threads; i++)
+  {
+    SacrificeD[i].initialize(CI.SD.n);
+  }
+
+  /* Initialize the networking TCP sockets */
+  CI.tnthreads = 5 * CI.no_online_threads;
+  CI.csockets = vector<vector<vector<int>>>(CI.tnthreads + 2, vector<vector<int>>(CI.SD.n, vector<int>(3)));
+  Get_Connections(CI.ssocket, CI.csockets, CI.portnum, CI.my_number, CI.SD, CI.verbose);
+  printf("All connections now done\n");
+}
+
+void Run_Clear(Config_Info &CI)
+{
+  CI.machine.Dump_Memory(CI.my_number);
+  Destroy_SSL_CTX(CI.ctx);
+}
+
+void Run_PocSetup(BLS &bls, Config_Info &CI)
+{
+  cout << "----------Begin of Setup----------" << endl;
+  vector<gfp> MacK(0);
+  Player P(CI.my_number, CI.SD, CI.tnthreads, CI.ctx, CI.csockets[CI.tnthreads], MacK, CI.verbose);
+  poc_Setup(bls, P);
+
+  cout << "secre key share: " << endl;
+  print_mclBnFr(bls.get_sk());
+
+  cout << "public key: " << endl;
+  print_mclBnG1(bls.vk);
+  cout << "----------End of Setup----------" << endl;
+}
+
+void Run_PocEphemKey(vector<Share> &ek, BLS bls, const string msg, Config_Info &CI)
+{
+  cout << "----------Begin of Ephemeral Key Generation----------" << endl;
+  vector<gfp> MacK(0);
+  Player P(CI.my_number, CI.SD, CI.tnthreads + 1, CI.ctx, CI.csockets[CI.tnthreads + 1], MacK, CI.verbose);
+
+//  mult_phase(0, P, CI.SD.fake_sacrifice, CI.OCD, CI.verbose);
+//  square_phase(0, P, CI.SD.fake_sacrifice, CI.OCD, CI.verbose);
+//  inputs_phase(0, P, CI.SD.fake_sacrifice, CI.OCD, CI.verbose);
+
+  G2_Affine_Coordinates ac;
+  poc_EnpherKey(ac, bls, msg, 0, P, CI);
+  ek.resize(4);
+  ek[0] = ac.x.real;
+  ek[1] = ac.x.imag;
+  ek[2] = ac.y.real;
+  ek[3] = ac.y.imag;
+  cout << "----------Begin of Ephemeral Key Generation----------" << endl;
+}
+
+void Run_PocGenProof(Config_Info &CI)
+{
+}
+
 void Init(int argc, char *argv[], Config_Info &CI)
 {
   if (argc != 2)
@@ -156,64 +403,9 @@ void Init(int argc, char *argv[], Config_Info &CI)
 //---------------------------//
 //---------------------------//
 
-class thread_info
-{
-public:
-  int thread_num;
-  const SystemData *SD;
-  offline_control_data *OCD;
-  SSL_CTX *ctx;
-  int me;
-  unsigned int no_online_threads;
-  vector<vector<int>> csockets;
-  vector<gfp> MacK;
-
-  int verbose;
-
-  Machine *machine; // Pointer to the machine
-};
-
-// We have 5 threads per online phase
-//   - Online
-//   - Sacrifice (and input tuple production)
-//   - Mult Triple Production
-//   - Square Pair Production
-//   - Bit Production
-vector<pthread_t> threads;
-
-Timer global_time;
-
-// Forward declarations to make code easier to read
-void *Main_Func(void *ptr);
-
-vector<sacrificed_data> SacrificeD;
-
-/* Global data structure to hold the OT stuff */
-//OT_Thread_Data OTD;
-
-/* Before calling this we assume various things have
- * been set up. In particular the following functions have
- * been called
- *
- *    Init_SSL_CTX
- *    gfp::init_field
- *    Share::init_share_data
- *    machine.SetUp_Memory
- *    machine.IO.init
- *    FHE data has been initialized if needed
- *
- * We also assume the machine.schedule has been initialised
- * with some stringstream tapes and a stringstream to a schedule file
- *
- * This function assumes that afterwards we sort out 
- * closing down SSL and Dump'ing memory if need be
- * for a future application
- *
- */
-
 void Run_Poc(BLS &bls, Config_Info &CI)
 {
-
+  /*
   CI.machine.SetUp_Threads(CI.no_online_threads);
   CI.OCD.resize(CI.no_online_threads, CI.SD.n, CI.my_number);
 
@@ -222,21 +414,21 @@ void Run_Poc(BLS &bls, Config_Info &CI)
   {
     SacrificeD[i].initialize(CI.SD.n);
   }
-
+*/
   unsigned int nthreads = 5 * CI.no_online_threads;
   unsigned int tnthreads = nthreads;
 
   /* Initialize the networking TCP sockets */
-  int ssocket;
-  vector<vector<vector<int>>> csockets(tnthreads + 1, vector<vector<int>>(CI.SD.n, vector<int>(3)));
-  Get_Connections(ssocket, csockets, CI.portnum, CI.my_number, CI.SD, CI.verbose);
-  printf("All connections now done\n");
+//  int ssocket;
+//  vector<vector<vector<int>>> csockets(tnthreads + 1, vector<vector<int>>(CI.SD.n, vector<int>(3)));
+//  Get_Connections(ssocket, csockets, CI.portnum, CI.my_number, CI.SD, CI.verbose);
+//  printf("All connections now done\n");
 
   global_time.start();
 
   vector<gfp> MacK(0);
 
-  Player P(CI.my_number, CI.SD, tnthreads, CI.ctx, csockets[tnthreads], MacK, CI.verbose);
+  Player P(CI.my_number, CI.SD, tnthreads, CI.ctx, CI.csockets[tnthreads], MacK, CI.verbose);
   poc_Setup(bls, P);
 
   //--------------------------//
@@ -256,7 +448,7 @@ void Run_Poc(BLS &bls, Config_Info &CI)
     tinfo[i].MacK = MacK;
     tinfo[i].me = CI.my_number;
     tinfo[i].no_online_threads = CI.no_online_threads;
-    tinfo[i].csockets = csockets[i];
+    tinfo[i].csockets = CI.csockets[i];
     tinfo[i].machine = &CI.machine;
     tinfo[i].verbose = CI.verbose;
     if (pthread_create(&threads[i], NULL, Main_Func, &tinfo[i]))
@@ -278,7 +470,7 @@ void Run_Poc(BLS &bls, Config_Info &CI)
     pthread_join(threads[i], NULL);
   }
 
-  Close_Connections(ssocket, csockets, CI.my_number);
+//  Close_Connections(ssocket, csockets, CI.my_number);
 
   global_time.stop();
   cout << "Total Time (with thread locking) = " << global_time.elapsed() << " seconds" << endl;

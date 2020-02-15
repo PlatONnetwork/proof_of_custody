@@ -12,6 +12,8 @@ All rights reserved
 #include "OnlineOp.h"
 #include "Group.h"
 
+#include "bls.h"
+
 extern vector<sacrificed_data> SacrificeD;
 
 void online_phase(int online_num, Player &P, offline_control_data &OCD,
@@ -87,10 +89,23 @@ void online_phase(int online_num, Player &P, offline_control_data &OCD,
 
   ///////////////////////
 
-    OnlineOp online_op(Proc, online_num, P, OCD, machine);
-    online_op.test_uhf();
-    online_op.test_legendre();
-/*
+  OnlineOp online_op(Proc, online_num, P, OCD, machine);
+  online_op.test_uhf();
+  online_op.test_legendre();
+  online_op.test_get_inputs();
+  BLS bls(Share::SD.M.nplayers(), Share::SD.threshold);
+//  bls.dstb_keygen(P);
+  bls.keygen();
+  cout << "secre key share: " << endl;
+  print_mclBnFr(bls.get_sk());
+
+  cout << "public key: " << endl;
+  print_mclBnG1(bls.vk);
+
+  G2_Affine_Coordinates ac;
+  bls.dstb_sign(ac, "123456", Proc, online_num, P, OCD, machine);
+
+  /*
     online_op.test_add();
     online_op.test_add_plain();
     online_op.test_mul_plain();

@@ -432,8 +432,8 @@ void OnlineOp::get_inputs(unsigned int party, Share &sa, gfp &inputs)
 
 void OnlineOp::get_inputs(unsigned int party, Complex &sa, Complex_Plain &inputs)
 {
-  get_inputs(party,sa.real,inputs.real);
-  get_inputs(party,sa.imag,inputs.imag);
+  get_inputs(party, sa.real, inputs.real);
+  get_inputs(party, sa.imag, inputs.imag);
 }
 
 // the following apis for testing
@@ -482,4 +482,19 @@ void OnlineOp::test_legendre()
 
   cout << "mpc leg value: " << res_s << endl;
   cout << "plain leg value: " << res << endl;
+}
+
+void OnlineOp::test_get_inputs()
+{
+  cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
+
+  gfp a, b;
+  a.assign(10);
+  b.assign(20);
+  Complex_Plain cp(a,b);
+  Complex cc;
+  get_inputs(1,cc,cp);
+
+  reveal_and_print({cc});
+  cout << "============================== END " << __FUNCTION__ << " ==============================" << endl;
 }

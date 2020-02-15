@@ -164,6 +164,7 @@ public:
 
     void test_uhf();
     void test_legendre();
+    void test_get_inputs();
 };
 
 #endif
