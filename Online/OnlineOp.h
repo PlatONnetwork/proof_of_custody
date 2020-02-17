@@ -11,6 +11,7 @@ All rights reserved
 #include "Online/Machine.h"
 #include "System/Player.h"
 #include "Processor/Processor.h"
+#include "Processor/Processor_IO.h"
 #include "LSSS/PRSS.h"
 
 extern vector<sacrificed_data> SacrificeD;

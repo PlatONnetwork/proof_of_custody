@@ -10,8 +10,7 @@ using namespace std;
 
 #include "Machine.h"
 
-void Machine::SetUp_Memory(unsigned int whoami, const string &memtype)
-{
+void Machine::SetUp_Memory(unsigned int whoami, const string& memtype) {
   char filename[2048];
 
   Mc.set_default(gfp(0));
@@ -19,27 +18,22 @@ void Machine::SetUp_Memory(unsigned int whoami, const string &memtype)
   Mr.set_default(Integer(0));
 
   // Initialize the global memory
-  if (memtype.compare("old") == 0)
-  {
+  if (memtype.compare("old") == 0) {
     sprintf(filename, "Data/Memory-P%d", whoami);
     ifstream inpf(filename, ios::in | ios::binary);
-    if (inpf.fail())
-    {
+    if (inpf.fail()) {
       throw file_error(filename);
     }
     // See below for ordering here
     inpf >> Mc >> Mr >> Ms;
     inpf.close();
-  }
-  else if (!(memtype.compare("empty") == 0))
-  {
+  } else if (!(memtype.compare("empty") == 0)) {
     cerr << "Invalid memory argument" << endl;
     exit(1);
   }
 }
 
-void Machine::Dump_Memory(unsigned int whoami)
-{
+void Machine::Dump_Memory(unsigned int whoami) {
   // Reduce memory size to speed up
   int max_size = 1 << 20;
   if (Mc.size() > max_size)
@@ -59,10 +53,8 @@ void Machine::Dump_Memory(unsigned int whoami)
   outf.close();
 }
 
-void Machine::Init_OTI(unsigned int nthreads)
-{
-  for (unsigned int i = 0; i < nthreads; i++)
-  {
+void Machine::Init_OTI(unsigned int nthreads) {
+  for (unsigned int i = 0; i < nthreads; i++) {
     pthread_mutex_init(&online_mutex[i], NULL);
     pthread_cond_init(&machine_ready[i], NULL);
     pthread_cond_init(&online_thread_ready[i], NULL);
@@ -75,8 +67,7 @@ void Machine::Init_OTI(unsigned int nthreads)
   }
 }
 
-void Machine::SetUp_Threads(unsigned int nthreads)
-{
+void Machine::SetUp_Threads(unsigned int nthreads) {
   // Set up the thread data
   OTI.resize(nthreads);
   online_mutex.resize(nthreads);
@@ -86,12 +77,9 @@ void Machine::SetUp_Threads(unsigned int nthreads)
   Init_OTI(nthreads);
 }
 
-void Machine::Synchronize()
-{
-  for (unsigned int i = 0; i < OTI.size(); i++)
-  {
-    while (!OTI[i].ready)
-    {
+void Machine::Synchronize() {
+  for (unsigned int i = 0; i < OTI.size(); i++) {
+    while (!OTI[i].ready) {
       fprintf(stderr, "Waiting for thread %d to be ready\n", i);
       pthread_cond_wait(&online_thread_ready[i], &online_mutex[i]);
     }
@@ -99,35 +87,28 @@ void Machine::Synchronize()
   }
 }
 
-void Machine::Signal_Ready(unsigned int num, bool flag)
-{
+void Machine::Signal_Ready(unsigned int num, bool flag) {
   pthread_mutex_lock(&online_mutex[num]);
   OTI[num].ready = flag;
-  if (flag)
-  {
+  if (flag) {
     pthread_cond_signal(&online_thread_ready[num]);
-  }
-  else
-  {
+  } else {
     OTI[num].prognum = -1;
     pthread_cond_signal(&machine_ready[num]);
   }
   pthread_mutex_unlock(&online_mutex[num]);
 }
 
-void Machine::Lock_Until_Ready(unsigned int num)
-{
+void Machine::Lock_Until_Ready(unsigned int num) {
   pthread_mutex_lock(&online_mutex[num]);
   if (!OTI[num].ready)
     pthread_cond_wait(&machine_ready[num], &online_mutex[num]);
   pthread_mutex_unlock(&online_mutex[num]);
 }
 
-int Machine::Pause_While_Nothing_To_Do(unsigned int num)
-{
+int Machine::Pause_While_Nothing_To_Do(unsigned int num) {
   pthread_mutex_lock(&online_mutex[num]);
-  if (OTI[num].prognum == -2)
-  {
+  if (OTI[num].prognum == -2) {
     pthread_cond_wait(&machine_ready[num], &online_mutex[num]);
   }
   int program = OTI[num].prognum;
@@ -136,48 +117,41 @@ int Machine::Pause_While_Nothing_To_Do(unsigned int num)
   return program;
 }
 
-void Machine::Signal_Finished_Tape(unsigned int num)
-{
+void Machine::Signal_Finished_Tape(unsigned int num) {
   pthread_mutex_lock(&online_mutex[num]);
   OTI[num].finished = true;
   pthread_cond_signal(&online_thread_ready[num]);
   pthread_mutex_unlock(&online_mutex[num]);
 }
 
-void Machine::Lock_Until_Finished_Tape(unsigned int num)
-{
+void Machine::Lock_Until_Finished_Tape(unsigned int num) {
   pthread_mutex_lock(&online_mutex[num]);
   if (!OTI[num].finished)
     pthread_cond_wait(&online_thread_ready[num], &online_mutex[num]);
   pthread_mutex_unlock(&online_mutex[num]);
 }
 
-void Machine::run()
-{
+void Machine::run() {
   // Initialise the timers
   timers.resize(N_TIMERS);
-  for (unsigned int i = 0; i < N_TIMERS; i++)
-  {
+  for (unsigned int i = 0; i < N_TIMERS; i++) {
     timers[i].start();
   }
 
   // First go through the schedule and execute what is there
   bool flag = true;
-  for (unsigned int i = 0; i < 1; i++)
-  {
+  for (unsigned int i = 0; i < 1; i++) {
     Lock_Until_Finished_Tape(i);
   }
 
   // Tell all online threads to stop
-  for (unsigned int i = 0; i < OTI.size(); i++)
-  {
+  for (unsigned int i = 0; i < OTI.size(); i++) {
     Signal_Ready(i, false);
   }
 
   cerr << "Waiting for all clients to finish" << endl;
   // Wait until all clients have signed out
-  for (unsigned int i = 0; i < OTI.size(); i++)
-  {
+  for (unsigned int i = 0; i < OTI.size(); i++) {
     pthread_mutex_lock(&online_mutex[i]);
     OTI[i].ready = true;
     pthread_cond_signal(&machine_ready[i]);
@@ -189,25 +163,22 @@ void Machine::run()
   }
 }
 
-void Machine::start_timer(unsigned int i)
-{
-  if (i >= N_TIMERS)
-  {
+void Machine::start_timer(unsigned int i) {
+  if (i >= N_TIMERS) {
     throw invalid_length();
   }
   timers[i].reset();
 }
 
-void Machine::stop_timer(unsigned int i)
-{
-  if (i >= N_TIMERS)
-  {
+void Machine::stop_timer(unsigned int i) {
+  if (i >= N_TIMERS) {
     throw invalid_length();
   }
   double time = timers[i].elapsed();
-  printf(BENCH_TEXT_BOLD BENCH_COLOR_GREEN BENCH_MAGIC_START
-         "{\"timer\":%u,\n"
-         "  \"time\":{\"seconds\":%lf,\"ms\":%.4lf}\n"
-         "}\n" BENCH_MAGIC_END BENCH_ATTR_RESET,
-         i, time, (time * 1000));
+  printf(
+      BENCH_TEXT_BOLD BENCH_COLOR_GREEN BENCH_MAGIC_START
+      "{\"timer\":%u,\n"
+      "  \"time\":{\"seconds\":%lf,\"ms\":%.4lf}\n"
+      "}\n" BENCH_MAGIC_END BENCH_ATTR_RESET,
+      i, time, (time * 1000));
 }

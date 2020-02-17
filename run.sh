@@ -10,8 +10,9 @@ cd ..
 
 ln -sf ./build/main.x main.x
 
-./main.x 2 >log2 2>&1 &
-./main.x 1 >log1 2>&1 &
+mkdir -p log
+./main.x 2 >log/log2 2>&1 &
+./main.x 1 >log/log1 2>&1 &
 ./main.x 0
 
 exit 0
