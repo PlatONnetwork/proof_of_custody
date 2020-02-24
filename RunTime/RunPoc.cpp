@@ -273,12 +273,8 @@ void Run_PocEphemKey(vector<Share>& ek, BLS bls, const string msg, Config_Info& 
   cout << "----------Begin of Ephemeral Key Generation----------" << endl;
   Player& P = *(tinfo[ThreadPlayer::TP_PocEphemKey].player);
 
-  //  mult_phase(0, P, CI.SD.fake_sacrifice, CI.OCD, CI.verbose);
-  //  square_phase(0, P, CI.SD.fake_sacrifice, CI.OCD, CI.verbose);
-  //  inputs_phase(0, P, CI.SD.fake_sacrifice, CI.OCD, CI.verbose);
-
   G2_Affine_Coordinates ac;
-  poc_EnpherKey(ac, bls, msg, 0, P, CI);
+  poc_EnphemKey(ac, bls, msg, 0, P, CI);
   ek.resize(4);
   ek[0] = ac.x.real;
   ek[1] = ac.x.imag;

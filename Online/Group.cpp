@@ -443,6 +443,7 @@ void G2Op::add_aff(G2_Affine_Coordinates &c,
 {
     Complex dx;
     Complex m, mm;
+
     sub(m, a.y, b.y);
     sub(dx, a.x, b.x);
 
@@ -739,6 +740,7 @@ void G2Op::G2_test_add_aff()
 
     get_inputs(1, ac[1].x, g2x);
     get_inputs(1, ac[1].y, g2y);
+    
     cout << "--------test add_affine--------" << endl;
     G2_Affine_Coordinates res(ac[0]);
     reveal_and_print(res);

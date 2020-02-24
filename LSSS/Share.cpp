@@ -324,6 +324,7 @@ void Share::add(const Share &S1, const Share &S2)
 
 void Share::sub(const Share &S1, const Share &S2)
 {
+
   if (S1.p != S2.p)
   {
     throw bad_value();

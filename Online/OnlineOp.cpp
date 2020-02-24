@@ -493,8 +493,8 @@ void OnlineOp::test_get_inputs()
   b.assign(20);
   Complex_Plain cp(a,b);
   Complex cc;
-  get_inputs(1,cc,cp);
-
+  get_inputs(0,cc,cp);
+  
   reveal_and_print({cc});
   cout << "============================== END " << __FUNCTION__ << " ==============================" << endl;
 }

@@ -43,9 +43,11 @@ void online_phase(int online_num, Player& P, offline_control_data& OCD, Machine&
   online_op.test_uhf();
   online_op.test_legendre();
   online_op.test_get_inputs();
+
+/*
   BLS bls(Share::SD.M.nplayers(), Share::SD.threshold);
-  //  bls.dstb_keygen(P);
-  bls.keygen();
+  bls.dstb_keygen(P);
+//  bls.keygen();
   cout << "secre key share: " << endl;
   print_mclBnFr(bls.get_sk());
 
@@ -53,7 +55,8 @@ void online_phase(int online_num, Player& P, offline_control_data& OCD, Machine&
   print_mclBnG1(bls.vk);
 
   G2_Affine_Coordinates ac;
-  //bls.dstb_sign(ac, "123456", Proc, online_num, P, OCD, machine);
+  bls.dstb_sign(ac, "123456", Proc, online_num, P, OCD, machine);
+*/
   ///////////////////////////////////////////////
 
   // MAC/Hash Check

@@ -5,7 +5,7 @@ void poc_Setup(BLS &bls, Player &P)
     bls.dstb_keygen(P);
 }
 
-void poc_EnpherKey(G2_Affine_Coordinates &ac, BLS &bls, const string &msg,
+void poc_EnphemKey(G2_Affine_Coordinates &ac, BLS &bls, const string &msg,
                    int online_num, Player &P, Config_Info &CI)
 {
     bls.dstb_sign(ac, msg, CI.Proc, online_num, P, CI.OCD, CI.machine);

@@ -37,7 +37,7 @@ void poc_Setup(BLS &bls, Player &P);
 Ephermeral key for UHF and legendre prf.
 It is essentially the distributed signing algorithms.
 */
-void poc_EnpherKey(G2_Affine_Coordinates &ac, BLS &bls, const string &msg,
+void poc_EnphemKey(G2_Affine_Coordinates &ac, BLS &bls, const string &msg,
                    int online_num, Player &P, Config_Info &CI);
 
 /*

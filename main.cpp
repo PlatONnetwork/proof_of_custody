@@ -13,7 +13,8 @@ int main(int argc, char* argv[]) {
 
   string nonce = "123456";
   vector<Share> ek(4);
-  //Run_PocEphemKey(ek, bls, nonce, CI);
+
+  Run_PocEphemKey(ek, bls, nonce, CI);
 
   Run_Online(CI);
 

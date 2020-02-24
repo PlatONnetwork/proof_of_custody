@@ -197,32 +197,20 @@ void BLS::dstb_sign(G2_Affine_Coordinates &out, const string msg,
                     offline_control_data &OCD, Machine &machine)
 {
     sign(msg);
-    vector<Complex_Plain> s;
-    mclBnG2_to_Complex_Plain(s, sigma);
-
     vector<G2_Affine_Coordinates> ac(P.nplayers());
+    vector<vector<Complex_Plain>> s(P.nplayers(), vector<Complex_Plain>(2));
+
+    mclBnG2_to_Complex_Plain(s[P.whoami()], sigma);
 
     G2Op g2op(Proc, online_num, P, OCD, machine);
-    cout<<"reach here 1 size:" << ac.size() << "\n";
     for (int i = 0; i < ac.size(); i++)
     {
-        if (i == P.whoami())
-        {
-            g2op.get_inputs(i, ac[i].x, s[0]);
-            g2op.get_inputs(i, ac[i].y, s[1]);
-        }
-        // ac[i].x.imag.set_player(P.whoami());
-        // ac[i].x.real.set_player(P.whoami());
-        // ac[i].y.imag.set_player(P.whoami());
-        // ac[i].y.real.set_player(P.whoami());
+        g2op.get_inputs(i, ac[i].x, s[i][0]);
+        g2op.get_inputs(i, ac[i].y, s[i][1]);
     }
-    cout<<"reach here 2\n";
-
     out = ac[0];
     for (int i = 1; i < ac.size(); i++)
     {
-        cout<<"reach here 3-" << i << " " << ac.size() << "\n";
         g2op.add_aff_inplace(out, ac[i]);
     }
-    cout<<"reach here 4\n";
 }
