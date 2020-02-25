@@ -57,7 +57,7 @@ void offline_Maurer_triples(Player &P, PRSS &prss, list<Share> &a,
   Share aa, bb;
   vector<vector<Share>> cc(amortize, vector<Share>(P.nplayers()));
   vector<stringstream> ss(P.nplayers()); 
-  for (int i= 0; i < sz_offline_batch / amortize; i++)
+  for (int i= 0; i < sz_offline_triples_batch / amortize; i++)
     {
       clear_vector_sstream(ss);
 
@@ -96,7 +96,7 @@ void offline_Maurer_squares(Player &P, PRSS &prss,
   vector<vector<Share>> bb(amortize, vector<Share>(P.nplayers()));
   vector<string> sstr(P.nplayers());
   vector<stringstream> ss(P.nplayers()); 
-  while (a.size() < sz_offline_batch * rep)
+  while (a.size() < sz_offline_squares_batch * rep)
     {
       clear_vector_sstream(ss);
 
@@ -135,7 +135,7 @@ void offline_Maurer_bits(Player &P, PRSS &prss, list<Share> &b,
   twoi.invert();
   vector<string> sstr(P.nplayers());
   vector<stringstream> ss(P.nplayers());
-  for (int i= 0; i < sz_offline_batch / amortize; i++)
+  for (int i= 0; i < sz_offline_bits_batch / amortize; i++)
     {
       /* Essentially run the square protocol to get amortize
        * number of sharing of a and sharing of b=a^2

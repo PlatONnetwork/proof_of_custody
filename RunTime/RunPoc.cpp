@@ -145,8 +145,8 @@ void Run_Init(int argc, char *argv[], Config_Info &CI)
   CI.OCD.minm = 0;
   CI.OCD.mins = 0;
   CI.OCD.minb = 0;
-  CI.OCD.maxm = 0;
-  CI.OCD.maxs = 0;
+  CI.OCD.maxm = 3000; //set for optimized performance
+  CI.OCD.maxs = 1000;
   CI.OCD.maxb = 0;
   CI.OCD.maxI = 0;
 

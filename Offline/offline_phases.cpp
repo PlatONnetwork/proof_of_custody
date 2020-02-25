@@ -226,7 +226,7 @@ void mult_phase(
 
     if (flag == 2)
     {
-//      sleep(1);
+      usleep(10000);
     }
     else
     {
@@ -286,7 +286,7 @@ void square_phase(
 
     if (flag == 2)
     {
-      sleep(1);
+      usleep(10000);
     }
     else
     {
@@ -330,7 +330,9 @@ void bit_phase(
   int flag;
   while (0 == 0)
   {
-    flag = check_exit(num_online, P, OCD, Bits);
+    //  flag = check_exit(num_online, P, OCD, Bits);
+
+    flag = 1; // not needed in this version.
 
     /* Needs to die gracefully if online is gone */
     if (flag == 1)
@@ -344,7 +346,7 @@ void bit_phase(
 
     if (flag == 2)
     {
-      sleep(1);
+      usleep(10000);
     }
     else
     {
@@ -395,7 +397,7 @@ void inputs_phase(
 
     if (exit != true && finish == 0 && minput_global == false)
     {
-      sleep(2);
+      usleep(10000);
     }
     else
     {

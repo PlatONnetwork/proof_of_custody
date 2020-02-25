@@ -740,7 +740,7 @@ void G2Op::G2_test_add_aff()
 
     get_inputs(1, ac[1].x, g2x);
     get_inputs(1, ac[1].y, g2y);
-    
+
     cout << "--------test add_affine--------" << endl;
     G2_Affine_Coordinates res(ac[0]);
     reveal_and_print(res);

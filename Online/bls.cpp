@@ -166,17 +166,6 @@ void BLS::dstb_keygen(Player &P)
             }
         }
     }
-    /*
-    for (int i = 0; i < P.nplayers(); i++)
-    {
-        cout << "print aux_tmp " << i << endl;
-        for (int k = 0; k < aux.size(); k++)
-        {
-            print_mclBnG1(aux_tmp[i][k]);
-        }
-        cout<< "==================\n";
-    }
-*/
 }
 
 void mclBnG2_to_Complex_Plain(vector<Complex_Plain> &cp, const bls_sigma &s)
@@ -196,7 +185,7 @@ void BLS::dstb_sign(G2_Affine_Coordinates &out, const string msg,
                     Processor &Proc, int online_num, Player &P,
                     offline_control_data &OCD, Machine &machine)
 {
-    Timer bls_sign_time;
+    Timer point_add_time;
 
     sign(msg);
 
@@ -211,17 +200,17 @@ void BLS::dstb_sign(G2_Affine_Coordinates &out, const string msg,
         g2op.get_inputs(i, ac[i].x, s[i][0]);
         g2op.get_inputs(i, ac[i].y, s[i][1]);
     }
-    bls_sign_time.start();
+    point_add_time.start();
 
     out = ac[0];
     for (int i = 1; i < ac.size(); i++)
     {
         g2op.add_aff_inplace(out, ac[i]);
     }
-    bls_sign_time.stop();
+    point_add_time.stop();
 
     cout << endl
-         << "bls sign time: " << bls_sign_time.elapsed() << " seconds" << endl;
+         << "point addition time (including part of the offline time): " << point_add_time.elapsed() << " seconds" << endl;
 
     cout << "used triple: " << g2op.UT.UsedTriples << endl;
     cout << "used square: " << g2op.UT.UsedSquares << endl;

@@ -5,7 +5,6 @@ int main(int argc, char *argv[])
   Config_Info CI;
   Run_Init(argc, argv, CI);
 
-  cout << "Begin of prog\n";
   BLS bls(Share::SD.M.nplayers(), Share::SD.threshold);
 
   Run_PocSetup(bls, CI);
@@ -32,6 +31,5 @@ int main(int argc, char *argv[])
 
   Run_Clear(CI);
 
-  cout << "End of prog\n";
   return 0;
 }

@@ -12,10 +12,12 @@ All rights reserved
 /* The minimum batch size for offline production per call 
  * to base routine. 
  */
-// #define sz_offline_batch 60000
-#define sz_offline_batch 1000
-//#define sz_offline_batch 1024
-#define sz_IO_batch 10000
+#define sz_offline_batch 60000
+#define sz_offline_triples_batch 3072
+#define sz_offline_squares_batch 1024
+#define sz_offline_bits_batch 3072
+
+#define sz_IO_batch 100
 //#define sz_IO_batch 100
 
 /* The max number of triples etc in the sacrifice production queue 
@@ -24,16 +26,17 @@ All rights reserved
  * good data away
  */
 //#define max_default 5000000
-#define max_default 5000
-#define max_triples_sacrifice  1000//max_default
-#define max_squares_sacrifice max_default
+#define max_default 3000
+#define max_triples_sacrifice  max_default
+#define max_squares_sacrifice 1024//max_default
 #define max_bits_sacrifice max_default
 // Following is per player 
 //#define max_IO_sacrifice 100000
-#define max_IO_sacrifice 1000
+#define max_IO_sacrifice 10//1000
 
 /* The amount of amortization in sacrifice and offline (when we do it) */
 #define amortize 512
+
 //#define amortize 32
 
 /* Number of openings between a OpenCheck call */
