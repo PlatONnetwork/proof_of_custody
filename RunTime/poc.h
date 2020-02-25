@@ -18,7 +18,7 @@ public:
     SystemData SD;
     Machine machine;
     offline_control_data OCD;
-    Processor Proc;
+//    Processor Proc;
     int ssocket;
     vector<vector<vector<int>>> csockets;
     unsigned int tnthreads;
@@ -51,6 +51,8 @@ Compute UHF and legendre prf.
 int poc_GenProof(const vector<Share> &keys, const vector<gfp> &msg,
                  int online_num, Player &P, Config_Info &CI);
 
+/*
 int poc_GenProof(const vector<Share> keys, const vector<gfp> msg,
                  Processor &Proc, int online_num, Player &P,
                  offline_control_data &OCD, Machine &machine);
+*/

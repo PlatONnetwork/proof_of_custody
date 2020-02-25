@@ -72,8 +72,9 @@ void Processor_IO::private_input(
 {
   gfp i_epsilon;
   int thread = Proc.get_thread_num();
-  Wait_For_Preproc(DATA_INPUT_MASK, 1, thread, OCD, player);
 
+  Wait_For_Preproc(DATA_INPUT_MASK, 1, thread, OCD, player);
+  
   if (player == P.whoami())
   {
     i_epsilon = inputs;

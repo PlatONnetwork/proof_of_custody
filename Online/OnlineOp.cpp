@@ -15,7 +15,7 @@ All rights reserved
 void OnlineOp::getTuples(vector<Share> &sp, int opcode)
 {
   int thread = Proc.get_thread_num();
-  Wait_For_Preproc(opcode, 100, thread, OCD); // temp set 100
+  Wait_For_Preproc(opcode, 1, thread, OCD);
   for (int i = 0; i < sp.size(); i++)
   {
     sp[i].set_player(P.whoami());

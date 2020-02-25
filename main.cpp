@@ -1,6 +1,7 @@
 #include "RunTime/RunPoc.h"
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
   Config_Info CI;
   Run_Init(argc, argv, CI);
 
@@ -14,9 +15,18 @@ int main(int argc, char* argv[]) {
   string nonce = "123456";
   vector<Share> ek(4);
 
+  vector<gfp> msg(CHUNK_NUM);
+  for (int i = 0; i < msg.size(); i++)
+  {
+    msg[i].assign(i + 9);
+  }
+
   Run_PocEphemKey(ek, bls, nonce, CI);
 
-  Run_Online(CI);
+  int bit = Run_PocGenProof({ek[0], ek[1]}, msg, CI);
+  //  Run_Online(CI);
+  cout << "custody bit: " << bit << endl
+       << endl;
 
   Wait_ForExit(CI);
 

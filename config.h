@@ -13,7 +13,7 @@ All rights reserved
  * to base routine. 
  */
 // #define sz_offline_batch 60000
-#define sz_offline_batch 6000
+#define sz_offline_batch 1000
 //#define sz_offline_batch 1024
 #define sz_IO_batch 10000
 //#define sz_IO_batch 100
@@ -25,7 +25,7 @@ All rights reserved
  */
 //#define max_default 5000000
 #define max_default 5000
-#define max_triples_sacrifice max_default
+#define max_triples_sacrifice  1000//max_default
 #define max_squares_sacrifice max_default
 #define max_bits_sacrifice max_default
 // Following is per player 

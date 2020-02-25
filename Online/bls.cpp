@@ -196,7 +196,10 @@ void BLS::dstb_sign(G2_Affine_Coordinates &out, const string msg,
                     Processor &Proc, int online_num, Player &P,
                     offline_control_data &OCD, Machine &machine)
 {
+    Timer bls_sign_time;
+
     sign(msg);
+
     vector<G2_Affine_Coordinates> ac(P.nplayers());
     vector<vector<Complex_Plain>> s(P.nplayers(), vector<Complex_Plain>(2));
 
@@ -208,9 +211,20 @@ void BLS::dstb_sign(G2_Affine_Coordinates &out, const string msg,
         g2op.get_inputs(i, ac[i].x, s[i][0]);
         g2op.get_inputs(i, ac[i].y, s[i][1]);
     }
+    bls_sign_time.start();
+
     out = ac[0];
     for (int i = 1; i < ac.size(); i++)
     {
         g2op.add_aff_inplace(out, ac[i]);
     }
+    bls_sign_time.stop();
+
+    cout << endl
+         << "bls sign time: " << bls_sign_time.elapsed() << " seconds" << endl;
+
+    cout << "used triple: " << g2op.UT.UsedTriples << endl;
+    cout << "used square: " << g2op.UT.UsedSquares << endl;
+    cout << "used bit: " << g2op.UT.UsedBit << endl;
+    cout << "used input mask: " << g2op.UT.UsedInputMask << endl;
 }

@@ -16,7 +16,7 @@ Processor::Processor(int thread_num, unsigned int nplayers,
 
 Processor::~Processor()
 {
-  fprintf(stderr, "Sent %d elements in %d rounds\n", sent, rounds);
+//  fprintf(stderr, "Sent %d elements in %d rounds\n", sent, rounds);
 #ifdef VERBOSE
   cout << "dabitgen statistics:" << endl;
   cout << "Produced " << daBitGen->total << " dabits" << endl;
