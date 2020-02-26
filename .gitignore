@@ -9,6 +9,9 @@ key/
 out/
 log/
 
+Cert-Store/
+Data/
+
 *.o
 *.obj
 *.idea
