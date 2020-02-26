@@ -70,12 +70,12 @@ public:
     Player &P;
     offline_control_data &OCD;
     Machine &machine;
-    PRSS prss;
+//    PRSS prss;
     explicit OnlineOp(Processor &Proc_, int online_num_, Player &P_,
                       offline_control_data &OCD_, Machine &machine_)
         : Proc(Proc_), online_num(online_num_), P(P_), OCD(OCD_), machine(machine_)
     {
-        prss = PRSS(P);
+//        prss = PRSS(P);
     }
 
     void getTuples(vector<Share> &sp, int opcode);
