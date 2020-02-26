@@ -310,7 +310,7 @@ void init_secret_sharing()
   unsigned int v = 0, t, bd;
   while (v < 1 || v > 4)
   {
-    cout << "Enter a number (1-4).." << endl;
+    cout << "Enter2 a number (1-4).." << endl;
     cin >> v;
   }
 
@@ -418,9 +418,9 @@ int main(int argc, const char *argv[])
     cout << "\t2) Secret Sharing\n";
     cout << endl;
 
-    while (ans < 1 || ans > 4)
+    while (ans < 1 || ans > 2)
     {
-      cout << "Enter a number (1-4).." << endl;
+      cout << "Enter a number (1-2).." << endl;
       cin >> ans;
     }
   }

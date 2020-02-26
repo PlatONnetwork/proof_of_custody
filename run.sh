@@ -1,18 +1,24 @@
 #!/bin/bash
+# set -x
 
-killall main.x
+curdir=$(pwd)
+chmod +x *.sh
 
-mkdir -p build
-cd build
-cmake ..
-make -j8
-cd ..
+if [ $# -lt 1 ]; then
+    echo "$0 <n>"
+    exit 1
+fi
+n=$1
 
-ln -sf ./build/main.x main.x
+# compile
+./compile.sh
 
+# test
 mkdir -p log
-./main.x 2 >log/log2 2>&1 &
-./main.x 1 >log/log1 2>&1 &
-./main.x 0
+for ((i = 1; i < $n; i++)); do
+    ./main.x $i >log/log$i.txt 2>&1 &
+done
+./main.x 0 >log/log0.txt 2>&1
+#./main.x 0
 
 exit 0
