@@ -188,7 +188,7 @@ void BLS::dstb_sign(G2_Affine_Coordinates &out, const string msg,
     Timer point_add_time;
 
     sign(msg);
-
+    
     vector<G2_Affine_Coordinates> ac(P.nplayers());
     vector<vector<Complex_Plain>> s(P.nplayers(), vector<Complex_Plain>(2));
 

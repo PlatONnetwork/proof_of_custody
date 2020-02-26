@@ -88,3 +88,13 @@ void mclBnG2_to_gfp(vector<gfp> &out, const mclBnG2 &a)
         to_gfp(out[i], bn);
     }
 }
+
+void print_mclBnG2(const mclBnG2 &a)
+{
+    vector<string> out;
+    mclBnG2_to_str(out,a);
+    for(int i = 0; i < out.size(); i++)
+    {
+        cout<<out[i]<<endl;
+    }
+}

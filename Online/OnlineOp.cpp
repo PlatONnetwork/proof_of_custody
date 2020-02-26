@@ -174,7 +174,17 @@ void OnlineOp::inv(Share &ia, const Share &a)
 {
   Share rshare;
   //get random share r
-  rshare = prss.next_share(P);
+  if (Share::SD.M.nplayers() <= 7)
+  {
+    rshare = prss.next_share(P);
+  }
+  else
+  {
+    vector<Share>tmp(2);
+    getTuples(tmp,SQUARE);
+    rshare = tmp[0];
+  }
+  
 
   Share c;
   //get share of r*a;

@@ -26,6 +26,7 @@ void mclFr_to_G1(mclBnG1 &out, const mclBnFr &in);
 void print_mclBnFr(const mclBnFr &a);
 
 void print_mclBnG1(const mclBnG1 &a);
+void print_mclBnG2(const mclBnG2 &a);
 
 void mclBnFr_to_str(string &str, const mclBnFr &a);
 void str_to_mclBnFr(mclBnFr &out, const string &str);
