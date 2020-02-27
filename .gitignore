@@ -12,6 +12,9 @@ log/
 Cert-Store/
 Data/
 
+main.x
+Setup.x
+
 *.o
 *.obj
 *.idea
