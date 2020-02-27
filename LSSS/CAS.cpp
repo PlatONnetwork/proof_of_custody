@@ -409,10 +409,10 @@ void CAS::assign(unsigned int nn, unsigned int t)
   spec_as_unqualified= true;
 
   unsigned int ncomb= Combinations(n, t);
+  printf("\t%d C %d = %d\n", n, t, ncomb);
   if (ncomb > 50)
     {
       printf("\nAm not going to compute the CAS as number of combinations is too big\n");
-      printf("\t%d C %d = %d\n", n, t, ncomb);
       printf("This will mean PRSS calls are replaced by a protocol\n\n");
       return;
     }

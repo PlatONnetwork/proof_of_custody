@@ -23,32 +23,22 @@ class Processor;
 #include <deque>
 using namespace std;
 
-class Processor_IO
-{
+class Processor_IO {
   vector<Share> rshares;
 
-public:
-  Processor_IO(){}
-  Processor_IO(unsigned int nplayers)
-      : rshares(nplayers)
-  {
-  }
+ public:
+  Processor_IO() {}
+  Processor_IO(unsigned int nplayers) : rshares(nplayers) {}
 
   // Get a private input values from a player on a given channel
-  void private_input(unsigned int player, int target, unsigned int channel,
-                     Processor &Proc, Player &P, Machine &machine, offline_control_data &OCD);
-  // Get a private input values from a player on a given channel
-  void private_input(unsigned int player, Share &sa, unsigned int channel,
-                     Processor &Proc, Player &P, Machine &machine,
-                     offline_control_data &OCD, gfp &inputs);
-  // Get a private input values from a player on a given channel
-  void private_input(unsigned int player, Share &sa, unsigned int channel,
-                     Processor &Proc, Player &P, Machine &machine, offline_control_data &OCD, vector<gfp> &inputs);
+  void private_input(
+    unsigned int player, Share& sa, unsigned int channel, Processor& Proc, Player& P,
+    Machine& machine, offline_control_data& OCD, gfp& inputs);
 
   // Output a private value to a player on a channel
-  void private_output(unsigned int player, int source, unsigned int channel,
-                      Processor &Proc, Player &P, Machine &machine,
-                      offline_control_data &OCD);
+  void private_output(
+    unsigned int player, int source, unsigned int channel, Processor& Proc, Player& P,
+    Machine& machine, offline_control_data& OCD);
 };
 
 #endif

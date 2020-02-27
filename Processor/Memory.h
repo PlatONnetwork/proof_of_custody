@@ -16,43 +16,37 @@ All rights reserved
 using namespace std;
 
 // Forward declaration as apparently this is needed for friends in templates
-template<class T>
+template <class T>
 class Memory;
-template<class T>
-ostream &operator<<(ostream &s, const Memory<T> &M);
-template<class T>
-istream &operator>>(istream &s, Memory<T> &M);
+template <class T>
+ostream& operator<<(ostream& s, const Memory<T>& M);
+template <class T>
+istream& operator>>(istream& s, Memory<T>& M);
 
-template<class T>
-class Memory
-{
+template <class T>
+class Memory {
   vector<T> M;
   T def_value; // A default value of type T for copying
 
-public:
-  void set_default(T d)
-  {
-    def_value= d;
+ public:
+  void set_default(T d) {
+    def_value = d;
   }
-  void resize(int sz)
-  {
+  void resize(int sz) {
     M.resize(sz, def_value);
   }
 
-  int size()
-  {
+  int size() {
     return M.size();
   }
 
-  const T &read(int i) const
-  {
+  const T& read(int i) const {
     return M[i];
   }
 
-  void write(unsigned int i, const T &x, int PC= -1)
-  {
-    M[i]= x;
-    (void) PC;
+  void write(unsigned int i, const T& x, int PC = -1) {
+    M[i] = x;
+    (void)PC;
   }
 
   /* Clears the memory */
@@ -60,8 +54,8 @@ public:
 
   void minimum_size(int sz, string threadname);
 
-  friend ostream &operator<<<>(ostream &s, const Memory<T> &M);
-  friend istream &operator>><>(istream &s, Memory<T> &M);
+  friend ostream& operator<<<>(ostream& s, const Memory<T>& M);
+  friend istream& operator>><>(istream& s, Memory<T>& M);
 };
 
 /* This function loads a global memory from disk and
@@ -73,7 +67,7 @@ public:
  *    n val   <- values
  *    -1 -1   <- End of values
  */
-template<class T>
-void Load_Memory(Memory<T> &M, ifstream &inpf);
+template <class T>
+void Load_Memory(Memory<T>& M, ifstream& inpf);
 
 #endif

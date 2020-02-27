@@ -40,13 +40,13 @@ string number_to_string(int num) {
   return ss;
 }
 
-void send(int socket, uint8_t* msg, int len) {
+static void send(int socket, uint8_t* msg, int len) {
   if (send(socket, msg, len, 0) != len) {
     throw Networking_error("Send error - 1 ");
   }
 }
 
-void receive(int socket, uint8_t* msg, int len) {
+static void receive(int socket, uint8_t* msg, int len) {
   int i = 0, j;
   while (len - i > 0) {
     j = recv(socket, msg + i, len - i, 0);
@@ -148,9 +148,9 @@ int OpenConnection(const string& hostname, int port) {
       break;
     } else {
       printf(
-          "Getaddrinfo on %s  has returned '%s' for %s trying again in a "
-          "second ...\n",
-          my_name, gai_strerror(erp), hostname.c_str());
+        "Getaddrinfo on %s  has returned '%s' for %s trying again in a "
+        "second ...\n",
+        my_name, gai_strerror(erp), hostname.c_str());
       if (ai)
         freeaddrinfo(ai);
       sleep(1);
@@ -191,8 +191,8 @@ int OpenConnection(const string& hostname, int port) {
  * The server portnum for each player is in the vector portnum
  */
 void Get_Connections(
-    int& ssocket, vector<vector<vector<int>>>& csocket, const vector<unsigned int>& portnum,
-    unsigned int me, const SystemData& SD, int verbose) {
+  int& ssocket, vector<vector<vector<int>>>& csocket, const vector<unsigned int>& portnum,
+  unsigned int me, const SystemData& SD, int verbose) {
   // create server socket
   unsigned int nthreads = csocket.size();
   if (verbose > 0) {
@@ -213,12 +213,12 @@ void Get_Connections(
         for (unsigned int j = 0; j < nthreads; j++) {
           for (unsigned int k = 0; k < csocket[0][0].size(); k++) {
             int client =
-                accept(ssocket, (struct sockaddr*)&addr, &len); /* accept connection as usual */
+              accept(ssocket, (struct sockaddr*)&addr, &len); /* accept connection as usual */
             if (client == -1) {
               string err = "Unable to accept connections : Error code " + number_to_string(errno);
               throw Networking_error(err);
             }
-            if (verbose > 0) {
+            if (verbose > 1) {
               printf("S: Connection: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
             }
 
@@ -232,7 +232,7 @@ void Get_Connections(
             receive(client, buff, 4);
             c = BYTES_TO_INT(buff);
             csocket[t][p][c] = client;
-            if (verbose > 0) {
+            if (verbose > 1) {
               printf("S: Player %d connected to %d on connection %d for thread %d\n", me, p, c, t);
             }
           }
@@ -240,14 +240,14 @@ void Get_Connections(
       } else { // Now client side stuff
         for (unsigned int j = 0; j < nthreads; j++) {
           for (unsigned int k = 0; k < csocket[0][0].size(); k++) {
-            if (verbose > 0) {
+            if (verbose > 1) {
               printf(
-                  "C: Player %d connecting to player %d on connection %d at address %s for "
-                  "thread %d on port %d\n",
-                  me, i, k, SD.IP[i].c_str(), j, portnum[i]);
+                "C: Player %d connecting to player %d on connection %d at address %s for "
+                "thread %d on port %d\n",
+                me, i, k, SD.IP[i].c_str(), j, portnum[i]);
             }
             csocket[j][i][k] = OpenConnection(SD.IP[i], portnum[i]);
-            if (verbose > 0) {
+            if (verbose > 1) {
               printf("C: Player %d connected to %d on connection %d for thread %d\n", me, i, k, j);
             }
             // Send my number, my thread number and my connection

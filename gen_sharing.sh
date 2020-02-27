@@ -8,6 +8,7 @@ if {$argc < 1} {
 }
 
 set t [lindex $argv 0]
+set timeout 60
 
 spawn ./Setup.x
 expect "Enter a number"

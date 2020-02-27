@@ -23,8 +23,8 @@ int OpenConnection(const string& hostname, int port);
  * The server portnum for each player is in the vector portnum
  */
 void Get_Connections(
-    int& ssocket, vector<vector<vector<int>>>& csocket, const vector<unsigned int>& portnum,
-    unsigned int me, const SystemData& SD, int verbose);
+  int& ssocket, vector<vector<vector<int>>>& csocket, const vector<unsigned int>& portnum,
+  unsigned int me, const SystemData& SD, int verbose);
 
 void Close_Connections(int ssocket, vector<vector<vector<int>>>& csocket, unsigned int me);
 

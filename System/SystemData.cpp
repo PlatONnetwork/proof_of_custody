@@ -10,12 +10,10 @@ All rights reserved
 #include <fstream>
 
 #include <iostream>
-SystemData::SystemData(const string &NetworkDataFileName)
-{
+SystemData::SystemData(const string& NetworkDataFileName) {
   unsigned int i, j;
   ifstream inp(NetworkDataFileName.c_str());
-  if (inp.fail())
-  {
+  if (inp.fail()) {
     throw file_error(NetworkDataFileName.c_str());
   }
 
@@ -30,8 +28,7 @@ SystemData::SystemData(const string &NetworkDataFileName)
   IP_Numbers.resize(numplayers);
   PlayerCertFiles.resize(numplayers);
   PlayerNames.resize(numplayers);
-  for (i = 0; i < numplayers; i++)
-  {
+  for (i = 0; i < numplayers; i++) {
     inp >> j >> IP_Numbers[i] >> PlayerCertFiles[i] >> PlayerNames[i];
     cout << j << endl;
     cout << IP_Numbers[i] << endl;
@@ -45,19 +42,16 @@ SystemData::SystemData(const string &NetworkDataFileName)
   init(numplayers, RootCertName, IP_Numbers, PlayerCertFiles, PlayerNames, fake_off, fake_sac);
 }
 
-void SystemData::init(unsigned int numplayers, const string &RootCertName,
-                      const vector<string> &IP_Numbers,
-                      const vector<string> &PlayerCertFiles,
-                      const vector<string> &PlayerNames,
-                      int fake_off, int fake_sac)
-{
+void SystemData::init(
+  unsigned int numplayers, const string& RootCertName, const vector<string>& IP_Numbers,
+  const vector<string>& PlayerCertFiles, const vector<string>& PlayerNames, int fake_off,
+  int fake_sac) {
   n = numplayers;
   RootCRT = RootCertName;
   IP.resize(n);
   PlayerCRT.resize(n);
   PlayerCN.resize(n);
-  if (n != IP_Numbers.size() || n != PlayerCertFiles.size() || n != PlayerNames.size())
-  {
+  if (n != IP_Numbers.size() || n != PlayerCertFiles.size() || n != PlayerNames.size()) {
     throw data_mismatch();
   }
   IP = IP_Numbers;

@@ -13,73 +13,64 @@ All rights reserved
 
 #include <fstream>
 
-template<class T>
-void Memory<T>::minimum_size(int sz, string threadname)
-{
-  if (sz > size())
-    {
-      fprintf(stderr, "%s needs more %s memory, resizing to %d\n",
-              threadname.c_str(), T::type_string().c_str(), sz);
-      resize(sz);
-    }
+template <class T>
+void Memory<T>::minimum_size(int sz, string threadname) {
+  if (sz > size()) {
+    fprintf(
+      stderr, "%s needs more %s memory, resizing to %d\n", threadname.c_str(),
+      T::type_string().c_str(), sz);
+    resize(sz);
+  }
 }
 
-template<class T>
-ostream &operator<<(ostream &s, const Memory<T> &M)
-{
+template <class T>
+ostream& operator<<(ostream& s, const Memory<T>& M) {
   s << M.M.size() << endl;
 
   // printf("Memory %s : size = %d\n",T::type_string().c_str(),M.M.size());
 
 #ifdef DEBUG
-  for (unsigned int i= 0; i < M.M.size(); i++)
-    {
-      M.M[i].output(s, true);
-      s << endl;
-    }
+  for (unsigned int i = 0; i < M.M.size(); i++) {
+    M.M[i].output(s, true);
+    s << endl;
+  }
   s << endl;
 
 #else
-  for (unsigned int i= 0; i < M.M.size(); i++)
-    {
-      M.M[i].output(s, false);
-      // cout << i << " : "; M.M[i].output(cout,true); cout << endl;
-    }
+  for (unsigned int i = 0; i < M.M.size(); i++) {
+    M.M[i].output(s, false);
+    // cout << i << " : "; M.M[i].output(cout,true); cout << endl;
+  }
 
 #endif
 
   return s;
 }
 
-template<class T>
-istream &operator>>(istream &s, Memory<T> &M)
-{
+template <class T>
+istream& operator>>(istream& s, Memory<T>& M) {
   int len;
 
   s >> len;
   M.resize(len);
   s.seekg(1, istream::cur);
 
-  for (unsigned int i= 0; i < M.M.size(); i++)
-    {
-      M.M[i].input(s, false);
-    }
+  for (unsigned int i = 0; i < M.M.size(); i++) {
+    M.M[i].input(s, false);
+  }
 
   return s;
 }
 
-template<class T>
-void Memory<T>::clear_memory()
-{
-  for (unsigned int i= 0; i < M.size(); i++)
-    {
-      M[i].assign_zero();
-    }
+template <class T>
+void Memory<T>::clear_memory() {
+  for (unsigned int i = 0; i < M.size(); i++) {
+    M[i].assign_zero();
+  }
 }
 
-template<class T>
-void Load_Memory(Memory<T> &M, ifstream &inpf)
-{
+template <class T>
+void Load_Memory(Memory<T>& M, ifstream& inpf) {
   int a;
   T val;
 
@@ -91,12 +82,11 @@ void Load_Memory(Memory<T> &M, ifstream &inpf)
   // Read clear memory
   inpf >> a;
   val.input(inpf, true);
-  while (a != -1)
-    {
-      M.write(a, val);
-      inpf >> a;
-      val.input(inpf, true);
-    }
+  while (a != -1) {
+    M.write(a, val);
+    inpf >> a;
+    val.input(inpf, true);
+  }
 }
 
 template class Memory<gfp>;
@@ -104,15 +94,15 @@ template class Memory<Share>;
 template class Memory<Integer>;
 //template class Memory<aBitVector>;
 
-template istream &operator>>(istream &s, Memory<gfp> &M);
-template istream &operator>>(istream &s, Memory<Share> &M);
-template istream &operator>>(istream &s, Memory<Integer> &M);
+template istream& operator>>(istream& s, Memory<gfp>& M);
+template istream& operator>>(istream& s, Memory<Share>& M);
+template istream& operator>>(istream& s, Memory<Integer>& M);
 
-template ostream &operator<<(ostream &s, const Memory<gfp> &M);
-template ostream &operator<<(ostream &s, const Memory<Share> &M);
-template ostream &operator<<(ostream &s, const Memory<Integer> &M);
+template ostream& operator<<(ostream& s, const Memory<gfp>& M);
+template ostream& operator<<(ostream& s, const Memory<Share>& M);
+template ostream& operator<<(ostream& s, const Memory<Integer>& M);
 
-template void Load_Memory(Memory<gfp> &M, ifstream &inpf);
-template void Load_Memory(Memory<Share> &M, ifstream &inpf);
-template void Load_Memory(Memory<Integer> &M, ifstream &inpf);
+template void Load_Memory(Memory<gfp>& M, ifstream& inpf);
+template void Load_Memory(Memory<Share>& M, ifstream& inpf);
+template void Load_Memory(Memory<Integer>& M, ifstream& inpf);
 //template void Load_Memory(Memory<aBitVector> &M, ifstream &inpf);

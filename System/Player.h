@@ -16,8 +16,7 @@ All rights reserved
 
 #include "SSLUtil.h"
 
-class Player
-{
+class Player {
   unsigned int me; // My player number
 
   // We have an array of ssl[nplayer][3] connections
@@ -29,7 +28,7 @@ class Player
   //   - Note if you increase the number of connections
   //     you also need to increase the second dimension
   //     in csockets
-  vector<vector<SSL *>> ssl;
+  vector<vector<SSL*>> ssl;
 
   vector<gfp> mac_keys;
 
@@ -37,7 +36,7 @@ class Player
   // correct, when we need/want to do this
   vector<SHA256_CTX> sha256;
 
-public:
+ public:
   // network data in bytes
   mutable long data_sent;
   mutable long data_received;
@@ -47,7 +46,7 @@ public:
   mutable long br_messages_sent;
 
   PRNG G; // Each player has a local PRNG
-          // Avoids needing to set one up all the time
+    // Avoids needing to set one up all the time
 
   // We have a set of timers here to use for debug purposes
   // when needed.
@@ -56,36 +55,32 @@ public:
   // Thread specifies which thread this instance is related to
   Player() {}
   Player(
-      int mynumber, const SystemData &SD, int thread, SSL_CTX *ctx, vector<vector<int>> &csockets,
-      const vector<gfp> &MacK, int verbose);
+    int mynumber, const SystemData& SD, int thread, SSL_CTX* ctx, vector<vector<int>>& csockets,
+    const vector<gfp>& MacK, int verbose);
 
   ~Player();
 
   //Init player
   void Init(
-      int mynumber, const SystemData &SD, int thread, SSL_CTX *ctx, vector<vector<int>> &csockets,
-      int verbose);
+    int mynumber, const SystemData& SD, int thread, SSL_CTX* ctx, vector<vector<int>>& csockets,
+    int verbose);
 
   // Send and receive strings
-  void send_all(const string &o, int connection = 0, bool verbose = false) const;
-  void send_to_player(int player, const string &o, int connection = 0) const;
-  void receive_from_player(int i, string &o, int connection = 0, bool verbose = false) const;
+  void send_all(const string& o, int connection = 0, bool verbose = false) const;
+  void send_to_player(int player, const string& o, int connection = 0) const;
+  void receive_from_player(int i, string& o, int connection = 0, bool verbose = false) const;
 
-  unsigned int whoami() const
-  {
+  unsigned int whoami() const {
     return me;
   }
-  unsigned int nplayers() const
-  {
+  unsigned int nplayers() const {
     return ssl.size();
   }
 
-  gfp get_mac_key(int i) const
-  {
+  gfp get_mac_key(int i) const {
     return mac_keys[i];
   }
-  const vector<gfp> &get_mac_keys() const
-  {
+  const vector<gfp>& get_mac_keys() const {
     return mac_keys;
   }
 
@@ -93,7 +88,7 @@ public:
    *  - Assumes o[me] contains the thing broadcast by me
    *  - Check says whether we do a hash check or not
    */
-  void Broadcast_Receive(vector<string> &o, bool check = false, int connection = 0);
+  void Broadcast_Receive(vector<string>& o, bool check = false, int connection = 0);
 
   /* Runs the broadcast check for any checked broadcast */
   void Check_Broadcast(int connection = 0);
@@ -101,7 +96,7 @@ public:
   /* This sends o[i] to player i for all i,
    * then receives back o[i] from player i
    */
-  void Send_Distinct_And_Receive(vector<string> &o, int connection = 0) const;
+  void Send_Distinct_And_Receive(vector<string>& o, int connection = 0) const;
 
   void print_network_data();
 };

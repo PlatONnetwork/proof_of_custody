@@ -45,6 +45,7 @@ public:
   PRSS(Player &P);
 
   Share next_share(Player &P);
+  size_t asets_size(){return Asets.size();}
 };
 
 /* Some helper functions, useful elsewhere */
