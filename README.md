@@ -72,3 +72,6 @@ Special thanks to Dankrad Feist for introducing proof of custody and deep discus
 Thanks to Nigel Smart for discussions of PRSS implementation in SCALE-MAMBA.
 
 Thanks to Yu Yu for discussions of universal hash function and the security of Legendre PRF.
+
+## Contact
+xiang.xie@platon.network
