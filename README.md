@@ -1,10 +1,23 @@
 [TOC]
 
+## Introduction
+This project implements the proof of custody algorithm in Ethereum 2.0 with secure multi-party computation.
+
+[Custody game](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/phase1/custody-game.md) is a mechnism will be adpoted in Ethereum 2.0 (Phase 1) to solve the data avaliablity problem. It is designed to be mpc-friendly, because the mpc implmentation will avoid single point of failure, reduce the staking cost and enable the possibility of trustless validator pools, et al.
+
+This project aims to estimate the feasiblity and performance of the mpc implementation of proof of custody.
+The implementation is built on and highly customized from [SCALE-MAMBA](https://github.com/KULeuven-COSIC/SCALE-MAMBA) with optimizations specific to proof of custody.
+
+**The project is officially granted by Ethereum Foundation.**
+
 ## Dependencies
-Besides the required lib for scale mamba, you also need to install the [mcl](https://github.com/herumi/mcl) library.
+- openssl
+- gmp
+- mpir
+- mcl
+- yasm
 
-
-Run the following script to install all deps.
+Run the following script to install all the dependencies.
 
 ```bash
 sudo ./install_deps.sh
@@ -12,12 +25,15 @@ sudo ./install_deps.sh
 
 ## Compile
 
+Run the following command to compile,
+
 ```bash
 ./compile.sh
 ```
 
 ## Init
 
+Run the following command to initiate the system.
 ```bash
 ./init.sh n t
 ```
@@ -29,18 +45,19 @@ sudo ./install_deps.sh
 
 ## Run the demo
 
-You should `init` first, and then
+You could run the demo in localhost, with the following command. 
+Note: `init`  should be run first.
 
 ```bash
 ./run.sh n
 ```
-- n : the number of parties
+- n : the number of parties, should be the same as the one in `init`.
 
 ## Progresses
 
 ### Stage I
 
-1. Seperate Scale-Mamba (100%)
+1. Remove the compiler part of  SCALE-MAMBA (100%)
 2. DKG of BLS (100%)
 3. Distributed sign of BLS (100%)
 4. Universal hash function (UHF) (100%)
@@ -48,3 +65,10 @@ You should `init` first, and then
 
 ## Performance
 1. the total time for 3-1 case is less than 0.5s in LAN.
+
+## Acknowledgements
+Special thanks to Dankrad Feist for introducing proof of custody and deep discussions of the technique details. 
+
+Thanks to Nigel Smart for the discussions of PRSS implementation in SCALE-MAMBA.
+
+Thanks to Yu Yu for the discussions of the  universal hash function and the security of Legendre PRF.
