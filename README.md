@@ -25,7 +25,7 @@ sudo ./install_deps.sh
 
 ## Compile
 
-Run the following command to compile,
+Run the following command to compile.
 
 ```bash
 ./compile.sh
@@ -69,6 +69,6 @@ Note: `init`  should be run first.
 ## Acknowledgements
 Special thanks to Dankrad Feist for introducing proof of custody and deep discussions of the technique details. 
 
-Thanks to Nigel Smart for the discussions of PRSS implementation in SCALE-MAMBA.
+Thanks to Nigel Smart for discussions of PRSS implementation in SCALE-MAMBA.
 
-Thanks to Yu Yu for the discussions of the  universal hash function and the security of Legendre PRF.
+Thanks to Yu Yu for discussions of universal hash function and the security of Legendre PRF.
