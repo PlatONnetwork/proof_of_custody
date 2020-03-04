@@ -115,7 +115,7 @@ int run_simulator(int argc, char* argv[], int how_long) {
 int main(int argc, char* argv[]) {
   int ret = 1;
   ret = run_once(argc, argv); // run once
-  sleep(1); // for closing connections completed
-  ret = run_simulator(argc, argv, 60 * 10); // run 60*10 s
+  // sleep(1); // for closing connections completed
+  // ret = run_simulator(argc, argv, 60 * 10); // run 60*10 s
   return ret;
 }

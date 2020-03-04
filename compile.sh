@@ -3,7 +3,7 @@
 curdir=$(pwd)
 chmod +x *.sh
 
-killall main.x
+killall -q main.x
 
 mkdir -p build
 cd build

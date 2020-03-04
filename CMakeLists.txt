@@ -6,13 +6,11 @@ endif ()
 
 project(PROOF_OF_CUSTODY VERSION 1.0 DESCRIPTION "POC" LANGUAGES CXX)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_CXX_STANDARD 11)
 
-include_directories($<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+include_directories($<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 
-# TODO is it possible to make this into a runtime parameter?
-# TODO why is it not in config.h as well?
 add_definitions(-DMAX_MOD_SZ=7)
 add_compile_options(
         -maes 
@@ -25,47 +23,23 @@ add_compile_options(
 find_package(MPIR REQUIRED)
 find_package(MPIRXX REQUIRED)
 find_package(OpenSSL REQUIRED)
-find_package(CryptoPP REQUIRED)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 
-file(GLOB exceptions Exceptions/*.cpp)
-file(GLOB io Input_Output/*.cpp)
-file(GLOB lsss LSSS/*.cpp)
-file(GLOB mpcmath Math/*.cpp)
-file(GLOB offline Offline/*.cpp)
-file(GLOB online Online/*.cpp)
-file(GLOB processor Processor/*.cpp)
-file(GLOB system System/*.cpp)
-file(GLOB tools Tools/*.cpp)
-file(GLOB runtime RunTime/*.cpp)
-
 # poc
-add_library(poc STATIC
-        ${exceptions}
-        ${io}
-        ${lsss}
-        ${mpcmath}
-        ${offline}
-        ${online}
-        ${ot}
-        ${processor}
-        ${system}
-        ${tools}
-        ${runtime}
-        )
+file(GLOB_RECURSE poc_srcs src/*.cpp)
+add_library(poc STATIC ${poc_srcs})
 
 target_link_libraries(poc PRIVATE
         Threads::Threads OpenSSL::Crypto OpenSSL::SSL
-        ${CRYPTOPP_LIBRARIES} ${MPIR_LIBRARIES} ${MPIRXX_LIBRARIES}
+        ${MPIR_LIBRARIES} ${MPIRXX_LIBRARIES}
         mcl
         mclbn384_256
         )
 
 add_executable(main.x main.cpp)
-
 target_link_libraries(main.x PRIVATE poc)
 
 add_executable(Setup.x Setup.cpp)
