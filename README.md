@@ -3,6 +3,13 @@
 ## Dependencies
 Besides the required lib for scale mamba, you also need to install the [mcl](https://github.com/herumi/mcl) library.
 
+
+Run the following script to install all deps.
+
+```bash
+sudo ./install_deps.sh
+```
+
 ## Compile
 
 ```bash
@@ -15,7 +22,7 @@ Besides the required lib for scale mamba, you also need to install the [mcl](htt
 ./init.sh n t
 ```
 - n : the number of parties.
-- t : the number of threshold, and t < n/2
+- t : the number of threshold, and 0 < t < n/2
 - Shamir type of LSSS is used.
 
 - The default modulus (under BLS12-381 curve) is `4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787`.
@@ -29,8 +36,10 @@ You should `init` first, and then
 ```
 - n : the number of parties
 
-## Progresses 
+## Progresses
+
 ### Stage I
+
 1. Seperate Scale-Mamba (100%)
 2. DKG of BLS (100%)
 3. Distributed sign of BLS (100%)
