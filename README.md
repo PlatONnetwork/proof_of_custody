@@ -67,11 +67,11 @@ Note: `init`  should be run first.
 1. the total time for 3-1 case is less than 0.5s in LAN.
 
 ## Acknowledgements
-Special thanks to Dankrad Feist for introducing proof of custody and deep discussions of the technique details. 
+- Special thanks to Dankrad Feist for introducing proof of custody and deep discussions of the technique details. 
 
-Thanks to Nigel Smart for discussions of PRSS implementation in SCALE-MAMBA.
+- Thanks to Nigel Smart for discussions of PRSS implementation in SCALE-MAMBA.
 
-Thanks to Yu Yu for discussions of universal hash function and the security of Legendre PRF.
+- Thanks to Yu Yu for discussions of universal hash function and the security of Legendre PRF.
 
 ## Contact
 xiang.xie@platon.network
