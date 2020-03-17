@@ -2,6 +2,7 @@
 #include "vss.h"
 #include "Tools/Crypto.h"
 #include "Group.h"
+#include "Math/Lagrange.h"
 
 void BLS::keygen()
 {
@@ -33,6 +34,14 @@ int BLS::verify(const bls_sigma _sigma, const string msg)
 
     int ret = mclBnGT_isEqual(&e1, &e2);
     return ret;
+}
+
+void BLS::sign_scale(const bls_sk scale, const string msg)
+{
+    mclBnG2_hashAndMapTo(&sigma, (const char *)msg.c_str(), msg.size());
+    bls_sk sign_sk;
+    mclBnFr_mul(&sign_sk,&sk,&scale);
+    mclBnG2_mul(&sigma, &sigma, &sign_sk);
 }
 
 void BLS::dstb_keygen(Player &P)
@@ -187,8 +196,11 @@ void BLS::dstb_sign(G2_Affine_Coordinates &out, const string msg,
 {
     Timer point_add_time;
 
-    sign(msg);
-    
+    mclBnFr lag_coeff;
+    get_lagrange_coeff(lag_coeff, P.nplayers(), P.whoami()+1);
+
+    sign_scale(lag_coeff,msg);
+
     vector<G2_Affine_Coordinates> ac(P.nplayers());
     vector<vector<Complex_Plain>> s(P.nplayers(), vector<Complex_Plain>(2));
 

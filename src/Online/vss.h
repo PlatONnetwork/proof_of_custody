@@ -53,9 +53,3 @@ public:
     }
     ~VSS() {}
 };
-
-//recover share, for test
-void recover_share(mclBnFr &out, const vector<mclBnFr> shares);
-
-//compute lagrange coeffecient (not test yet)
-void lagrange_coeff(vector<mclBnFr> &lag_coeff, vector<int> val);

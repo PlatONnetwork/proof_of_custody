@@ -47,6 +47,10 @@ public:
     void sign(const string msg);
     int verify(const bls_sigma _sigma, const string msg);
 
+    //sign with scale*sk on msg
+    void sign_scale(const bls_sk scale, const string msg);
+
+
     //distributed keygen,sign algorithms
     void dstb_keygen(Player &P);
     void dstb_sign(G2_Affine_Coordinates &out, const string msg,

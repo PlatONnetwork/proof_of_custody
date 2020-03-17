@@ -8,11 +8,12 @@ using namespace std;
 
 #define CHUNK_NUM (128 * 1024 / 48 + 1)
 
-class Config_Info {
- public:
+class Config_Info
+{
+public:
   unsigned int my_number;
   unsigned int no_online_threads;
-  SSL_CTX* ctx;
+  SSL_CTX *ctx;
   vector<unsigned int> portnum;
   SystemData SD;
   Machine machine;
@@ -29,15 +30,18 @@ The distributed setup stage to generate private signing key
 shares of BLS along with the public key.
 It is essentially the distrbuted key generation algorithm.
 */
-void poc_Setup(BLS& bls, Player& P);
+void poc_setup(BLS &bls, Player &P);
 
 /*
 Ephermeral key for UHF and legendre prf.
 It is essentially the distributed signing algorithms.
 */
-void poc_EnphemKey(
-  G2_Affine_Coordinates& ac, BLS& bls, const string& msg, int online_num, Player& P,
-  Config_Info& CI);
+void poc_compute_enphem_key(G2_Affine_Coordinates &ac,
+                            BLS &bls, const string &msg,
+                            int online_num,
+                            Player &P,
+                            Config_Info &CI);
+
 
 /*
 void poc_EphemKey(G2_Affine_Coordinates &ac, BLS &bls, const string msg,
@@ -47,11 +51,11 @@ void poc_EphemKey(G2_Affine_Coordinates &ac, BLS &bls, const string msg,
 /*
 Compute UHF and legendre prf.
 */
-int poc_GenProof(
-  const vector<Share>& keys, const vector<gfp>& msg, int online_num, Player& P, Config_Info& CI);
+void poc_compute_custody_bit_offline();
 
-/*
-int poc_GenProof(const vector<Share> keys, const vector<gfp> msg,
-                 Processor &Proc, int online_num, Player &P,
-                 offline_control_data &OCD, Machine &machine);
-*/
+int poc_compute_custody_bit_online();
+
+int poc_compute_custody_bit(const vector<Share> &keys,
+                            const vector<gfp> &msg,
+                            int online_num, Player &P,
+                            Config_Info &CI);

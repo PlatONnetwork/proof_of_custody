@@ -118,7 +118,7 @@ void Init_ThreadInfo(Config_Info& CI, vector<thread_info>& tinfo) {
   }
 }
 
-void Run_Init(int argc, char* argv[], Config_Info& CI) {
+void run_init(int argc, char* argv[], Config_Info& CI) {
   if (argc != 2) {
     cerr << "ERROR: incorrect number of arguments to Player.x\n";
   } else {
@@ -227,7 +227,7 @@ void Run_Init(int argc, char* argv[], Config_Info& CI) {
   global_time.start();
 }
 
-void Run_Clear(Config_Info& CI) {
+void run_clear(Config_Info& CI) {
   //  cout << "----------Begin of Clear----------------------------" << endl;
   tinfo.clear();
   CI.machine.Dump_Memory(CI.my_number);
@@ -240,13 +240,13 @@ void Run_Clear(Config_Info& CI) {
   //  cout << "----------End of Clear-------------------------------" << endl;
 }
 
-void Run_PocSetup(BLS& bls, Config_Info& CI) {
+void run_poc_setup(BLS& bls, Config_Info& CI) {
   cout << "----------Begin of Setup-----------------------------" << endl;
   Timer setup_time;
   setup_time.start();
   Player& P = *(tinfo[ThreadPlayer::TP_PocSetup].player);
 
-  poc_Setup(bls, P);
+  poc_setup(bls, P);
 
   setup_time.stop();
 
@@ -266,14 +266,14 @@ void Run_PocSetup(BLS& bls, Config_Info& CI) {
   cout << "----------End of Setup-------------------------------" << endl;
 }
 
-void Run_PocEphemKey(vector<Share>& ek, BLS bls, const string msg, Config_Info& CI) {
+void run_poc_compute_enphem_key(vector<Share>& ek, BLS bls, const string msg, Config_Info& CI) {
   cout << "----------Begin of Ephemeral Key Generation----------" << endl;
   Timer ek_time;
   ek_time.start();
   Player& P = *(tinfo[ThreadPlayer::TP_PocEphemKey].player);
 
   G2_Affine_Coordinates ac;
-  poc_EnphemKey(ac, bls, msg, 0, P, CI);
+  poc_compute_enphem_key(ac, bls, msg, 0, P, CI);
   ek.resize(4);
   ek[0] = ac.x.real;
   ek[1] = ac.x.imag;
@@ -291,14 +291,14 @@ void Run_PocEphemKey(vector<Share>& ek, BLS bls, const string msg, Config_Info& 
   cout << "----------End of Ephemeral Key Generation------------" << endl;
 }
 
-int Run_PocGenProof(const vector<Share>& keys, const vector<gfp>& msg, Config_Info& CI) {
+int run_poc_compute_custody_bit(const vector<Share>& keys, const vector<gfp>& msg, Config_Info& CI) {
   cout << "----------Begin of Run_PocGenProof-------------------" << endl;
   Timer genproof_time;
   genproof_time.start();
 
   Player& P = *(tinfo[ThreadPlayer::TP_PocGenProof].player);
 
-  int res = poc_GenProof(keys, msg, 0, P, CI);
+  int res = poc_compute_custody_bit(keys, msg, 0, P, CI);
 
   genproof_time.stop();
 
@@ -313,7 +313,7 @@ int Run_PocGenProof(const vector<Share>& keys, const vector<gfp>& msg, Config_In
   return res;
 }
 
-void Run_Online(Config_Info& CI) {
+void run_online(Config_Info& CI) {
   Player& P = *(tinfo[ThreadPlayer::TP_PocExtraOnline].player);
 
   printf("Setting up online phase threads\n");
@@ -333,7 +333,7 @@ void* Main_Offline_Func(void* ptr) {
   return NULL;
 }
 
-void Run_Offline(Config_Info& CI) {
+void run_offline(Config_Info& CI) {
   printf("Setting up offline phase threads\n");
 
   offline_time.start();
@@ -348,7 +348,7 @@ void Run_Offline(Config_Info& CI) {
   }
 }
 
-void Wait_ForExit(Config_Info& CI) {
+void wait_for_exit(Config_Info& CI) {
   // set offline & online finished
   CI.OCD.OCD_mutex[0].lock();
   CI.OCD.finish_offline[0] = 1;

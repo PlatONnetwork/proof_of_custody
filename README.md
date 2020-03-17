@@ -3,7 +3,7 @@
 ## Introduction
 This project implements the proof of custody algorithm in Ethereum 2.0 with secure multi-party computation.
 
-[Custody game](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/phase1/custody-game.md) is a mechnism will be adpoted in Ethereum 2.0 (Phase 1) to solve the data avaliablity problem. It is designed to be mpc-friendly, because the mpc implmentation will avoid single point of failure, reduce the staking cost and enable the possibility of trustless validator pools, et al.
+[Custody game](https://github.com/ethereum/eth2.0-specs/blob/dev/specs/phase1/custody-game.md) is a mechnism will be adpoted in Ethereum 2.0 (Phase 1) to solve the data availability problem. It is designed to be mpc-friendly, because the mpc implmentation will avoid single point of failure, reduce the staking cost and enable the possibility of trustless validator pools, et al.
 
 This project aims to estimate the feasiblity and performance of the mpc implementation of proof of custody.
 The implementation is built on and highly customized from [SCALE-MAMBA](https://github.com/KULeuven-COSIC/SCALE-MAMBA) with optimizations specific to proof of custody.
