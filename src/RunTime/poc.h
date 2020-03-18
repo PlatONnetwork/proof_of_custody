@@ -42,19 +42,22 @@ void poc_compute_enphem_key(G2_Affine_Coordinates &ac,
                             Player &P,
                             Config_Info &CI);
 
-
-/*
-void poc_EphemKey(G2_Affine_Coordinates &ac, BLS &bls, const string msg,
-                  Processor &Proc, int online_num, Player &P,
-                  offline_control_data &OCD, Machine &machine);
-*/
 /*
 Compute UHF and legendre prf.
 */
-void poc_compute_custody_bit_offline();
+void poc_compute_custody_bit_offline(vector<Share> &pre_key,
+                                     const vector<Share> &keys,
+                                     int online_num,
+                                     Player &P,
+                                     Config_Info &CI);
 
-int poc_compute_custody_bit_online();
+int poc_compute_custody_bit_online(const vector<Share> pre_key,
+                                   const vector<gfp> &msg,
+                                   int online_num,
+                                   Player &P,
+                                   Config_Info &CI);
 
+//run offline and online in one step
 int poc_compute_custody_bit(const vector<Share> &keys,
                             const vector<gfp> &msg,
                             int online_num, Player &P,

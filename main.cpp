@@ -30,7 +30,14 @@ int run_once(int argc, char *argv[])
   {
     msg[i].assign(i + 9);
   }
-  int bit = run_poc_compute_custody_bit({ek[0], ek[1]}, msg, CI);
+
+  vector<Share> pre_key;
+
+  run_poc_compute_custody_bit_offline(pre_key, {ek[0], ek[1]}, CI);
+
+  int bit = run_poc_compute_custody_bit_online(pre_key, msg, CI);
+
+  //  int bit = run_poc_compute_custody_bit({ek[0], ek[1]}, msg, CI);
   cout << "custody bit: " << bit << endl
        << endl;
 
@@ -122,13 +129,11 @@ int run_simulator(int argc, char *argv[], int how_long)
   return 0;
 }
 
-
 int main(int argc, char *argv[])
 {
   int ret = 1;
   ret = run_once(argc, argv); // run once
-  sleep(1); // for closing connections completed
-//  ret = run_simulator(argc, argv, 60 * 10); // run 60*10 s
+  sleep(1);                   // for closing connections completed
+                              //  ret = run_simulator(argc, argv, 60 * 10); // run 60*10 s
   return ret;
-
 }
