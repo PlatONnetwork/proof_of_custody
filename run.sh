@@ -14,7 +14,7 @@ n=$1
 ./compile.sh
 
 # test
-mkdir -p log
+mkdir -p log out
 for ((i = 1; i < $n; i++)); do
     ./main.x $i >log/log$i.txt 2>&1 &
 done

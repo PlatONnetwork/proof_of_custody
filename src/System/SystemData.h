@@ -30,6 +30,7 @@ class SystemData {
 
   int fake_offline;
   int fake_sacrifice;
+  int t;
 
   SystemData() {}
 

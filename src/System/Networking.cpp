@@ -127,6 +127,19 @@ int OpenConnection(const string& hostname, int port) {
     throw Networking_error("OpenConnection: setsockopt : TCP_NODELAY");
   }
 
+#if 1
+  int size = 1024 * 1024;
+  fl = setsockopt(sd, SOL_SOCKET, SO_SNDBUF, (const void*)&size, sizeof(size));
+  if (fl < 0) {
+    throw Networking_error("OpenConnection: setsockopt : SO_SNDBUF");
+  }
+
+  fl = setsockopt(sd, SOL_SOCKET, SO_RCVBUF, (const void*)&size, sizeof(size));
+  if (fl < 0) {
+    throw Networking_error("OpenConnection: setsockopt : SO_RCVBUF");
+  }
+#endif
+
   struct sockaddr_in addr;
   bzero(&addr, sizeof(addr));
   addr.sin_family = AF_INET;

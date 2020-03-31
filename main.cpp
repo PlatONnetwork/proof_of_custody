@@ -11,8 +11,7 @@
 #include <atomic>
 using namespace std;
 
-int run_once(int argc, char *argv[])
-{
+int run_once(int argc, char* argv[]) {
   Config_Info CI;
   run_init(argc, argv, CI);
 
@@ -26,30 +25,30 @@ int run_once(int argc, char *argv[])
   run_poc_compute_enphem_key(ek, bls, nonce, CI);
 
   vector<gfp> msg(CHUNK_NUM);
-  for (int i = 0; i < msg.size(); i++)
-  {
+  for (int i = 0; i < msg.size(); i++) {
     msg[i].assign(i + 9);
   }
 
   vector<Share> pre_key;
 
+#if 1 // set 0/1 to switch
   run_poc_compute_custody_bit_offline(pre_key, {ek[0], ek[1]}, CI);
-
   int bit = run_poc_compute_custody_bit_online(pre_key, msg, CI);
+#else
+  int bit = run_poc_compute_custody_bit({ek[0], ek[1]}, msg, CI);
+#endif
 
-  //  int bit = run_poc_compute_custody_bit({ek[0], ek[1]}, msg, CI);
-  cout << "custody bit: " << bit << endl
-       << endl;
+  cout << "custody bit: " << bit << endl << endl;
 
   wait_for_exit(CI);
+  output_statistics(CI);
 
   run_clear(CI);
 
   return 0;
 }
 
-int run_simulator(int argc, char *argv[], int how_long)
-{
+int run_simulator(int argc, char* argv[], int how_long) {
   Config_Info CI;
   run_init(argc, argv, CI);
 
@@ -66,8 +65,7 @@ int run_simulator(int argc, char *argv[], int how_long)
   vector<Share> ek(0);
   auto run_ephemkey = [&]() {
     int l = 0;
-    while (is_runing)
-    {
+    while (is_runing) {
       l++;
       string nonce = "123456-" + std::to_string(l);
       cout << "Run_PocEphemKey counter:" << l << ", nonce:" << nonce << endl;
@@ -87,28 +85,24 @@ int run_simulator(int argc, char *argv[], int how_long)
   thread t_run_ephemkey = thread(run_ephemkey);
 
   auto run_proof = [&]() {
-    while (true)
-    {
+    while (true) {
       if (ek.size() == 4)
         break;
       usleep(200000);
     }
     int l = 0;
-    while (is_runing)
-    {
+    while (is_runing) {
       l++;
       cout << "Run_PocGenProof counter: " << l << endl;
       vector<gfp> msg(CHUNK_NUM);
-      for (int i = 0; i < msg.size(); i++)
-      {
+      for (int i = 0; i < msg.size(); i++) {
         msg[i].assign(i + 9);
       }
       is_runing_proof = true;
       {
         unique_lock<mutex> lck(mtx_ek);
         int bit = run_poc_compute_custody_bit({ek[0], ek[1]}, msg, CI);
-        cout << "custody bit: " << bit << endl
-             << endl;
+        cout << "custody bit: " << bit << endl << endl;
       }
       is_runing_proof = false;
       sleep(1);
@@ -129,11 +123,9 @@ int run_simulator(int argc, char *argv[], int how_long)
   return 0;
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char* argv[]) {
   int ret = 1;
   ret = run_once(argc, argv); // run once
-  sleep(1);                   // for closing connections completed
-                              //  ret = run_simulator(argc, argv, 60 * 10); // run 60*10 s
+  //  ret = run_simulator(argc, argv, 60 * 10); // run 60*10 s
   return ret;
 }

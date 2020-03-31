@@ -536,31 +536,31 @@ void offline_phase(
   {
   case 0:
     mult_phase(num_online, P, fake_sacrifice, OCD, verbose);
-    cout << "mult_phase sent data: " << P.data_sent << " Bytes" << endl;
-    cout << "mult_phase recv data: " << P.data_received << " Bytes" << endl;
-    cout << "mult_phase sent msgs: " << P.pp_messages_sent << endl;
-    cout << "mult_phase recv msgs: " << P.pp_messages_recv << endl;
+    // cout << "mult_phase sent data: " << P.data_sent << " Bytes" << endl;
+    // cout << "mult_phase recv data: " << P.data_received << " Bytes" << endl;
+    // cout << "mult_phase sent msgs: " << P.pp_messages_sent << endl;
+    // cout << "mult_phase recv msgs: " << P.pp_messages_recv << endl;
     break;
   case 1:
     square_phase(num_online, P, fake_sacrifice, OCD, verbose);
-    cout << "square_phase sent data: " << P.data_sent << " Bytes" << endl;
-    cout << "square_phase recv data: " << P.data_received << " Bytes" << endl;
-    cout << "square_phase sent msgs: " << P.pp_messages_sent << endl;
-    cout << "square_phase recv msgs: " << P.pp_messages_recv << endl;
+    // cout << "square_phase sent data: " << P.data_sent << " Bytes" << endl;
+    // cout << "square_phase recv data: " << P.data_received << " Bytes" << endl;
+    // cout << "square_phase sent msgs: " << P.pp_messages_sent << endl;
+    // cout << "square_phase recv msgs: " << P.pp_messages_recv << endl;
     break;
   case 2:
     bit_phase(num_online, P, fake_sacrifice, OCD, verbose);
-    cout << "bit_phase sent data: " << P.data_sent << " Bytes" << endl;
-    cout << "bit_phase recv data: " << P.data_received << " Bytes" << endl;
-    cout << "bit_phase sent msgs: " << P.pp_messages_sent << endl;
-    cout << "bit_phase recv msgs: " << P.pp_messages_recv << endl;
+    // cout << "bit_phase sent data: " << P.data_sent << " Bytes" << endl;
+    // cout << "bit_phase recv data: " << P.data_received << " Bytes" << endl;
+    // cout << "bit_phase sent msgs: " << P.pp_messages_sent << endl;
+    // cout << "bit_phase recv msgs: " << P.pp_messages_recv << endl;
     break;
   case 3:
     inputs_phase(num_online, P, fake_sacrifice, OCD, verbose);
-    cout << "input_phase sent data: " << P.data_sent << " Bytes" << endl;
-    cout << "input_phase recv data: " << P.data_received << " Bytes" << endl;
-    cout << "input_phase sent msgs: " << P.pp_messages_sent << endl;
-    cout << "input_phase recv msgs: " << P.pp_messages_recv << endl;
+    // cout << "input_phase sent data: " << P.data_sent << " Bytes" << endl;
+    // cout << "input_phase recv data: " << P.data_received << " Bytes" << endl;
+    // cout << "input_phase sent msgs: " << P.pp_messages_sent << endl;
+    // cout << "input_phase recv msgs: " << P.pp_messages_recv << endl;
     break;
   default:
     throw invalid_params();

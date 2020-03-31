@@ -38,6 +38,7 @@ SystemData::SystemData(const string& NetworkDataFileName) {
 
   inp >> fake_off;
   inp >> fake_sac;
+  inp >> t;
 
   init(numplayers, RootCertName, IP_Numbers, PlayerCertFiles, PlayerNames, fake_off, fake_sac);
 }

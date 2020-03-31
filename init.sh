@@ -18,7 +18,7 @@ t=$2
 if [ $? -ne 0 ]; then
     exit 1
 fi
-./gen_networkdata.sh ${n}
+./gen_networkdata.sh ${n} ${t}
 if [ $? -ne 0 ]; then
     exit 1
 fi

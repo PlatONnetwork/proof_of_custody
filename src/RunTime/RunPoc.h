@@ -7,6 +7,7 @@
 
 #include <openssl/ssl.h>
 
+
 /*
 ** Call chain:
 ** init -> setup -> offline -> ephemkey/genproof/online -> wait -> clear
@@ -39,7 +40,7 @@ int run_poc_compute_custody_bit(const vector<Share> &keys,
                                 const vector<gfp> &msg,
                                 Config_Info &CI);
 
-void run_online(Config_Info &CI);
-
-void wait_for_exit(Config_Info &CI); // must be called before Run_Clear
+void wait_for_exit(Config_Info &CI); // must be called before run_clear
+void output_statistics(Config_Info &CI); // must be called before run_clear, after wait_for_exit
 void run_clear(Config_Info &CI);
+
