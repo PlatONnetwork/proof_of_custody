@@ -3,11 +3,12 @@
 
 curdir=$(pwd)
 
-if [ $# -lt 1 ]; then
-    echo "$0 <n>"
+if [ $# -lt 2 ]; then
+    echo "$0 <n> <t>"
     exit 1
 fi
 n=$1
+t=$2
 
 mkdir -p Data
 NDFile=./Data/NetworkData.txt
@@ -23,5 +24,7 @@ done
 
 echo "0" >>${NDFile}
 echo "0" >>${NDFile}
+
+echo "${t}" >>${NDFile}
 
 exit 0
