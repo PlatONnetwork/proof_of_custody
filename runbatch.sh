@@ -22,8 +22,8 @@ function run_once() {
     ./main.x 0 >log/log0.txt 2>&1
     #./main.x 0
 }
-for ((i = 0; i < 50; i++)); do
-    #run_once
-    echo $i
+for ((j = 0; j < 50; j++)); do
+    run_once
+    echo $j
     sleep 1
 done
