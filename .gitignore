@@ -31,3 +31,5 @@ Setup.x
 *.x
 
 update-github.sh
+*vm*
+
