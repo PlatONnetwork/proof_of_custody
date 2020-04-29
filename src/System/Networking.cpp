@@ -27,6 +27,7 @@ All rights reserved
 
 #include <arpa/inet.h>
 
+#include <iostream>
 using namespace std;
 
 #include "Exceptions/Exceptions.h"
@@ -279,6 +280,7 @@ void Get_Connections(
 }
 
 void Close_Connections(int ssocket, vector<vector<vector<int>>>& csocket, unsigned int me) {
+  cout << "closing connections..." << endl;
   // Close connection sockets
   for (unsigned int i = 0; i < csocket.size(); i++) {
     for (unsigned int j = 0; j < csocket[i].size(); j++) {

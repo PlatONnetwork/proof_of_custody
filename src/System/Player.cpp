@@ -40,10 +40,10 @@ Player::Player(
   const vector<gfp>& MacK, int verbose) {
   clocks.resize(10);
   G.ReSeed(thread);
-  sha256.resize(3);
-  SHA256_Init(&sha256[0]);
-  SHA256_Init(&sha256[1]);
-  SHA256_Init(&sha256[2]);
+  sha256.resize(NSSL);
+  for (int i = 0; i < NSSL; i++) {
+    SHA256_Init(&sha256[i]);
+  }
 
   me = mynumber;
   ssl.resize(SD.n);
@@ -56,8 +56,8 @@ Player::Player(
 
   // When communicating with player i, player me acts as server when i<me
   for (unsigned int i = 0; i < SD.n; i++) {
-    ssl[i].resize(3);
-    for (unsigned int j = 0; j < 3; j++) {
+    ssl[i].resize(NSSL);
+    for (unsigned int j = 0; j < NSSL; j++) {
       if (i != me) {
         ssl[i][j] = SSL_new(ctx); /* get new SSL state with context */
         if (i < me) { /* set connection socket to SSL state */
@@ -131,9 +131,9 @@ Player::~Player() {
   //  print_network_data();
   for (unsigned int i = 0; i < ssl.size(); i++) {
     if (i != me) {
-      SSL_free(ssl[i][0]);
-      SSL_free(ssl[i][1]);
-      SSL_free(ssl[i][2]);
+      for (int j = 0; j < NSSL; j++) {
+        SSL_free(ssl[i][j]);
+      }
     }
   }
 }
@@ -142,10 +142,11 @@ void Player::Init(
   int verbose) {
   clocks.resize(10);
   G.ReSeed(thread);
-  sha256.resize(3);
-  SHA256_Init(&sha256[0]);
-  SHA256_Init(&sha256[1]);
-  SHA256_Init(&sha256[2]);
+
+  sha256.resize(NSSL);
+  for (int i = 0; i < NSSL; i++) {
+    SHA256_Init(&sha256[i]);
+  }
 
   me = mynumber;
   ssl.resize(SD.n);
@@ -158,8 +159,8 @@ void Player::Init(
 
   // When communicating with player i, player me acts as server when i<me
   for (unsigned int i = 0; i < SD.n; i++) {
-    ssl[i].resize(3);
-    for (unsigned int j = 0; j < 3; j++) {
+    ssl[i].resize(NSSL);
+    for (unsigned int j = 0; j < NSSL; j++) {
       if (i != me) {
         ssl[i][j] = SSL_new(ctx); /* get new SSL state with context */
         if (i < me) { /* set connection socket to SSL state */

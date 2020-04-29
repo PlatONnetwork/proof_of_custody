@@ -493,6 +493,57 @@ void Share::input(istream &s, bool human)
   }
 }
 
+void Share::output_bigint(ostream& s) {
+  {
+    //
+    s << p << " ";
+  }
+
+  for (unsigned int i = 0; i < SD.M.shares_per_player(p); i++) {
+    bigint ans;
+    to_bigint(ans, a[i]);
+    s << ans << " ";
+  }
+  if (SD.type == Full) {
+    for (unsigned int i = 0; i < SD.nmacs; i++) {
+      bigint ans;
+      to_bigint(ans, mac[i]);
+      s << ans << " ";
+    }
+  }
+  s << endl;
+}
+void Share::input_bigint(istream& s) {
+  if (s.peek() == EOF) {
+    if (s.tellg() == 0) {
+      throw file_error("Input Share");
+    }
+    throw file_error("Input Share");
+  }
+  int t;
+  {
+    //
+    s >> t;
+  }
+  if (t != p) {
+    p = t;
+    a.resize(SD.M.shares_per_player(p));
+  }
+
+  for (unsigned int i = 0; i < SD.M.shares_per_player(p); i++) {
+    bigint ans;
+    s >> ans;
+    to_gfp(a[i], ans);
+  }
+  if (SD.type == Full) {
+    for (unsigned int i = 0; i < SD.nmacs; i++) {
+      bigint ans;
+      s >> ans;
+      to_gfp(mac[i], ans);
+    }
+  }
+}
+
 void make_shares(vector<Share> &share, const gfp &val, PRNG &G)
 {
   vector<gfp> ss = Share::SD.M.Random_Sharing(val, G);

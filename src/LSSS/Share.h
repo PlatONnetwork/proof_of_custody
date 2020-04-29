@@ -179,6 +179,8 @@ public:
   //  - Can do in human or machine only format (later should be faster)
   void output(ostream &s, bool human) const;
   void input(istream &s, bool human);
+  void output_bigint(ostream &s);
+  void input_bigint(istream &s);
 
   /* Takes a vector of shares, one from each player and
      * determines the shared value

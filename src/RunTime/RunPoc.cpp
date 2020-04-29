@@ -212,6 +212,12 @@ void run_init(int argc, char* argv[], Config_Info& CI) {
 
   string memtype = "empty";
   unsigned int portnumbase = 20000;
+
+  if (CI.version == 0) {
+    portnumbase = 20000;
+  } else if (CI.version == 1) {
+    portnumbase = 30000;
+  }
   CI.verbose = -1;
 
   /*************************************
@@ -252,7 +258,12 @@ void run_init(int argc, char* argv[], Config_Info& CI) {
    * Initialise the secret sharing     *
    * data and the gfp field data       *
    *************************************/
-  ifstream inp("Data/SharingData.txt");
+  string dsd("Data/SharingData.txt");
+  if (CI.version == 0) {
+  } else if (CI.version == 1) {
+    dsd = "Data/SharingData1.txt";
+  }
+  ifstream inp(dsd);
   if (inp.fail()) {
     throw file_error("Data/SharingData.txt");
   }
@@ -304,18 +315,21 @@ void run_init(int argc, char* argv[], Config_Info& CI) {
   /* Initialize the networking TCP sockets */
   CI.tnthreads = ThreadPlayer::TP_NUMS;
   CI.csockets =
-    vector<vector<vector<int>>>(CI.tnthreads, vector<vector<int>>(CI.SD.n, vector<int>(3)));
+    vector<vector<vector<int>>>(CI.tnthreads, vector<vector<int>>(CI.SD.n, vector<int>(NSSL)));
   Get_Connections(CI.ssocket, CI.csockets, CI.portnum, CI.my_number, CI.SD, 1);
   printf("All connections now done\n");
 
   init_thread_info(CI, tinfo);
   init_stats_info();
   global_time.start();
+  global_time.reset();
 }
+
+void run_clear0(Config_Info& CI) { tinfo.clear(); }
 
 void run_clear(Config_Info& CI) {
   //  cout << "----------Begin of Clear----------------------------" << endl;
-  tinfo.clear();
+  run_clear0(CI);
   CI.machine.Dump_Memory(CI.my_number);
   Close_Connections(CI.ssocket, CI.csockets, CI.my_number);
   Destroy_SSL_CTX(CI.ctx);

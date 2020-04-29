@@ -11,6 +11,7 @@ using namespace std;
 
 class Config_Info {
  public:
+  int version = 0;
   unsigned int my_number;
   unsigned int no_online_threads;
   SSL_CTX* ctx;

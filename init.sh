@@ -22,6 +22,10 @@ fi
 if [ $? -ne 0 ]; then
     exit 1
 fi
+
+./gen_sharing1.sh ${t}
+cp Data/SharingData.txt Data/SharingData1.txt
+
 ./gen_sharing.sh ${t}
 
 exit 0

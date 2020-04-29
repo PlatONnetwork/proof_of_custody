@@ -16,6 +16,7 @@ All rights reserved
 
 #include "SSLUtil.h"
 
+const static int NSSL = 2;
 class Player {
   unsigned int me; // My player number
 
