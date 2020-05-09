@@ -127,6 +127,36 @@ class OnlineOp {
   void div(Complex& c, const Complex& a, const Complex& b);
   void div_inplace(Complex& c, const Complex& a);
 
+  //bit ops
+
+  void XOR(Share& c, const Share& a, const Share& b);
+  void XOR_plain(Share& c, const Share& a, const gfp& b);
+
+  void OR(Share& c, const Share& a, const Share& b);
+  void OR_plain(Share& c, const Share& a, const gfp& b);
+
+  void AND(Share& c, const Share& a, const Share& b);
+  void AND_plain(Share& c, const Share& a, const gfp& b);
+
+  void KXOR(Share& c, const vector<Share>& a, unsigned int k);
+
+  //output random shares of r and bits of r, with uniformly random r.
+  void pre_rand(Share& r, vector<Share>& bitr, unsigned int k);
+
+  void carry_sum(Share& ca_out, Share& s, const Share& x, const Share& y, const Share& ca_in);
+  void carry_sum_plain(Share& ca_out, Share& s, const Share& x, const gfp& y, const Share& ca_in);
+
+  //Bit addition
+  void add_bit(vector<Share>& c, const vector<Share>& a, const vector<Share>& b);
+  void add_bit_plain(vector<Share>& c, const vector<Share>& a, const vector<gfp>& b);
+  void add_bit_plain(vector<Share>& c, const vector<Share>& a, const gfp& b, unsigned int k);
+
+  //Binary to Arithmetic
+  void B2A(Share& c, const vector<Share>& bits, unsigned int k);
+
+  //Arithmetic to Binary
+  void A2B(vector<Share>& bits, const Share& c, unsigned int k);
+
   // out = in[0] + in[1]*key + in[2]*key^2 +...+ in[size-1]*key^{size-1}
   void uhf(Share& out, const Share& key, const vector<gfp>& in, unsigned int size);
   void legendre(int& out, const Share& in);
@@ -152,6 +182,8 @@ class OnlineOp {
   void test_legendre();
   void test_get_inputs();
   void test_mul();
+
+  void test_bit_ops();
 };
 
 #endif

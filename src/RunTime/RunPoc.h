@@ -44,3 +44,5 @@ void wait_for_exit(Config_Info &CI); // must be called before run_clear
 void output_statistics(Config_Info &CI); // must be called before run_clear, after wait_for_exit
 void run_clear(Config_Info &CI);
 
+void run_test_bit_ops(Config_Info &CI);
+

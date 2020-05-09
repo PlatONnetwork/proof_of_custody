@@ -151,32 +151,15 @@ void init_stats_info() {
     for (int i = 0; i < ThreadPlayer::TP_NUMS; i++) {
       string name("Unknow");
       switch (i) {
-        case 0:
-          name = "mult_phase";
-          break;
-        case 1:
-          name = "square_phase";
-          break;
-        case 2:
-          name = "bit_phase";
-          break;
-        case 3:
-          name = "inputs_phase";
-          break;
-        case TP_PocSetup:
-          name = "setup";
-          break;
-        case TP_PocEphemKey:
-          name = "ephem_key";
-          break;
-        case TP_PocGenProofPre:
-          name = "gen_proof_pre";
-          break;
-        case TP_PocGenProof:
-          name = "gen_proof";
-          break;
-        default:
-          break;
+        case 0: name = "mult_phase"; break;
+        case 1: name = "square_phase"; break;
+        case 2: name = "bit_phase"; break;
+        case 3: name = "inputs_phase"; break;
+        case TP_PocSetup: name = "setup"; break;
+        case TP_PocEphemKey: name = "ephem_key"; break;
+        case TP_PocGenProofPre: name = "gen_proof_pre"; break;
+        case TP_PocGenProof: name = "gen_proof"; break;
+        default: break;
       }
       stats[i].name = name;
     }
@@ -525,4 +508,16 @@ void output_statistics(Config_Info& CI) {
 
     ofile.close();
   }
+}
+
+void run_test_bit_ops(Config_Info& CI) {
+  cout << "----------Begin of test-----------------------------" << endl;
+  Player& P = *(tinfo[ThreadPlayer::TP_PocSetup].player);
+
+  Processor Proc(0, P.nplayers(), P);
+
+  OnlineOp online_op(Proc, 0, P, CI.OCD, CI.machine);
+
+  online_op.test_bit_ops();
+  cout << "----------End of test-------------------------------" << endl;
 }
