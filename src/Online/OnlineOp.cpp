@@ -164,6 +164,7 @@ void OnlineOp::mul(
   vector<Share>& c, const vector<Share>& a, const vector<Share>& b, unsigned int k) {
   if (a.size() != k || b.size() != k)
     throw invalid_size();
+  c.resize(k);
 
   vector<vector<Share>> sp(k, vector<Share>(3));
   vector<Share> sp0(k), sp1(k), sp2(k);
@@ -408,16 +409,11 @@ void OnlineOp::XOR(Share& c, const Share& a, const Share& b) {
 
 void OnlineOp::XOR(
   vector<Share>& c, const vector<Share>& a, const vector<Share>& b, unsigned int k) {
-  cout << "here\n";
   if (a.size() != k || b.size() != k)
     throw invalid_size();
   vector<Share> tmp;
-  cout << "reach here2:\n";
   add(c, a, b, k);
-  cout << "reach here3:\n";
-
   mul(tmp, a, b, k);
-  cout << "reach here4:\n";
   sub_inplace(c, tmp, k);
   sub_inplace(c, tmp, k);
 }
@@ -514,8 +510,6 @@ void OnlineOp::KXOR(Share& c, const vector<Share>& a, unsigned int k) {
     return;
   }
 
-  cout << "k = " << k << endl;
-
   vector<Share> half_c, half_a;
 
   if (k % 2 == 0) {
@@ -523,12 +517,9 @@ void OnlineOp::KXOR(Share& c, const vector<Share>& a, unsigned int k) {
       half_c.push_back(a[2 * i]);
       half_a.push_back(a[2 * i + 1]);
     }
-    cout << "half_c: " << half_c.size() << endl;
-    cout << "half_a: " << half_a.size() << endl;
 
     XOR_inplace(half_c, half_a, k / 2);
-    cout << "reach here!" << endl;
-    //  KXOR(c, half_c, k / 2);
+    KXOR(c, half_c, k / 2);
   }
 
   if (k % 2 == 1) {
@@ -540,25 +531,131 @@ void OnlineOp::KXOR(Share& c, const vector<Share>& a, unsigned int k) {
     half_c.push_back(a[k - 1]);
     KXOR(c, half_c, (k + 1) / 2);
   }
-
-  /*
-  Share tmp;
-  tmp = a[0];
-  for (int i = 1; i < k; i++) {
-    XOR(c, tmp, a[i]);
-    tmp = c;
-  }
-*/
 }
 
-void OnlineOp::pre_rand(Share& r, vector<Share>& bitr, unsigned int k) {
-  bitr.resize(k);
-  vector<Share> tmp(1);
-  for (int i = 0; i < k; i++) {
-    getTuples(tmp, BIT);
-    bitr[i] = tmp[0];
+void OnlineOp::KOR(Share& c, const vector<Share>& a, unsigned int k) {
+  if (a.size() != k)
+    throw invalid_size();
+
+  if (k == 1) {
+    c = a[0];
+    return;
   }
-  B2A(r, bitr, k);
+
+  vector<Share> half_c, half_a;
+
+  if (k % 2 == 0) {
+    for (int i = 0; i < k / 2; i++) {
+      half_c.push_back(a[2 * i]);
+      half_a.push_back(a[2 * i + 1]);
+    }
+
+    OR_inplace(half_c, half_a, k / 2);
+    KOR(c, half_c, k / 2);
+  }
+
+  if (k % 2 == 1) {
+    for (int i = 0; i < (k - 1) / 2; i++) {
+      half_c.push_back(a[2 * i]);
+      half_a.push_back(a[2 * i + 1]);
+    }
+    OR_inplace(half_c, half_a, k / 2);
+    half_c.push_back(a[k - 1]);
+    KOR(c, half_c, (k + 1) / 2);
+  }
+}
+
+void OnlineOp::prefix_OR(vector<Share>& c, const vector<Share>& a, unsigned int k) {
+  if (a.size() != k)
+    throw invalid_size();
+
+  c.resize(k);
+
+  if (k == 1) {
+    c[0] = a[0];
+    return;
+  }
+
+  unsigned half = k / 2;
+  vector<Share> half_a0, half_a1;
+  vector<Share> half_c0, half_c1;
+  half_a0.insert(half_a0.begin(), a.begin(), a.begin() + half);
+  half_a1.insert(half_a1.begin(), a.begin() + half, a.end());
+
+  prefix_OR(half_c0, half_a0, half);
+  prefix_OR(half_c1, half_a1, k - half);
+
+  vector<Share> tmp(k - half, half_c0[half - 1]);
+
+  OR_inplace(tmp, half_c1, k - half);
+
+  copy(half_c0.begin(), half_c0.end(), c.begin());
+  copy(tmp.begin(), tmp.end(), c.begin() + half);
+}
+
+void OnlineOp::lt(Share& bit, vector<Share>& a, vector<Share>& b, unsigned int k) {
+  vector<Share> c, d;
+  XOR(c, a, b, k);
+  reverse(c.begin(), c.end());
+  prefix_OR(d, c, k);
+  reverse(d.begin(), d.end());
+
+  vector<Share> e(k);
+  for (int i = 0; i < k - 1; i++) {
+    sub(e[i], d[i], d[i + 1]);
+  }
+  e[k - 1] = d[k - 1];
+
+  vector<Share> tmp;
+  mul(tmp, e, b, k);
+  bit = tmp[0];
+  for (int i = 1; i < k; i++) {
+    add_inplace(bit, tmp[i]);
+  }
+}
+
+void OnlineOp::lt(Share& bit, vector<Share>& a, vector<gfp>& b, unsigned int k) {
+  vector<Share> c, d;
+  XOR_plain(c, a, b, k);
+  reverse(c.begin(), c.end());
+  prefix_OR(d, c, k);
+  reverse(d.begin(), d.end());
+
+  vector<Share> e(k);
+  for (int i = 0; i < k - 1; i++) {
+    sub(e[i], d[i], d[i + 1]);
+  }
+  e[k - 1] = d[k - 1];
+
+  vector<Share> tmp;
+  mul_plain(tmp, e, b, k);
+  bit = tmp[0];
+  for (int i = 1; i < k; i++) {
+    add_inplace(bit, tmp[i]);
+  }
+}
+
+void OnlineOp::pre_rand(Share& r, vector<Share>& bitr) {
+  bitr.resize(PSIZE);
+  vector<gfp> pbits(PSIZE);
+  Share flag;
+  vector<gfp> pflag(1);
+
+  decompose(pbits, gfp::pr(), PSIZE);
+  while (1) {
+    vector<Share> tmp(1);
+    for (int i = 0; i < PSIZE; i++) {
+      getTuples(tmp, BIT);
+      bitr[i] = tmp[0];
+    }
+    lt(flag, bitr, pbits, PSIZE);
+    open({flag}, pflag);
+
+    if (pflag[0] == 1) {
+      B2A(r, bitr, PSIZE);
+      return;
+    }
+  }
 }
 
 // s = x xor y xor ca_in, ca_out = ca_in xor ((x xor ca_in) and (y xor ca_in))
@@ -566,11 +663,11 @@ void OnlineOp::carry_sum(
   Share& ca_out, Share& s, const Share& x, const Share& y, const Share& ca_in) {
   XOR(s, x, y);
   XOR_inplace(s, ca_in);
-
+  cout << "here 1" << endl;
   Share tmp;
   XOR(tmp, x, ca_in);
-  XOR(ca_out, y, ca_out);
-
+  XOR_inplace(ca_out, y);
+  cout << "here 2" << endl;
   AND_inplace(ca_out, tmp);
   XOR_inplace(ca_out, ca_in);
 }
@@ -592,41 +689,64 @@ void OnlineOp::carry_sum_plain(
 void OnlineOp::add_bit(vector<Share>& c, const vector<Share>& a, const vector<Share>& b) {
   if (a.size() != b.size())
     throw invalid_size();
-  c.resize(a.size());
+  c.resize(a.size() + 1);
+
+  cout << "reach here" << endl;
 
   Share ca_in, ca_out;
   AND(ca_in, a[0], b[0]);
   XOR(c[0], a[0], b[0]);
-  for (int i = 1; i < c.size(); i++) {
+  cout << "reach here2" << endl;
+
+  for (int i = 1; i < c.size() - 1; i++) {
     carry_sum(ca_out, c[i], a[i], b[i], ca_in);
     ca_in = ca_out;
+    cout << i << endl;
   }
+  c.back() = ca_out;
 }
 
 void OnlineOp::add_bit_plain(vector<Share>& c, const vector<Share>& a, const vector<gfp>& b) {
   if (a.size() != b.size())
     throw invalid_size();
-  c.resize(a.size());
+  c.resize(a.size() + 1);
 
   Share ca_in, ca_out;
   AND_plain(ca_in, a[0], b[0]);
   XOR_plain(c[0], a[0], b[0]);
-  for (int i = 1; i < c.size(); i++) {
+  for (int i = 1; i < c.size() - 1; i++) {
     carry_sum_plain(ca_out, c[i], a[i], b[i], ca_in);
     ca_in = ca_out;
   }
+  c.back() = ca_out;
 }
 
-void decompose(vector<gfp>& bits, const gfp& x, unsigned k) {
+void OnlineOp::decompose(vector<gfp>& bits, const gfp& x, unsigned int k) {
   bits.resize(k);
   gfp ONE;
   gfp tmp = x;
   ONE.assign_one();
-  for (int i = 0; i < k; i++) {
-    bits[i] = (tmp >> i) & ONE;
+
+  bits[0] = tmp & ONE;
+  for (int i = 1; i < k; i++) {
+    bits[i] = (tmp >> 1) & ONE;
+    tmp = (tmp >> 1);
   }
 }
 
+void OnlineOp::decompose(vector<gfp>& bits, const bigint& x, unsigned int k) {
+  bits.resize(k);
+  bigint ONE = 1;
+  bigint tmp(x);
+
+  bits[0].assign(tmp & ONE);
+  for (int i = 1; i < k; i++) {
+    bits[i].assign((tmp >> 1) & ONE);
+    tmp = tmp >> 1;
+  }
+}
+
+/*
 void OnlineOp::add_bit_plain(vector<Share>& c, const vector<Share>& a, const gfp& b, unsigned k) {
   if (a.size() != k)
     throw invalid_size();
@@ -634,7 +754,7 @@ void OnlineOp::add_bit_plain(vector<Share>& c, const vector<Share>& a, const gfp
   decompose(bbits, b, k);
   add_bit_plain(c, a, bbits);
 }
-
+*/
 void OnlineOp::B2A(Share& c, const vector<Share>& bits, unsigned int k) {
   gfp t, pow;
   t.assign(2);
@@ -648,20 +768,33 @@ void OnlineOp::B2A(Share& c, const vector<Share>& bits, unsigned int k) {
   }
 }
 
-void OnlineOp::A2B(vector<Share>& bits, const Share& c, unsigned int k) {
+void OnlineOp::B2A(gfp& c, const vector<gfp>& bits, unsigned int k) {
+  gfp t, pow;
+  t.assign(2);
+  c = bits[0];
+  gfp tmp;
+  for (int i = 1; i < k; i++) {
+    pow = t;
+    pow.power(i);
+    tmp = bits[i] * pow;
+    c = c + tmp;
+  }
+}
+/*
+void OnlineOp::A2B(vector<Share>& bits, const Share&) {
   Share r, mask;
   vector<gfp> cp;
   vector<Share> bitr;
-  pre_rand(r, bitr, k);
+  pre_rand(r, bitr);
   sub(mask, c, r);
   open({mask}, cp);
 
   add_bit_plain(bits, bitr, cp[0], k);
 }
-
+*/
 void OnlineOp::uhf(Share& out, const Share& key, const vector<gfp>& in, unsigned int size) {
   if (in.size() != size) {
-    throw bad_value();
+    throw invalid_size();
   }
 
   mul_plain(out, key, in[size - 1]);
@@ -829,15 +962,15 @@ void OnlineOp::test_bit_ops() {
   vector<Share> sc(4);
 
   c[0].assign_zero();
-  c[1].assign_zero();
-  c[2].assign_zero();
-  c[3].assign_zero();
+  c[1].assign_one();
+  c[2].assign_one();
+  c[3].assign_one();
 
   for (int i = 0; i < 4; i++) {
     get_inputs(0, sc[i], c[i]);
   }
 
-  a[0].assign_zero();
+  a[0].assign_one();
   a[1].assign_one();
   b[0].assign_zero();
   b[1].assign_one();
@@ -846,7 +979,7 @@ void OnlineOp::test_bit_ops() {
   cout << a[1] << endl;
   cout << b[0] << endl;
   cout << b[1] << endl;
-  cout<<"----"<<endl;
+  cout << "----" << endl;
 
   for (int i = 0; i < 2; i++) {
     get_inputs(0, sa[i], a[i]);
@@ -855,7 +988,38 @@ void OnlineOp::test_bit_ops() {
 
   reveal_and_print(sa);
   reveal_and_print(sb);
-/*
+
+  Share ltbit;
+  lt(ltbit, sb, sa, 2);
+  cout << "less than test: \n";
+  reveal_and_print({ltbit});
+
+  gfp neg, neg2;
+  vector<gfp> bits;
+  neg.assign(-75);
+  decompose(bits, neg, PSIZE);
+  for (int i = 0; i < PSIZE; i++) {
+    cout << bits[i];
+  }
+  cout << endl;
+
+  B2A(neg2, bits, PSIZE);
+  cout << neg2 << endl;
+
+  bigint bn = gfp::pr();
+  decompose(bits, bn, PSIZE);
+  for (int i = 0; i < PSIZE; i++) {
+    cout << bits[i];
+  }
+  cout << endl;
+
+  vector<Share> res;
+  add_bit(res, sa, sb);
+  cout << "res size: " << res.size();
+
+  reveal_and_print(res);
+
+  /*
   for (int i = 0; i < 2; i++) {
     for (int j = 0; j < 2; j++) {
       XOR(xor_share[2 * i + j], sa[i], sb[j]);
@@ -886,29 +1050,28 @@ void OnlineOp::test_bit_ops() {
   cout << "AND in Plain :\n";
   reveal_and_print(and_plain);
 
-  //  Share kxor_share;
-  //  KXOR(kxor_share, sc, sc.size());
+  Share kxor_share;
+  KXOR(kxor_share, sc, sc.size());
 
   cout << "KXOR in Plain :\n";
   cout << (c[0] ^ c[1] ^ c[2] ^ c[3]) << endl;
 
-  //  cout << "KXOR in Share :\n";
-  //  reveal_and_print({kxor_share});
+  cout << "KXOR in Share :\n";
+  reveal_and_print({kxor_share});
+
+  vector<Share> pOR;
+  prefix_OR(pOR, sc, sc.size());
+
+  cout << "Prefix OR:\n";
+  reveal_and_print(pOR);
 */
-  vector<Share> res_xor;
-  cout << "reach here" << endl;
-
-  XOR(res_xor, sa, sb, 2);
-
-  cout << "XOR vector: " << endl;
-  reveal_and_print({res_xor});
-
-/*
+  /*
   Share rand;
   vector<Share> rbits;
-  int k = 10;
+  vector<gfp> prand(1);
+  vector<gfp> pbits;
 
-  pre_rand(rand, rbits, k);
+  pre_rand(rand, rbits);
 
   cout << "random number :\n";
   reveal_and_print({rand});
@@ -916,12 +1079,13 @@ void OnlineOp::test_bit_ops() {
   cout << "random bits :\n";
   reveal_and_print(rbits);
 
+  open({rand}, prand);
+  decompose(pbits, prand[0], PSIZE);
+  for (int i = 0; i < PSIZE; i++) {
+    cout << pbits[i];
+  }
+  
   vector<Share> bits;
-
-  A2B(bits, rand, k / 2);
-  cout << "A2B: \n";
-  reveal_and_print(bits);
-
   vector<Share> res;
   add(res, sa, sb, 2);
   cout << "vector add:\n";

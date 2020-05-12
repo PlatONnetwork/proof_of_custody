@@ -18,8 +18,8 @@ extern vector<sacrificed_data> SacrificeD;
 
 enum { TRIPLE = 0x50, BIT = 0x51, SQUARE = 0x52, INPUT_MASK = 0x53 };
 
-#define PSIZE 381;
-#define QSIZE 256;
+static const unsigned int PSIZE = 381;
+static const unsigned int QSIZE = 256;
 
 class UsedTuples {
  public:
@@ -166,11 +166,16 @@ class OnlineOp {
 
   void KXOR(Share& c, const vector<Share>& a, unsigned int k);
   void KOR(Share& c, const vector<Share>& a, unsigned int k);
-  void prefix_XOR(vector<Share>& c, const vector<Share>& b, unsigned int k);
-  void prefix_OR(vector<Share>& c, const vector<Share>& b, unsigned int k);
+  void prefix_XOR(vector<Share>& c, const vector<Share>& a, unsigned int k); /*not implemented*/
+  void prefix_OR(vector<Share>& c, const vector<Share>& a, unsigned int k);
+
+  /*return (a<b)*/
+  void lt(Share& bit, vector<Share>& a, vector<Share>& b, unsigned int k);
+  void lt(Share& bit, vector<Share>& a, vector<gfp>& b, unsigned int k);
+
 
   //output random shares of r and bits of r, with uniformly random r.
-  void pre_rand(Share& r, vector<Share>& bitr, unsigned int k);
+  void pre_rand(Share& r, vector<Share>& bitr);
 
   void carry_sum(Share& ca_out, Share& s, const Share& x, const Share& y, const Share& ca_in);
   void carry_sum_plain(Share& ca_out, Share& s, const Share& x, const gfp& y, const Share& ca_in);
@@ -178,10 +183,14 @@ class OnlineOp {
   //Bit addition
   void add_bit(vector<Share>& c, const vector<Share>& a, const vector<Share>& b);
   void add_bit_plain(vector<Share>& c, const vector<Share>& a, const vector<gfp>& b);
-  void add_bit_plain(vector<Share>& c, const vector<Share>& a, const gfp& b, unsigned int k);
+  //void add_bit_plain(vector<Share>& c, const vector<Share>& a, const gfp& b, unsigned int k);
+
+  void decompose(vector<gfp>& bits, const gfp& x, unsigned int k);
+  void decompose(vector<gfp>& bits, const bigint& x, unsigned int k);
 
   //Binary to Arithmetic
   void B2A(Share& c, const vector<Share>& bits, unsigned int k);
+  void B2A(gfp& c, const vector<gfp>& bits, unsigned int k);
 
   //Arithmetic to Binary
   void A2B(vector<Share>& bits, const Share& c, unsigned int k);
