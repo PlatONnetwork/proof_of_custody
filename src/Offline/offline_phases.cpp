@@ -330,9 +330,7 @@ void bit_phase(
   int flag;
   while (0 == 0)
   {
-    //  flag = check_exit(num_online, P, OCD, Bits);
-
-    flag = 1; // not needed in this version.
+    flag = check_exit(num_online, P, OCD, Bits);
 
     /* Needs to die gracefully if online is gone */
     if (flag == 1)

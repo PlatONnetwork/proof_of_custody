@@ -18,6 +18,9 @@ extern vector<sacrificed_data> SacrificeD;
 
 enum { TRIPLE = 0x50, BIT = 0x51, SQUARE = 0x52, INPUT_MASK = 0x53 };
 
+#define PSIZE 381;
+#define QSIZE 256;
+
 class UsedTuples {
  public:
   unsigned int UsedTriples = 0;
@@ -69,9 +72,17 @@ class OnlineOp {
   // c = a + b (b is share)
   void add(Share& c, const Share& a, const Share& b);
   // c = a + b (b is plain)
+
+  void add(vector<Share>& c, const vector<Share>& a, const vector<Share> b, unsigned int k);
+
   void add_plain(Share& c, const Share& a, const gfp& b);
+
+  void add_plain(vector<Share>& c, const vector<Share>& a, const vector<gfp>& b, unsigned int k);
   // c = c + a;
   void add_inplace(Share& c, const Share& a);
+
+  void add_inplace(vector<Share>& c, const vector<Share>& a, unsigned int k);
+
   void add_plain_inplace(Share& c, const gfp& a);
 
   // c = a - b (b is share)
@@ -81,10 +92,16 @@ class OnlineOp {
   // c = c - a
   void sub_inplace(Share& c, const Share& a);
 
+  void sub_inplace(vector<Share>& c, const vector<Share>& a, unsigned int k);
+
   // c = a * b (b is plain)
   void mul_plain(Share& c, const Share& a, const gfp& b);
+
+  void mul_plain(vector<Share>& c, const vector<Share>& a, const vector<gfp>& b, unsigned int k);
   // c = a * b (b is share)
   void mul(Share& c, const Share& a, const Share& b);
+
+  void mul(vector<Share>& c, const vector<Share>& a, const vector<Share>& b, unsigned int k);
   void mul_inplace(Share& c, const Share& a);
 
   // aa = a^2
@@ -130,15 +147,27 @@ class OnlineOp {
   //bit ops
 
   void XOR(Share& c, const Share& a, const Share& b);
+  void XOR(vector<Share>& c, const vector<Share>& a, const vector<Share>& b, unsigned int k);
+  void XOR_inplace(Share& c, const Share& a);
+  void XOR_inplace(vector<Share>& c, const vector<Share>& a, unsigned int k);
   void XOR_plain(Share& c, const Share& a, const gfp& b);
+  void XOR_plain(vector<Share>& c, const vector<Share>& a, const vector<gfp>& b, unsigned int k);
 
   void OR(Share& c, const Share& a, const Share& b);
+  void OR(vector<Share>& c, const vector<Share>& a, const vector<Share>& b, unsigned int k);
+  void OR_inplace(Share& c, const Share& a);
+  void OR_inplace(vector<Share>& c, const vector<Share>& a, unsigned int k);
   void OR_plain(Share& c, const Share& a, const gfp& b);
+  void OR_plain(vector<Share>& c, const vector<Share>& a, const vector<gfp>& b, unsigned int k);
 
   void AND(Share& c, const Share& a, const Share& b);
+  void AND_inplace(Share& c, const Share& a);
   void AND_plain(Share& c, const Share& a, const gfp& b);
 
   void KXOR(Share& c, const vector<Share>& a, unsigned int k);
+  void KOR(Share& c, const vector<Share>& a, unsigned int k);
+  void prefix_XOR(vector<Share>& c, const vector<Share>& b, unsigned int k);
+  void prefix_OR(vector<Share>& c, const vector<Share>& b, unsigned int k);
 
   //output random shares of r and bits of r, with uniformly random r.
   void pre_rand(Share& r, vector<Share>& bitr, unsigned int k);
