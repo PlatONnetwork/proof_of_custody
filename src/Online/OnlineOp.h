@@ -194,6 +194,7 @@ class OnlineOp {
 
   //Arithmetic to Binary
   void A2B(vector<Share>& bits, const Share& c, unsigned int k);
+  void A2B(vector<Share>& bits, const Share& a);
 
   // out = in[0] + in[1]*key + in[2]*key^2 +...+ in[size-1]*key^{size-1}
   void uhf(Share& out, const Share& key, const vector<gfp>& in, unsigned int size);
