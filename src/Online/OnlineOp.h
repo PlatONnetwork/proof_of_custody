@@ -19,7 +19,7 @@ extern vector<sacrificed_data> SacrificeD;
 enum { TRIPLE = 0x50, BIT = 0x51, SQUARE = 0x52, INPUT_MASK = 0x53 };
 
 static const unsigned int PSIZE = 381;
-static const unsigned int QSIZE = 256;
+static const unsigned int QSIZE = 254;
 
 class UsedTuples {
  public:

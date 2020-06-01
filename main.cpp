@@ -34,7 +34,7 @@ int run_once(int argc, char* argv[]) {
 
   string nonce = "123456";
   vector<Share> ek(4);
-  run_poc_compute_enphem_key(ek, bls, nonce, CI);
+  run_poc_compute_ephem_key(ek, bls, nonce, CI);
 
   vector<gfp> msg(CHUNK_NUM);
   for (int i = 0; i < msg.size(); i++) {
@@ -83,7 +83,7 @@ int run_simulator(int argc, char* argv[], int how_long) {
       cout << "Run_PocEphemKey counter:" << l << ", nonce:" << nonce << endl;
       vector<Share> ek0(4);
       is_runing_ephemkey = true;
-      run_poc_compute_enphem_key(ek0, bls, nonce, CI);
+      run_poc_compute_ephem_key(ek0, bls, nonce, CI);
       is_runing_ephemkey = false;
       {
         unique_lock<mutex> lck(mtx_ek);
