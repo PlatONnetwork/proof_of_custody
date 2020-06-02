@@ -62,14 +62,13 @@ void OnlineOp::add(
   vector<Share>& c, const vector<Share>& a, const vector<Share> b, unsigned int k) {
   if (a.size() != k || b.size() != k)
     throw invalid_size();
-  cout << "add here 1" << endl;
+
+  /// cout << "add here 1" << endl;
   c.resize(k);
   for (int i = 0; i < k; i++) {
-    cout << "i: " << i << endl;
     add(c[i], a[i], b[i]);
-    cout << "test " << i << endl;
   }
-  cout << "add here 2" << endl;
+  /// cout << "add here 2" << endl;
 }
 
 void OnlineOp::add_plain(Share& c, const Share& a, const gfp& b) { c.add(a, b); }
@@ -413,19 +412,21 @@ void OnlineOp::XOR(Share& c, const Share& a, const Share& b) {
 
 void OnlineOp::XOR(
   vector<Share>& c, const vector<Share>& a, const vector<Share>& b, unsigned int k) {
-  cout << "c: " << c.size() << endl;
-  cout << "a: " << a.size() << endl;
-  cout << "b: " << b.size() << endl;
-  cout << "k: " << k << endl;
+  /// cout << "c: " << c.size() << endl;
+  /// cout << "a: " << a.size() << endl;
+  /// cout << "b: " << b.size() << endl;
+  /// cout << "k: " << k << endl;
   if (a.size() != k || b.size() != k)
     throw invalid_size();
 
-  cout << "xor here" << endl;
+  /// cout << "xor here" << endl;
+
   vector<Share> tmp;
   add(c, a, b, k);
-  cout << "xor add here 1" << endl;
+
+  /// cout << "xor add here 1" << endl;
   mul(tmp, a, b, k);
-  cout << "xor mul here 2" << endl;
+  /// cout << "xor mul here 2" << endl;
   sub_inplace(c, tmp, k);
   sub_inplace(c, tmp, k);
 }
@@ -523,8 +524,6 @@ void OnlineOp::KXOR(Share& c, const vector<Share>& a, unsigned int k) {
     return;
   }
 
-  cout << "here" << endl;
-  cout << k << endl;
   vector<Share> half_c, half_a;
 
   if (k % 2 == 0) {
@@ -537,23 +536,23 @@ void OnlineOp::KXOR(Share& c, const vector<Share>& a, unsigned int k) {
     KXOR(c, half_c, k / 2);
   }
 
-  cout << "here 2" << endl;
   if (k % 2 == 1) {
     for (int i = 0; i < (k - 1) / 2; i++) {
       half_c.push_back(a[2 * i]);
       half_a.push_back(a[2 * i + 1]);
     }
-    cout << "here 4" << endl;
-    cout << "half_c size: " << half_c.size() << endl;
-    cout << "half_a size: " << half_a.size() << endl;
-    cout << "k/2: " << k / 2 << endl;
+    /// cout << "here 4" << endl;
+    /// cout << "half_c size: " << half_c.size() << endl;
+    /// cout << "half_a size: " << half_a.size() << endl;
+    /// cout << "k/2: " << k / 2 << endl;
 
     XOR_inplace(half_c, half_a, k / 2);
+
     half_c.push_back(a[k - 1]);
-    cout << "here 5" << endl;
+    /// cout << "here 5" << endl;
     KXOR(c, half_c, (k + 1) / 2);
   }
-  cout << "here 3" << endl;
+  /// cout << "here 3" << endl;
 }
 
 void OnlineOp::KOR(Share& c, const vector<Share>& a, unsigned int k) {

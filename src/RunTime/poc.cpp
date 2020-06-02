@@ -115,6 +115,7 @@ void shared_rand_bits_phase_one(
     for (int i = 0; i < sbit.size(); i++) {
       gfp tmp;
       tmp.assign(local_bits[j]);
+      sbit[i].set_player(P.whoami());
       if (i == P.whoami()) {
         online_op.get_inputs(i, sbit[i], tmp);
       }
@@ -164,6 +165,7 @@ void decompose_and_reveal(
 void shared_rand_bits_phase_two(
   vector<Share>& shared_bits, const vector<bigint>& local_bits, int online_num, Player& P,
   Config_Info& CI) {
+  shared_bits.resize(2 * PSIZE);
   Processor Proc(online_num, P.nplayers(), P);
   OnlineOp online_op(Proc, online_num, P, CI.OCD, CI.machine);
 
@@ -172,6 +174,7 @@ void shared_rand_bits_phase_two(
     for (int i = 0; i < sbit.size(); i++) {
       gfp tmp;
       tmp.assign(local_bits[j]);
+      sbit[i].set_player(P.whoami());
       if (i == P.whoami()) {
         online_op.get_inputs(i, sbit[i], tmp);
       }

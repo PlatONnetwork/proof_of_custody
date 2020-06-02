@@ -442,17 +442,17 @@ void run_poc_compute_ephem_key_2primes_phase_one(
 void run_poc_compute_ephem_key_2primes_phase_two(
   vector<Share>& ek, const vector<bigint>& local_bits, const vector<bigint>& reveal_bits,
   Config_Info& CI) {
-  Player& P = *(tinfo[ThreadPlayer::TP_PocEphemKey].player);
   cout << "----------Begin of compute_enphem_key in 2 primes version phase_two----------" << endl;
+  Player& P = *(tinfo[ThreadPlayer::TP_PocEphemKey].player);
   Timer timer;
   timer.start();
 
   vector<Share> shared_bits;
   shared_rand_bits_phase_two(shared_bits, local_bits, 0, P, CI);
   xor_and_combine(ek, shared_bits, reveal_bits, 0, P, CI);
-  timer.stop();
 
-  cout << "ephem key phase two: " << timer.elapsed() << "s" << endl;
+  timer.stop();
+  stats[ThreadPlayer::TP_PocEphemKey].set(P, timer.elapsed()).print(CI.verbose);
 
   cout << "----------End of compute_enphem_key in 2 primes version phase_two------------" << endl;
 }
