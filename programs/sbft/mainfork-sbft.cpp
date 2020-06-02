@@ -15,6 +15,8 @@
 #include <atomic>
 using namespace std;
 
+string get_nonce(int p);
+
 #define POC_DEBUG_PRINT 0
 
 int run_stage_one(int argc, char* argv[], int partyid, int loops = 1) {
@@ -34,7 +36,7 @@ int run_stage_one(int argc, char* argv[], int partyid, int loops = 1) {
     Timer timer;
     timer.start();
 
-    string nonce = "123456";
+    string nonce = get_nonce(CI.my_number);
     vector<bigint> local_bits, reveal_bits;
     run_poc_compute_ephem_key_2primes_phase_one(local_bits, reveal_bits, bls, nonce, CI);
 
@@ -95,6 +97,7 @@ int run_stage_two(int argc, char* argv[], int partyid, int loops = 1) {
 
   Config_Info CI;
   CI.version = 1; // set 0 in stage2
+  CI.verbose = 2;
 
   run_init(argc, argv, CI);
   run_offline(CI);

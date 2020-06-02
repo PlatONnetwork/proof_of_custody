@@ -7,7 +7,16 @@ endif ()
 project(PROOF_OF_CUSTODY VERSION 1.0 DESCRIPTION "POC" LANGUAGES CXX)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+
+# lib and bin
+SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/")
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/")
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/")
+link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+link_directories(${CMAKE_BINARY_DIR}/lib)
+link_directories(${CMAKE_INSTALL_PREFIX}/lib)
+
 
 include_directories($<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 
@@ -51,11 +60,6 @@ target_link_libraries(poc PRIVATE
         mclbn384_256
         )
 
-add_executable(main.x main.cpp)
-target_link_libraries(main.x PRIVATE poc)
 
-add_executable(mainfork mainfork.cpp)
-target_link_libraries(mainfork PRIVATE poc)
-
-add_executable(Setup.x Setup.cpp)
-target_link_libraries(Setup.x PRIVATE OpenSSL::Crypto OpenSSL::SSL poc)
+# programs
+add_subdirectory(programs)

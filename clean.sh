@@ -2,7 +2,7 @@
 
 rm -rf build log out
 rm -rf Cert-Store Data
-rm -rf main.x Setup.x mainfork
+rm -rf main.x Setup.x mainfork mainfork-sbft
 
 rm -rf vm/Cert-Store
 rm -rf vm/Data
