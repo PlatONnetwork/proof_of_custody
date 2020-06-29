@@ -14,7 +14,7 @@ target_link_libraries(mainfork PRIVATE poc)
 
 
 # Concord-BFT, base on SBFT
-add_subdirectory(sbft)
+#add_subdirectory(sbft)
 
 
 
