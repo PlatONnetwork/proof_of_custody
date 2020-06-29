@@ -13,6 +13,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <atomic>
+#include <random>
 using namespace std;
 
 #define POC_DEBUG_PRINT 0
@@ -145,16 +146,19 @@ int run_stage_two(int argc, char* argv[], int partyid, int loops = 1) {
     vector<Share> ek(3);
     run_poc_compute_ephem_key_2primes_phase_two(ek, local_bits, reveal_bits, CI);
 
+    random_device rd;
     vector<gfp> msg(CHUNK_NUM);
+    int tmp;
     for (int i = 0; i < msg.size(); i++) {
-      msg[i].assign(i + 9);
+      tmp = rd();
+      msg[i].assign(tmp);
     }
 
     vector<Share> pre_key;
 
 #if 1 // set 0/1 to switch
-    run_poc_compute_custody_bit_offline_2primes(pre_key, {ek[0], ek[1]}, CI);
-    int bit = run_poc_compute_custody_bit_online_2primes(pre_key, ek[2], msg, CI);
+    run_poc_compute_custody_bit_offline_2primes(pre_key, ek, CI);
+    int bit = run_poc_compute_custody_bit_online_2primes(pre_key, ek[0], msg, CI);
 #else
     int bit = run_poc_compute_custody_bit({ek[0], ek[1]}, msg, CI);
 #endif

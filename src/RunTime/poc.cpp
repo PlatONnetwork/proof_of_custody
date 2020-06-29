@@ -218,6 +218,46 @@ void xor_and_combine(
   cout << "used input mask: " << online_op.UT.UsedInputMask << endl;
 }
 
+void poc_compute_custody_bit_offline_2primes(
+  vector<Share>& pre_key, const vector<Share>& keys, int online_num, Player& P, Config_Info& CI) {
+  if (keys.size() != 3) {
+    throw bad_value();
+  }
+
+  Processor Proc(online_num, P.nplayers(), P);
+  OnlineOp online_op(Proc, online_num, P, CI.OCD, CI.machine);
+
+  pre_key.resize(CHUNK_NUM);
+  Share s0_cube, s1_cube, s2_cube;
+  online_op.sqr(s0_cube, keys[0]);
+  online_op.mul_inplace(s0_cube, keys[0]);
+
+  online_op.sqr(s1_cube, keys[1]);
+  online_op.mul_inplace(s1_cube, keys[1]);
+
+  online_op.sqr(s2_cube, keys[2]);
+  pre_key[1] = s2_cube;
+  online_op.mul_inplace(s2_cube, keys[2]);
+
+  pre_key[0] = keys[1];
+  pre_key[2] = s0_cube;
+  // s1, s2^2, s0^3, s1^4, s2^5, s0^6, constant not considered
+
+  for (int i = 3; i < CHUNK_NUM; i++) {
+    if (i % 3 == 0) {
+      online_op.mul(pre_key[i], pre_key[i - 3], s1_cube);
+    } else if (i % 3 == 1) {
+      online_op.mul(pre_key[i], pre_key[i - 3], s2_cube);
+    } else if (i % 3 == 2) {
+      online_op.mul(pre_key[i], pre_key[i - 3], s0_cube);
+    }
+  }
+
+  cout << "used triple: " << online_op.UT.UsedTriples << endl;
+  cout << "used square: " << online_op.UT.UsedSquares << endl;
+  cout << "used bit: " << online_op.UT.UsedBit << endl;
+  cout << "used input mask: " << online_op.UT.UsedInputMask << endl;
+}
 int poc_compute_custody_bit_online_2primes(
   const vector<Share> pre_key, const Share key, const vector<gfp>& msg, int online_num, Player& P,
   Config_Info& CI) {
@@ -230,7 +270,7 @@ int poc_compute_custody_bit_online_2primes(
   Share uhf_out;
 
   online_op.mul_plain(uhf_out, pre_key[0], msg[1]);
-  online_op.add_plain_inplace(uhf_out, msg[0]);
+  online_op.add_plain_inplace(uhf_out, msg[0]); // m[0] + m[1]*s1
 
   Share tmp;
 
@@ -242,8 +282,12 @@ int poc_compute_custody_bit_online_2primes(
   online_op.add_inplace(uhf_out, pre_key.back());
 
   int res;
-  res = online_op.legendre_prf(key, uhf_out);
-
+  for (int i = 0; i < 10; i++) {
+    gfp count(i);
+    Share in;
+    online_op.add_plain(in, uhf_out, count);
+    res |= online_op.legendre_prf(key, in);
+  }
   cout << "used triple: " << online_op.UT.UsedTriples << endl;
   cout << "used square: " << online_op.UT.UsedSquares << endl;
   cout << "used bit: " << online_op.UT.UsedBit << endl;

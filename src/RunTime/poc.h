@@ -7,7 +7,8 @@
 
 using namespace std;
 
-#define CHUNK_NUM (128 * 1024 / 48 + 1)
+//#define CHUNK_NUM (128 * 1024 / 48 + 1)
+#define CHUNK_NUM (256 * 1024 / 32) //8192
 
 class Config_Info {
  public:
@@ -70,6 +71,9 @@ void shared_rand_bits_phase_two(
 void xor_and_combine(
   vector<Share>& keys, const vector<Share>& shared_bits, const vector<bigint>& reveal_bits,
   int online_num, Player& P, Config_Info& CI);
+
+void poc_compute_custody_bit_offline_2primes(
+  vector<Share>& pre_key, const vector<Share>& keys, int online_num, Player& P, Config_Info& CI);
 
 int poc_compute_custody_bit_online_2primes(
   const vector<Share> pre_key, const Share key, const vector<gfp>& msg, int online_num, Player& P,

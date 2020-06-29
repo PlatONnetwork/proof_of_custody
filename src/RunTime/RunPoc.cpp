@@ -459,7 +459,17 @@ void run_poc_compute_ephem_key_2primes_phase_two(
 
 void run_poc_compute_custody_bit_offline_2primes(
   vector<Share>& pre_key, const vector<Share>& keys, Config_Info& CI) {
-  run_poc_compute_custody_bit_offline(pre_key, keys, CI);
+  //  run_poc_compute_custody_bit_offline(pre_key, keys, CI);
+  cout << "----------Begin of compute_custody_bit_offline_2primes-------------------" << endl;
+  Player& P = *(tinfo[ThreadPlayer::TP_PocGenProofPre].player);
+
+  Timer timer;
+  timer.start();
+  poc_compute_custody_bit_offline_2primes(pre_key, keys, 0, P, CI);
+  timer.stop();
+  stats[ThreadPlayer::TP_PocGenProofPre].set(P, timer.elapsed()).print(CI.verbose);
+
+  cout << "----------End of compute_custody_bit_offline_2primes-------------------" << endl;
 }
 
 int run_poc_compute_custody_bit_online_2primes(
