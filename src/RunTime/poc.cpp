@@ -116,9 +116,9 @@ void shared_rand_bits_phase_one(
       gfp tmp;
       tmp.assign(local_bits[j]);
       sbit[i].set_player(P.whoami());
-      if (i == P.whoami()) {
+      //if (i == P.whoami()) {
         online_op.get_inputs(i, sbit[i], tmp);
-      }
+      //}
     }
     online_op.KXOR(shared_bits[j], sbit, sbit.size());
   }
@@ -175,9 +175,9 @@ void shared_rand_bits_phase_two(
       gfp tmp;
       tmp.assign(local_bits[j]);
       sbit[i].set_player(P.whoami());
-      if (i == P.whoami()) {
+      //if (i == P.whoami()) {
         online_op.get_inputs(i, sbit[i], tmp);
-      }
+      //}
     }
     online_op.KXOR(shared_bits[j], sbit, sbit.size());
   }
