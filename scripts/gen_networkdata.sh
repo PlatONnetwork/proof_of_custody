@@ -3,6 +3,8 @@
 
 curdir=$(pwd)
 
+# <n> the number of parties.
+# <t> the number of threshold, and 0 < t < n/2.
 if [ $# -lt 2 ]; then
     echo "$0 <n> <t>"
     exit 1

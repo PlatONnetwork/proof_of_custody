@@ -11,14 +11,50 @@
 #include <atomic>
 using namespace std;
 
+int run_test2(int argc, char* argv[]) {
+  Config_Info CI;
+  run_init(argc, argv, CI);
+
+  BLS bls(Share::SD.M.nplayers(), Share::SD.threshold);
+  run_poc_setup(bls, CI);
+
+  run_offline(CI);
+
+  {
+    // test
+    {
+      Share sa;
+      run_check_x(CI, sa);
+    }
+
+    string nonce = "123456";
+    vector<bigint> local_bits, reveal_bits;
+    run_poc_compute_ephem_key_2primes_phase_one(local_bits, reveal_bits, bls, nonce, CI);
+
+    {
+      // test
+      Share sa;
+      run_check_x(CI, sa);
+    }
+  }
+
+  run_test_bit_ops(CI);
+
+  wait_for_exit(CI);
+  //  output_statistics(CI);
+
+  run_clear(CI);
+}
+
 int run_test(int argc, char* argv[]) {
   Config_Info CI;
   run_init(argc, argv, CI);
   run_offline(CI);
+
   run_test_bit_ops(CI);
 
   wait_for_exit(CI);
-//  output_statistics(CI);
+  //  output_statistics(CI);
 
   run_clear(CI);
 }
@@ -137,8 +173,9 @@ int run_simulator(int argc, char* argv[], int how_long) {
 
 int main(int argc, char* argv[]) {
   int ret = 1;
-  //ret = run_test(argc, argv);
-    ret = run_once(argc, argv); // run once
+  ret = run_test(argc, argv);
+  // ret = run_test2(argc, argv);
+  //  ret = run_once(argc, argv); // run once
   //  ret = run_simulator(argc, argv, 60 * 10); // run 60*10 s
   return ret;
 }

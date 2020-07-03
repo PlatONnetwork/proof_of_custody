@@ -821,7 +821,6 @@ void OnlineOp::A2B(vector<Share>& bits, const Share& a) {
     bits = bitr;
     return;
   }
-
   decompose(bound, gfp::pr() - bcp, PSIZE);
 
   lt(factor, bitr, bound, PSIZE);

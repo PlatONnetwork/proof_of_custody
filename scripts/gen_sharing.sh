@@ -2,11 +2,13 @@
 
 # FIRST: sudo apt install expect
 
+# p
 if {$argc < 1} {
    send_user "usage: $argv0 <t>\n"
    exit
 }
 
+# <t> the number of threshold, and 0 < t < n/2.
 set t [lindex $argv 0]
 set timeout 60
 

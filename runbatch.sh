@@ -16,14 +16,10 @@ n=$1
 # test
 mkdir -p log out
 function run_once() {
-    for ((i = 1; i < $n; i++)); do
-        ./main.x $i >log/log$i.txt 2>&1 &
-    done
-    ./main.x 0 >log/log0.txt 2>&1
-    #./main.x 0
+    ./scripts/run_program.sh main.x $n
 }
 for ((j = 0; j < 50; j++)); do
-    run_once
-    echo $j
+    echo -e "\n$j ----------------------"
+    time run_once
     sleep 1
 done

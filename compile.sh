@@ -5,13 +5,14 @@ chmod +x *.sh
 
 killall -q main.x
 
-mkdir -p build
+# compile
+mkdir -p ${curdir}/build
 cd build
-cmake ..
-make -j8
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j
 cd ..
 
-bindir=./build/bin
+bindir=${curdir}/build/bin
 ln -sf ${bindir}/Setup.x Setup.x
 ln -sf ${bindir}/main.x main.x
 ln -sf ${bindir}/mainfork mainfork

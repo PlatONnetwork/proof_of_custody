@@ -53,3 +53,4 @@ void output_statistics(Config_Info& CI); // must be called before run_clear, aft
 void run_clear(Config_Info& CI);
 
 void run_test_bit_ops(Config_Info& CI);
+void run_check_x(Config_Info& CI, Share&sa); // for check

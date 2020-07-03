@@ -64,6 +64,7 @@ enum ThreadPlayer {
   TP_PocEphemKey,
   TP_PocGenProofPre,
   TP_PocGenProof,
+  TP_PocCheck,
   // extras here
   TP_NUMS
 };
@@ -598,4 +599,29 @@ void run_test_bit_ops(Config_Info& CI) {
 
   online_op.test_bit_ops();
   cout << "----------End of test-------------------------------" << endl;
+}
+
+void run_check_x(Config_Info& CI, Share& sa) {
+  Player& P = *(tinfo[ThreadPlayer::TP_PocCheck].player);
+  Processor Proc(0, P.nplayers(), P);
+  OnlineOp online_op(Proc, 0, P, CI.OCD, CI.machine);
+
+  online_op.test_bit_ops();
+
+  cout << "================= BEG " << __FUNCTION__ << " =================" << endl;
+  gfp a, b;
+  Share aa, bb, cc;
+  if (P.whoami() == 0) {
+    a.assign(3);
+  }
+  if (P.whoami() == 1) {
+    b.assign(4);
+  }
+  online_op.get_inputs(0, aa, a);
+  online_op.get_inputs(1, bb, b);
+  online_op.mul(cc, aa, bb);
+  online_op.reveal_and_print({aa, bb, cc});
+
+  sa = cc;
+  cout << "================= END " << __FUNCTION__ << " =================" << endl;
 }

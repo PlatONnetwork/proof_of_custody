@@ -3,6 +3,7 @@
 
 curdir=$(pwd)
 
+# <n> the number of parties.
 if [ $# -lt 1 ]; then
     echo "$0 <n>"
     exit 1

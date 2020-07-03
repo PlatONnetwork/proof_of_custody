@@ -35,7 +35,7 @@ void Share::assign_zero()
 
 void Share::assign(const gfp &aa, const vector<gfp> &alphai)
 {
-  cout << "alphai.size(): " << alphai.size() << endl;
+  //!cout << "alphai.size(): " << alphai.size() << endl;
   if (SD.type == Other || SD.type == Replicated || SD.type == Q2MSP)
   {
     for (unsigned int i = 0; i < SD.M.shares_per_player(p); i++)
@@ -45,19 +45,19 @@ void Share::assign(const gfp &aa, const vector<gfp> &alphai)
   }
   else
   {
-    cout << "Share::assign 1" << endl;
+    //!cout << "Share::assign 1" << endl;
     if (p == 0 || SD.type == Shamir)
     {
-      cout << "Share::assign 2, a.size()" << a.size() << endl;
+      //!cout << "Share::assign 2, a.size()" << a.size() << endl;
       a[0] = aa;
     }
     else
     {
-      cout << "Share::assign 3" << endl;
+      //!cout << "Share::assign 3" << endl;
       a[0].assign_zero();
     }
 
-    cout << "Share::assign 4" << endl;
+    //!cout << "Share::assign 4" << endl;
     if (SD.type == Full)
     {
       for (unsigned int i = 0; i < SD.nmacs; i++)
