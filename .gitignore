@@ -39,3 +39,8 @@
 build/
 build/**
 *yyl*
+
+local/
+logs/
+Player-Data/**
+mascot-example.x

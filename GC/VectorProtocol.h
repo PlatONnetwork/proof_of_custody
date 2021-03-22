@@ -1,0 +1,36 @@
+/*
+ * VectorProtocol.h
+ *
+ */
+
+#ifndef GC_VECTORPROTOCOL_H_
+#define GC_VECTORPROTOCOL_H_
+
+#include "Protocols/Replicated.h"
+
+namespace GC
+{
+
+template<class T>
+class VectorProtocol : public ProtocolBase<T>
+{
+    typename T::part_type::Protocol part_protocol;
+
+public:
+    VectorProtocol(Player& P);
+
+    void init_mul(SubProcessor<T>* proc);
+    void init_mul(Preprocessing<T>& prep, typename T::MAC_Check& MC);
+    typename T::clear prepare_mul(const T& x, const T& y, int n = -1);
+    void exchange();
+    T finalize_mul(int n = -1);
+
+    typename T::part_type::Protocol& get_part()
+    {
+        return part_protocol;
+    }
+};
+
+} /* namespace GC */
+
+#endif /* GC_VECTORPROTOCOL_H_ */
