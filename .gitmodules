@@ -1,0 +1,9 @@
+[submodule "mcl"]
+	path = mcl
+	url = https://github.com/herumi/mcl.git
+[submodule "SimpleOT"]
+	path = SimpleOT
+	url = https://github.com/mkskeller/SimpleOT.git
+[submodule "mpir"]
+	path = mpir
+	url = https://github.com/wbhart/mpir.git
