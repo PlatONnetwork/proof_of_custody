@@ -1,36 +1,41 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Others
 .DS_Store
 .vs/
 .vscode/
+
+build/
 build/**
-target
-bin
-
-key/
-out/
-log/
-
-Cert-Store/
-Data/
-
-main.x
-Setup.x
-
-*.o
-*.obj
-*.idea
-*.iml
-*.log
-*.enc
-*.suo
-*.lik
-*.lnk
-*.pdb
-*.db
-*.pch
-*.ipch
-*.x
-
-update-github.sh
-*vm*
-
-3rd
+*yyl*
