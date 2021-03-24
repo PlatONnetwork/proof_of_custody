@@ -43,4 +43,4 @@ build/**
 local/
 logs/
 Player-Data/**
-mascot-example.x
+/*.x
