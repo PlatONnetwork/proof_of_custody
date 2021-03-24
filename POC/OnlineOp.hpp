@@ -1,6 +1,15 @@
 #include "OnlineOp.h"
 
 template <class T>
+void OnlineOp<T>::str_to_gfp(clear &ans, const string &str)
+{
+  // bigint bn(str, 10);
+  mpz_class bnx(str, 10);
+  bigint bn(bnx);
+  to_gfp(ans, bn);
+}
+
+template <class T>
 void OnlineOp<T>::power(clear &a, int exp)
 {
   if (exp == 0)
@@ -1081,4 +1090,3 @@ void OnlineOp<T>::get_inputs(unsigned int party, Complex<T> &sa, const Complex_P
   get_inputs(party, sa.imag, inputs.imag);
 }
 
-#include "OnlineOp.test.hpp"

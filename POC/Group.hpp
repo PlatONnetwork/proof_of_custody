@@ -1,4 +1,3 @@
-
 #include "Group.h"
 
 #define OK_CODE 0
@@ -14,18 +13,18 @@ void G1Op<T>::add_plain_aff(G1_Affine_Coordinates<T> &c,
 {
     T dx;
     T m, mm;
-    sub_plain(m, a.y, b.y);
-    sub_plain(dx, a.x, b.x);
+    this->sub_plain(m, a.y, b.y);
+    this->sub_plain(dx, a.x, b.x);
 
-    div_inplace(m, dx); // m = (y1-y2)/(x1-x2)
-    sqr(mm, m);         // mm = m^2
+    this->div_inplace(m, dx); // m = (y1-y2)/(x1-x2)
+    this->sqr(mm, m);         // mm = m^2
 
-    sub_inplace(mm, a.x);
-    sub_plain(c.x, mm, b.x); // x3 = m^2-x1-x2
+    this->sub_inplace(mm, a.x);
+    this->sub_plain(c.x, mm, b.x); // x3 = m^2-x1-x2
 
-    sub(c.y, a.x, c.x);
-    mul_inplace(c.y, m);
-    sub_inplace(c.y, a.y); // y3 = m(x1-x3)-y1
+    this->sub(c.y, a.x, c.x);
+    this->mul_inplace(c.y, m);
+    this->sub_inplace(c.y, a.y); // y3 = m(x1-x3)-y1
 }
 
 template <class T>
@@ -43,18 +42,18 @@ void G1Op<T>::add_aff(G1_Affine_Coordinates<T> &c,
 {
     T dx;
     T m, mm;
-    sub(m, a.y, b.y);
-    sub(dx, a.x, b.x);
+    this->sub(m, a.y, b.y);
+    this->sub(dx, a.x, b.x);
 
-    div_inplace(m, dx); // m = (y1-y2)/(x1-x2)
-    sqr(mm, m);         // mm = m^2
+    this->div_inplace(m, dx); // m = (y1-y2)/(x1-x2)
+    this->sqr(mm, m);         // mm = m^2
 
-    sub_inplace(mm, a.x);
-    sub(c.x, mm, b.x); // x3 = m^2-x1-x2
+    this->sub_inplace(mm, a.x);
+    this->sub(c.x, mm, b.x); // x3 = m^2-x1-x2
 
-    sub(c.y, a.x, c.x);
-    mul_inplace(c.y, m);
-    sub_inplace(c.y, a.y); // y3 = m(x1-x3)-y1
+    this->sub(c.y, a.x, c.x);
+    this->mul_inplace(c.y, m);
+    this->sub_inplace(c.y, a.y); // y3 = m(x1-x3)-y1
 }
 
 template <class T>
@@ -72,41 +71,41 @@ void G1Op<T>::add_plain_jac(G1_Jacobian_Coordinates<T> &c,
 {
     clear bZ3;
     T S1, S2, U1, U2;
-    sqr(S2, a.Z);
+    this->sqr(S2, a.Z);
     bZ3 = b.Z * b.Z;
 
-    mul_plain(U2, S2, b.X);  //U2 = X2*Z1^2
-    mul_plain(U1, a.X, bZ3); //U1 = X1*Z2^2
+    this->mul_plain(U2, S2, b.X);  //U2 = X2*Z1^2
+    this->mul_plain(U1, a.X, bZ3); //U1 = X1*Z2^2
 
     T S;
-    mul_plain(S, S2, b.Y);
-    mul(S2, S, a.Z); // S2 = Y2*Z1^3
+    this->mul_plain(S, S2, b.Y);
+    this->mul(S2, S, a.Z); // S2 = Y2*Z1^3
 
     bZ3 = bZ3 * b.Z;
-    mul_plain(S1, a.Y, bZ3); // S1 = Y1*Z2^3
+    this->mul_plain(S1, a.Y, bZ3); // S1 = Y1*Z2^3
 
     T R, H, V, G;
-    sub(R, S1, S2); //R = S1-S2
-    sub(H, U1, U2); // H = U1-U2
+    this->sub(R, S1, S2); //R = S1-S2
+    this->sub(H, U1, U2); // H = U1-U2
 
-    sqr(V, H);
-    mul(G, V, H);       //G = H^3
-    mul_inplace(V, U1); // V = U1*H^2
+    this->sqr(V, H);
+    this->mul(G, V, H);       //G = H^3
+    this->mul_inplace(V, U1); // V = U1*H^2
 
-    mul_plain(c.Z, a.Z, b.Z);
-    mul_inplace(c.Z, H); // Z3 = Z1*Z2*H
+    this->mul_plain(c.Z, a.Z, b.Z);
+    this->mul_inplace(c.Z, H); // Z3 = Z1*Z2*H
 
     T tmp;
-    sqr(tmp, R);
+    this->sqr(tmp, R);
 
-    add(c.X, tmp, G);
-    sub_inplace(c.X, V);
-    sub_inplace(c.X, V); //X3 = R^2+G-2V
+    this->add(c.X, tmp, G);
+    this->sub_inplace(c.X, V);
+    this->sub_inplace(c.X, V); //X3 = R^2+G-2V
 
-    mul(tmp, S1, G);
-    sub(c.Y, V, c.X);
-    mul_inplace(c.Y, R);
-    sub_inplace(c.Y, tmp); //Y3 = R*(V-X3)-S1*G
+    this->mul(tmp, S1, G);
+    this->sub(c.Y, V, c.X);
+    this->mul_inplace(c.Y, R);
+    this->sub_inplace(c.Y, tmp); //Y3 = R*(V-X3)-S1*G
 }
 
 template <class T>
@@ -123,40 +122,40 @@ void G1Op<T>::add_jac(G1_Jacobian_Coordinates<T> &c,
                       const G1_Jacobian_Coordinates<T> &b)
 {
     T S1, S2, U1, U2;
-    sqr(S2, a.Z);
-    sqr(S1, b.Z);
+    this->sqr(S2, a.Z);
+    this->sqr(S1, b.Z);
 
-    mul(U2, b.X, S2); //U2 = X2*Z1^2
-    mul(U1, a.X, S1); //U1 = X1*Z2^2
+    this->mul(U2, b.X, S2); //U2 = X2*Z1^2
+    this->mul(U1, a.X, S1); //U1 = X1*Z2^2
 
-    mul_inplace(S2, b.Y);
-    mul_inplace(S2, a.Z); // S2 = Y2*Z1^3
+    this->mul_inplace(S2, b.Y);
+    this->mul_inplace(S2, a.Z); // S2 = Y2*Z1^3
 
-    mul_inplace(S1, a.Y);
-    mul_inplace(S1, b.Z); // S1 = Y1*Z2^3
+    this->mul_inplace(S1, a.Y);
+    this->mul_inplace(S1, b.Z); // S1 = Y1*Z2^3
 
     T R, H, V, G;
-    sub(R, S1, S2); //R = S1-S2
-    sub(H, U1, U2); // H = U1-U2
+    this->sub(R, S1, S2); //R = S1-S2
+    this->sub(H, U1, U2); // H = U1-U2
 
-    sqr(V, H);
-    mul(G, V, H);       //G = H^3
-    mul_inplace(V, U1); // V = U1*H^2
+    this->sqr(V, H);
+    this->mul(G, V, H);       //G = H^3
+    this->mul_inplace(V, U1); // V = U1*H^2
 
-    mul(c.Z, a.Z, b.Z);
-    mul_inplace(c.Z, H); // Z3 = Z1*Z2*H
+    this->mul(c.Z, a.Z, b.Z);
+    this->mul_inplace(c.Z, H); // Z3 = Z1*Z2*H
 
     T tmp;
-    sqr(tmp, R);
+    this->sqr(tmp, R);
 
-    add(c.X, tmp, G);
-    sub_inplace(c.X, V);
-    sub_inplace(c.X, V); //X3 = R^2+G-2V
+    this->add(c.X, tmp, G);
+    this->sub_inplace(c.X, V);
+    this->sub_inplace(c.X, V); //X3 = R^2+G-2V
 
-    mul(tmp, S1, G);
-    sub(c.Y, V, c.X);
-    mul_inplace(c.Y, R);
-    sub_inplace(c.Y, tmp); //Y3 = R*(V-X3)-S1*G
+    this->mul(tmp, S1, G);
+    this->sub(c.Y, V, c.X);
+    this->mul_inplace(c.Y, R);
+    this->sub_inplace(c.Y, tmp); //Y3 = R*(V-X3)-S1*G
 }
 
 template <class T>
@@ -177,39 +176,39 @@ void G1Op<T>::add_plain_proj(G1_Projective_Coordinates<T> &c,
      * could optimize the RAM used              */
 
     T U1, U2, S1, S2;
-    mul_plain(S2, a.Z, b.Y); //S2 = Y2 * Z1
-    mul_plain(S1, a.Y, b.Z); //S1 = Y1 * Z2
-    mul_plain(U2, a.Z, b.X); //U2 = X2 * Z1
-    mul_plain(U1, a.X, b.Z); //U1 = X1 * Z2
+    this->mul_plain(S2, a.Z, b.Y); //S2 = Y2 * Z1
+    this->mul_plain(S1, a.Y, b.Z); //S1 = Y1 * Z2
+    this->mul_plain(U2, a.Z, b.X); //U2 = X2 * Z1
+    this->mul_plain(U1, a.X, b.Z); //U1 = X1 * Z2
 
     T T_, H, R;
-    sub(R, S1, S2);          //R = S1 - S2
-    sub(H, U1, U2);          //H = U1 - U2
-    mul_plain(T_, a.Z, b.Z); //T = Z1 * Z2
+    this->sub(R, S1, S2);          //R = S1 - S2
+    this->sub(H, U1, U2);          //H = U1 - U2
+    this->mul_plain(T_, a.Z, b.Z); //T = Z1 * Z2
 
     T G, V, W;
     T R2, H2;
 
-    sqr(H2, H);     //H2 = H^2
-    mul(V, U1, H2); //V = U1*H^2
+    this->sqr(H2, H);     //H2 = H^2
+    this->mul(V, U1, H2); //V = U1*H^2
 
-    mul(G, H2, H); // G = H^3
+    this->mul(G, H2, H); // G = H^3
 
-    sqr(R2, R); //R2 = R^2
-    mul(W, R2, T_);
-    add_inplace(W, G);
-    sub_inplace(W, V);
-    sub_inplace(W, V); // W = R^2*T + G - 2V
+    this->sqr(R2, R); //R2 = R^2
+    this->mul(W, R2, T_);
+    this->add_inplace(W, G);
+    this->sub_inplace(W, V);
+    this->sub_inplace(W, V); // W = R^2*T + G - 2V
 
-    mul(c.Z, T_, G); //Z3 = T * G
+    this->mul(c.Z, T_, G); //Z3 = T * G
 
     T tmp;
-    mul(tmp, S1, G);
-    sub(c.Y, V, W);
-    mul_inplace(c.Y, R);
-    sub_inplace(c.Y, tmp); // Y3 = R*(V-W)-S1*G
+    this->mul(tmp, S1, G);
+    this->sub(c.Y, V, W);
+    this->mul_inplace(c.Y, R);
+    this->sub_inplace(c.Y, tmp); // Y3 = R*(V-W)-S1*G
 
-    mul(c.X, H, W); // X3 = H * W
+    this->mul(c.X, H, W); // X3 = H * W
 }
 
 template <class T>
@@ -230,39 +229,39 @@ void G1Op<T>::add_proj(G1_Projective_Coordinates<T> &c,
      * could optimize the RAM used              */
 
     T U1, U2, S1, S2;
-    mul(S2, b.Y, a.Z); //S2 = Y2 * Z1
-    mul(S1, a.Y, b.Z); //S1 = Y1 * Z2
-    mul(U2, b.X, a.Z); //U2 = X2 * Z1
-    mul(U1, a.X, b.Z); //U1 = X1 * Z2
+    this->mul(S2, b.Y, a.Z); //S2 = Y2 * Z1
+    this->mul(S1, a.Y, b.Z); //S1 = Y1 * Z2
+    this->mul(U2, b.X, a.Z); //U2 = X2 * Z1
+    this->mul(U1, a.X, b.Z); //U1 = X1 * Z2
 
     T T_, H, R;
-    sub(R, S1, S2);    //R = S1 - S2
-    sub(H, U1, U2);    //H = U1 - U2
-    mul(T_, a.Z, b.Z); //T = Z1 * Z2
+    this->sub(R, S1, S2);    //R = S1 - S2
+    this->sub(H, U1, U2);    //H = U1 - U2
+    this->mul(T_, a.Z, b.Z); //T = Z1 * Z2
 
     T G, V, W;
     T R2, H2;
 
-    sqr(H2, H);     //H2 = H^2
-    mul(V, U1, H2); //V = U1*H^2
+    this->sqr(H2, H);     //H2 = H^2
+    this->mul(V, U1, H2); //V = U1*H^2
 
-    mul(G, H2, H); // G = H^3
+    this->mul(G, H2, H); // G = H^3
 
-    sqr(R2, R); //R2 = R^2
-    mul(W, R2, T_);
-    add_inplace(W, G);
-    sub_inplace(W, V);
-    sub_inplace(W, V); // W = R^2*T + G - 2V
+    this->sqr(R2, R); //R2 = R^2
+    this->mul(W, R2, T_);
+    this->add_inplace(W, G);
+    this->sub_inplace(W, V);
+    this->sub_inplace(W, V); // W = R^2*T + G - 2V
 
-    mul(c.Z, T_, G); //Z3 = T * G
+    this->mul(c.Z, T_, G); //Z3 = T * G
 
     T tmp;
-    mul(tmp, S1, G);
-    sub(c.Y, V, W);
-    mul_inplace(c.Y, R);
-    sub_inplace(c.Y, tmp); // Y3 = R*(V-W)-S1*G
+    this->mul(tmp, S1, G);
+    this->sub(c.Y, V, W);
+    this->mul_inplace(c.Y, R);
+    this->sub_inplace(c.Y, tmp); // Y3 = R*(V-W)-S1*G
 
-    mul(c.X, H, W); // X3 = H * W
+    this->mul(c.X, H, W); // X3 = H * W
 }
 
 template <class T>
@@ -286,30 +285,22 @@ void G1Op<T>::reveal_and_print(const V p)
     OnlineOp<T>::reveal_and_print({p.Z});
 }
 
-// template <class T>
-// void G1Op<T>::reveal_and_print(const G1_Affine_Coordinates<T> ac)
-// {
-//     cout << "x: " << endl;
-//     OnlineOp::reveal_and_print({ac.x});
-//     cout << "y: " << endl;
-//     OnlineOp::reveal_and_print({ac.y});
-// }
+template <class T>
+void G1Op<T>::reveal_and_print(const G1_Affine_Coordinates<T> ac)
+{
+    cout << "x: " << endl;
+    OnlineOp<T>::reveal_and_print({ac.x});
+    cout << "y: " << endl;
+    OnlineOp<T>::reveal_and_print({ac.y});
+}
 
 //------test--------//
 
 template <class T>
-inline void str_to_gfp(typename T::clear &ans, const string &str)
-{
-#if OK_CODE
-    bigint bn(str.c_str(), 10);
-    to_gfp(ans, bn);
-#endif
-}
-
-template <class T>
 void G1Op<T>::G1_test_add_aff()
 {
-    cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
+    PRINT_TEST_BEG();
+
     vector<string> point1(2), point2(2);
     point1[0] = "1295728164626534415618781265254580659926272354843985135401485454504777372546472596033371574568093826491865410771001";
     point1[1] = "3839565232484830821203974136028462429409860797185329370952032679694793040839037122415038227769061259923986030367015";
@@ -318,19 +309,19 @@ void G1Op<T>::G1_test_add_aff()
     point2[1] = "1939834878592542483572653782999203248604368035458557492969812954708733328780181922866866198381425602016362784974612";
 
     clear g1x, g1y, g2x, g2y;
-    str_to_gfp(g1x, point1[0]);
-    str_to_gfp(g1y, point1[1]);
-    str_to_gfp(g2x, point2[0]);
-    str_to_gfp(g2y, point2[1]);
+    this->str_to_gfp(g1x, point1[0]);
+    this->str_to_gfp(g1y, point1[1]);
+    this->str_to_gfp(g2x, point2[0]);
+    this->str_to_gfp(g2y, point2[1]);
 
     G1_Affine_Coordinates_Plain<T> acp(g2x, g2y);
 
     vector<G1_Affine_Coordinates<T>> ac(2);
-    get_inputs(0, ac[0].x, g1x);
-    get_inputs(0, ac[0].y, g1y);
+    this->get_inputs(0, ac[0].x, g1x);
+    this->get_inputs(0, ac[0].y, g1y);
 
-    get_inputs(1, ac[1].x, g2x);
-    get_inputs(1, ac[1].y, g2y);
+    this->get_inputs(1, ac[1].x, g2x);
+    this->get_inputs(1, ac[1].y, g2y);
     cout << "--------test add_affine--------" << endl;
     G1_Affine_Coordinates<T> res(ac[0]);
     reveal_and_print(res);
@@ -342,12 +333,15 @@ void G1Op<T>::G1_test_add_aff()
     res = ac[0];
     add_plain_aff_inplace(res, acp);
     reveal_and_print(res);
+
+    PRINT_TEST_END();
 }
 
 template <class T>
 void G1Op<T>::G1_test_add_jac()
 {
-    cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
+    PRINT_TEST_BEG();
+
     vector<string> point1(3), point2(3);
     point1[0] = "3685416753713387016781088315183077757961620795782546409894578378688607592378376318836054947676345821548104185464507";
     point1[1] = "1339506544944476473020471379941921221584933875938349620426543736416511423956333506472724655353366534992391756441569";
@@ -358,23 +352,23 @@ void G1Op<T>::G1_test_add_jac()
     point2[2] = "2679013089888952946040942759883842443169867751876699240853087472833022847912667012945449310706733069984783512883138";
 
     clear g1x, g1y, g1z, g2x, g2y, g2z;
-    str_to_gfp(g1x, point1[0]);
-    str_to_gfp(g1y, point1[1]);
-    str_to_gfp(g1z, point1[2]);
-    str_to_gfp(g2x, point2[0]);
-    str_to_gfp(g2y, point2[1]);
-    str_to_gfp(g2z, point2[2]);
+    this->str_to_gfp(g1x, point1[0]);
+    this->str_to_gfp(g1y, point1[1]);
+    this->str_to_gfp(g1z, point1[2]);
+    this->str_to_gfp(g2x, point2[0]);
+    this->str_to_gfp(g2y, point2[1]);
+    this->str_to_gfp(g2z, point2[2]);
 
     G1_Jacobian_Coordinates_Plain<T> jcp(g2x, g2y, g2z);
 
     vector<G1_Jacobian_Coordinates<T>> jc(2);
-    get_inputs(0, jc[0].X, g1x);
-    get_inputs(0, jc[0].Y, g1y);
-    get_inputs(0, jc[0].Z, g1z);
+    this->get_inputs(0, jc[0].X, g1x);
+    this->get_inputs(0, jc[0].Y, g1y);
+    this->get_inputs(0, jc[0].Z, g1z);
 
-    get_inputs(1, jc[1].X, g2x);
-    get_inputs(1, jc[1].Y, g2y);
-    get_inputs(1, jc[1].Z, g2z);
+    this->get_inputs(1, jc[1].X, g2x);
+    this->get_inputs(1, jc[1].Y, g2y);
+    this->get_inputs(1, jc[1].Z, g2z);
     cout << "--------test add_jacobian--------" << endl;
     G1_Jacobian_Coordinates<T> res(jc[0]);
     reveal_and_print(res);
@@ -387,12 +381,15 @@ void G1Op<T>::G1_test_add_jac()
     reveal_and_print(res);
     add_plain_jac_inplace(res, jcp);
     reveal_and_print(res);
+
+    PRINT_TEST_END();
 }
 
 template <class T>
 void G1Op<T>::G1_test_add_proj()
 {
-    cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
+    PRINT_TEST_BEG();
+
     vector<string> point1(3), point2(3);
     point1[0] = "904218658502494312590159247105554874787512476566126303635147587402923829641584622770449558420966780868207684298157";
     point1[1] = "3215784584818841779393380451963501913485474208604528267666791755940205624806737197312591247682567521662969376111781";
@@ -403,23 +400,23 @@ void G1Op<T>::G1_test_add_proj()
     point2[2] = "1616122912214980288291576325462461695684418736110628553500087472020914353750538673566640769330086294264352298565201";
 
     clear g1x, g1y, g1z, g2x, g2y, g2z;
-    str_to_gfp(g1x, point1[0]);
-    str_to_gfp(g1y, point1[1]);
-    str_to_gfp(g1z, point1[2]);
-    str_to_gfp(g2x, point2[0]);
-    str_to_gfp(g2y, point2[1]);
-    str_to_gfp(g2z, point2[2]);
+    this->str_to_gfp(g1x, point1[0]);
+    this->str_to_gfp(g1y, point1[1]);
+    this->str_to_gfp(g1z, point1[2]);
+    this->str_to_gfp(g2x, point2[0]);
+    this->str_to_gfp(g2y, point2[1]);
+    this->str_to_gfp(g2z, point2[2]);
 
     G1_Projective_Coordinates_Plain<T> pcp(g2x, g2y, g2z);
 
     vector<G1_Projective_Coordinates<T>> pc(2);
-    get_inputs(0, pc[0].X, g1x);
-    get_inputs(0, pc[0].Y, g1y);
-    get_inputs(0, pc[0].Z, g1z);
+    this->get_inputs(0, pc[0].X, g1x);
+    this->get_inputs(0, pc[0].Y, g1y);
+    this->get_inputs(0, pc[0].Z, g1z);
 
-    get_inputs(1, pc[1].X, g2x);
-    get_inputs(1, pc[1].Y, g2y);
-    get_inputs(1, pc[1].Z, g2z);
+    this->get_inputs(1, pc[1].X, g2x);
+    this->get_inputs(1, pc[1].Y, g2y);
+    this->get_inputs(1, pc[1].Z, g2z);
     cout << "--------test add_projective--------" << endl;
     G1_Projective_Coordinates<T> res(pc[0]);
     reveal_and_print(res);
@@ -431,6 +428,8 @@ void G1Op<T>::G1_test_add_proj()
     res = pc[0];
     add_plain_proj_inplace(res, pcp);
     reveal_and_print(res);
+
+    PRINT_TEST_END();
 }
 
 //------G2 ops------//
@@ -442,18 +441,18 @@ void G2Op<T>::add_plain_aff(G2_Affine_Coordinates<T> &c,
 {
     Complex<T> dx;
     Complex<T> m, mm;
-    sub_plain(m, a.y, b.y);
-    sub_plain(dx, a.x, b.x);
+    this->sub_plain(m, a.y, b.y);
+    this->sub_plain(dx, a.x, b.x);
 
-    div_inplace(m, dx); // m = (y1-y2)/(x1-x2)
-    sqr(mm, m);         // mm = m^2
+    this->div_inplace(m, dx); // m = (y1-y2)/(x1-x2)
+    this->sqr(mm, m);         // mm = m^2
 
-    sub_inplace(mm, a.x);
-    sub_plain(c.x, mm, b.x); // x3 = m^2-x1-x2
+    this->sub_inplace(mm, a.x);
+    this->sub_plain(c.x, mm, b.x); // x3 = m^2-x1-x2
 
-    sub(c.y, a.x, c.x);
-    mul_inplace(c.y, m);
-    sub_inplace(c.y, a.y); // y3 = m(x1-x3)-y1
+    this->sub(c.y, a.x, c.x);
+    this->mul_inplace(c.y, m);
+    this->sub_inplace(c.y, a.y); // y3 = m(x1-x3)-y1
 }
 
 template <class T>
@@ -523,42 +522,42 @@ void G2Op<T>::add_plain_jac(G2_Jacobian_Coordinates<T> &c,
 {
     Complex_Plain<T> bZ3;
     Complex<T> S1, S2, U1, U2;
-    sqr(S2, a.Z);
+    this->sqr(S2, a.Z);
     mul_complex_plain(bZ3, b.Z, b.Z);
 
-    mul_plain(U2, S2, b.X);  //U2 = X2*Z1^2
-    mul_plain(U1, a.X, bZ3); //U1 = X1*Z2^2
+    this->mul_plain(U2, S2, b.X);  //U2 = X2*Z1^2
+    this->mul_plain(U1, a.X, bZ3); //U1 = X1*Z2^2
 
     Complex<T> S;
-    mul_plain(S, S2, b.Y);
-    mul(S2, S, a.Z); // S2 = Y2*Z1^3
+    this->mul_plain(S, S2, b.Y);
+    this->mul(S2, S, a.Z); // S2 = Y2*Z1^3
 
     mul_complex_plain_inplace(bZ3, b.Z);
 
-    mul_plain(S1, a.Y, bZ3); // S1 = Y1*Z2^3
+    this->mul_plain(S1, a.Y, bZ3); // S1 = Y1*Z2^3
 
     Complex<T> R, H, V, G;
-    sub(R, S1, S2); //R = S1-S2
-    sub(H, U1, U2); // H = U1-U2
+    this->sub(R, S1, S2); //R = S1-S2
+    this->sub(H, U1, U2); // H = U1-U2
 
-    sqr(V, H);
-    mul(G, V, H);       //G = H^3
-    mul_inplace(V, U1); // V = U1*H^2
+    this->sqr(V, H);
+    this->mul(G, V, H);       //G = H^3
+    this->mul_inplace(V, U1); // V = U1*H^2
 
-    mul_plain(c.Z, a.Z, b.Z);
-    mul_inplace(c.Z, H); // Z3 = Z1*Z2*H
+    this->mul_plain(c.Z, a.Z, b.Z);
+    this->mul_inplace(c.Z, H); // Z3 = Z1*Z2*H
 
     Complex<T> tmp;
-    sqr(tmp, R);
+    this->sqr(tmp, R);
 
-    add(c.X, tmp, G);
-    sub_inplace(c.X, V);
-    sub_inplace(c.X, V); //X3 = R^2+G-2V
+    this->add(c.X, tmp, G);
+    this->sub_inplace(c.X, V);
+    this->sub_inplace(c.X, V); //X3 = R^2+G-2V
 
-    mul(tmp, S1, G);
-    sub(c.Y, V, c.X);
-    mul_inplace(c.Y, R);
-    sub_inplace(c.Y, tmp); //Y3 = R*(V-X3)-S1*G
+    this->mul(tmp, S1, G);
+    this->sub(c.Y, V, c.X);
+    this->mul_inplace(c.Y, R);
+    this->sub_inplace(c.Y, tmp); //Y3 = R*(V-X3)-S1*G
 }
 
 template <class T>
@@ -576,40 +575,40 @@ void G2Op<T>::add_jac(G2_Jacobian_Coordinates<T> &c,
                       const G2_Jacobian_Coordinates<T> &b)
 {
     Complex<T> S1, S2, U1, U2;
-    sqr(S2, a.Z);
-    sqr(S1, b.Z);
+    this->sqr(S2, a.Z);
+    this->sqr(S1, b.Z);
 
-    mul(U2, b.X, S2); //U2 = X2*Z1^2
-    mul(U1, a.X, S1); //U1 = X1*Z2^2
+    this->mul(U2, b.X, S2); //U2 = X2*Z1^2
+    this->mul(U1, a.X, S1); //U1 = X1*Z2^2
 
-    mul_inplace(S2, b.Y);
-    mul_inplace(S2, a.Z); // S2 = Y2*Z1^3
+    this->mul_inplace(S2, b.Y);
+    this->mul_inplace(S2, a.Z); // S2 = Y2*Z1^3
 
-    mul_inplace(S1, a.Y);
-    mul_inplace(S1, b.Z); // S1 = Y1*Z2^3
+    this->mul_inplace(S1, a.Y);
+    this->mul_inplace(S1, b.Z); // S1 = Y1*Z2^3
 
     Complex<T> R, H, V, G;
-    sub(R, S1, S2); //R = S1-S2
-    sub(H, U1, U2); // H = U1-U2
+    this->sub(R, S1, S2); //R = S1-S2
+    this->sub(H, U1, U2); // H = U1-U2
 
-    sqr(V, H);
-    mul(G, V, H);       //G = H^3
-    mul_inplace(V, U1); // V = U1*H^2
+    this->sqr(V, H);
+    this->mul(G, V, H);       //G = H^3
+    this->mul_inplace(V, U1); // V = U1*H^2
 
-    mul(c.Z, a.Z, b.Z);
-    mul_inplace(c.Z, H); // Z3 = Z1*Z2*H
+    this->mul(c.Z, a.Z, b.Z);
+    this->mul_inplace(c.Z, H); // Z3 = Z1*Z2*H
 
     Complex<T> tmp;
-    sqr(tmp, R);
+    this->sqr(tmp, R);
 
-    add(c.X, tmp, G);
-    sub_inplace(c.X, V);
-    sub_inplace(c.X, V); //X3 = R^2+G-2V
+    this->add(c.X, tmp, G);
+    this->sub_inplace(c.X, V);
+    this->sub_inplace(c.X, V); //X3 = R^2+G-2V
 
-    mul(tmp, S1, G);
-    sub(c.Y, V, c.X);
-    mul_inplace(c.Y, R);
-    sub_inplace(c.Y, tmp); //Y3 = R*(V-X3)-S1*G
+    this->mul(tmp, S1, G);
+    this->sub(c.Y, V, c.X);
+    this->mul_inplace(c.Y, R);
+    this->sub_inplace(c.Y, tmp); //Y3 = R*(V-X3)-S1*G
 }
 
 template <class T>
@@ -630,39 +629,39 @@ void G2Op<T>::add_plain_proj(G2_Projective_Coordinates<T> &c,
      * could optimize the RAM used              */
 
     Complex<T> U1, U2, S1, S2;
-    mul_plain(S2, a.Z, b.Y); //S2 = Y2 * Z1
-    mul_plain(S1, a.Y, b.Z); //S1 = Y1 * Z2
-    mul_plain(U2, a.Z, b.X); //U2 = X2 * Z1
-    mul_plain(U1, a.X, b.Z); //U1 = X1 * Z2
+    this->mul_plain(S2, a.Z, b.Y); //S2 = Y2 * Z1
+    this->mul_plain(S1, a.Y, b.Z); //S1 = Y1 * Z2
+    this->mul_plain(U2, a.Z, b.X); //U2 = X2 * Z1
+    this->mul_plain(U1, a.X, b.Z); //U1 = X1 * Z2
 
     Complex<T> T_, H, R;
-    sub(R, S1, S2);          //R = S1 - S2
-    sub(H, U1, U2);          //H = U1 - U2
-    mul_plain(T_, a.Z, b.Z); //T = Z1 * Z2
+    this->sub(R, S1, S2);          //R = S1 - S2
+    this->sub(H, U1, U2);          //H = U1 - U2
+    this->mul_plain(T_, a.Z, b.Z); //T = Z1 * Z2
 
     Complex<T> G, V, W;
     Complex<T> R2, H2;
 
-    sqr(H2, H);     //H2 = H^2
-    mul(V, U1, H2); //V = U1*H^2
+    this->sqr(H2, H);     //H2 = H^2
+    this->mul(V, U1, H2); //V = U1*H^2
 
-    mul(G, H2, H); // G = H^3
+    this->mul(G, H2, H); // G = H^3
 
-    sqr(R2, R); //R2 = R^2
-    mul(W, R2, T_);
-    add_inplace(W, G);
-    sub_inplace(W, V);
-    sub_inplace(W, V); // W = R^2*T + G - 2V
+    this->sqr(R2, R); //R2 = R^2
+    this->mul(W, R2, T_);
+    this->add_inplace(W, G);
+    this->sub_inplace(W, V);
+    this->sub_inplace(W, V); // W = R^2*T + G - 2V
 
-    mul(c.Z, T_, G); //Z3 = T * G
+    this->mul(c.Z, T_, G); //Z3 = T * G
 
     Complex<T> tmp;
-    mul(tmp, S1, G);
-    sub(c.Y, V, W);
-    mul_inplace(c.Y, R);
-    sub_inplace(c.Y, tmp); // Y3 = R*(V-W)-S1*G
+    this->mul(tmp, S1, G);
+    this->sub(c.Y, V, W);
+    this->mul_inplace(c.Y, R);
+    this->sub_inplace(c.Y, tmp); // Y3 = R*(V-W)-S1*G
 
-    mul(c.X, H, W); // X3 = H * W
+    this->mul(c.X, H, W); // X3 = H * W
 }
 
 template <class T>
@@ -683,39 +682,39 @@ void G2Op<T>::add_proj(G2_Projective_Coordinates<T> &c,
      * could optimize the RAM used              */
 
     Complex<T> U1, U2, S1, S2;
-    mul(S2, b.Y, a.Z); //S2 = Y2 * Z1
-    mul(S1, a.Y, b.Z); //S1 = Y1 * Z2
-    mul(U2, b.X, a.Z); //U2 = X2 * Z1
-    mul(U1, a.X, b.Z); //U1 = X1 * Z2
+    this->mul(S2, b.Y, a.Z); //S2 = Y2 * Z1
+    this->mul(S1, a.Y, b.Z); //S1 = Y1 * Z2
+    this->mul(U2, b.X, a.Z); //U2 = X2 * Z1
+    this->mul(U1, a.X, b.Z); //U1 = X1 * Z2
 
     Complex<T> T_, H, R;
-    sub(R, S1, S2);    //R = S1 - S2
-    sub(H, U1, U2);    //H = U1 - U2
-    mul(T_, a.Z, b.Z); //T = Z1 * Z2
+    this->sub(R, S1, S2);    //R = S1 - S2
+    this->sub(H, U1, U2);    //H = U1 - U2
+    this->mul(T_, a.Z, b.Z); //T = Z1 * Z2
 
     Complex<T> G, V, W;
     Complex<T> R2, H2;
 
-    sqr(H2, H);     //H2 = H^2
-    mul(V, U1, H2); //V = U1*H^2
+    this->sqr(H2, H);     //H2 = H^2
+    this->mul(V, U1, H2); //V = U1*H^2
 
-    mul(G, H2, H); // G = H^3
+    this->mul(G, H2, H); // G = H^3
 
-    sqr(R2, R); //R2 = R^2
-    mul(W, R2, T_);
-    add_inplace(W, G);
-    sub_inplace(W, V);
-    sub_inplace(W, V); // W = R^2*T + G - 2V
+    this->sqr(R2, R); //R2 = R^2
+    this->mul(W, R2, T_);
+    this->add_inplace(W, G);
+    this->sub_inplace(W, V);
+    this->sub_inplace(W, V); // W = R^2*T + G - 2V
 
-    mul(c.Z, T_, G); //Z3 = T * G
+    this->mul(c.Z, T_, G); //Z3 = T * G
 
     Complex<T> tmp;
-    mul(tmp, S1, G);
-    sub(c.Y, V, W);
-    mul_inplace(c.Y, R);
-    sub_inplace(c.Y, tmp); // Y3 = R*(V-W)-S1*G
+    this->mul(tmp, S1, G);
+    this->sub(c.Y, V, W);
+    this->mul_inplace(c.Y, R);
+    this->sub_inplace(c.Y, tmp); // Y3 = R*(V-W)-S1*G
 
-    mul(c.X, H, W); // X3 = H * W
+    this->mul(c.X, H, W); // X3 = H * W
 }
 
 template <class T>
@@ -752,7 +751,8 @@ void G2Op<T>::reveal_and_print(const V p)
 template <class T>
 void G2Op<T>::G2_test_add_aff()
 {
-    cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
+    PRINT_TEST_BEG();
+
     vector<vector<string>> point1(2, vector<string>(2)), point2(2, vector<string>(2));
     point1[0][0] = "2480630520447434459745452474224673571710954591933549968516737967418913165838049948371936430061723054690854233264184";
     point1[0][1] = "3644469270405057610286350249996588958371264130321941529490169899587077020220364734985787921562794068692573854501481";
@@ -765,24 +765,24 @@ void G2Op<T>::G2_test_add_aff()
     point2[1][1] = "2036988673135752780119671948264754463514104930634625481515583855300300477160332414971334065417292937999677606499282";
 
     Complex_Plain<T> g1x, g1y, g2x, g2y;
-    str_to_gfp(g1x.real, point1[0][0]);
-    str_to_gfp(g1x.imag, point1[0][1]);
-    str_to_gfp(g1y.real, point1[1][0]);
-    str_to_gfp(g1y.imag, point1[1][1]);
+    this->str_to_gfp(g1x.real, point1[0][0]);
+    this->str_to_gfp(g1x.imag, point1[0][1]);
+    this->str_to_gfp(g1y.real, point1[1][0]);
+    this->str_to_gfp(g1y.imag, point1[1][1]);
 
-    str_to_gfp(g2x.real, point2[0][0]);
-    str_to_gfp(g2x.imag, point2[0][1]);
-    str_to_gfp(g2y.real, point2[1][0]);
-    str_to_gfp(g2y.imag, point2[1][1]);
+    this->str_to_gfp(g2x.real, point2[0][0]);
+    this->str_to_gfp(g2x.imag, point2[0][1]);
+    this->str_to_gfp(g2y.real, point2[1][0]);
+    this->str_to_gfp(g2y.imag, point2[1][1]);
 
     G2_Affine_Coordinates_Plain<T> acp(g2x, g2y);
 
     vector<G2_Affine_Coordinates<T>> ac(2);
-    get_inputs(0, ac[0].x, g1x);
-    get_inputs(0, ac[0].y, g1y);
+    this->get_inputs(0, ac[0].x, g1x);
+    this->get_inputs(0, ac[0].y, g1y);
 
-    get_inputs(1, ac[1].x, g2x);
-    get_inputs(1, ac[1].y, g2y);
+    this->get_inputs(1, ac[1].x, g2x);
+    this->get_inputs(1, ac[1].y, g2y);
 
     cout << "--------test add_affine--------" << endl;
     G2_Affine_Coordinates<T> res(ac[0]);
@@ -797,12 +797,15 @@ void G2Op<T>::G2_test_add_aff()
     res = ac[0];
     add_plain_aff_inplace(res, acp);
     reveal_and_print(res);
+
+    PRINT_TEST_END();
 }
 
 template <class T>
 void G2Op<T>::G2_test_add_jac()
 {
-    cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
+    PRINT_TEST_BEG();
+
     vector<vector<string>> point1(3, vector<string>(2)), point2(3, vector<string>(2));
     point1[0][0] = "3639014772220302969239478380372569697853575812585274288911649265451082883565179365094575093493765591320603987709986";
     point1[0][1] = "3627009162346736306815369238116921210498219699819586442010150505939503082090644552148957421881475528065715370270354";
@@ -819,30 +822,30 @@ void G2Op<T>::G2_test_add_jac()
     point2[2][1] = "578345463844648614472854569382514076495684244079273140322468994353640333794696894886030050136893687175790979496041";
 
     Complex_Plain<T> g1x, g1y, g1z, g2x, g2y, g2z;
-    str_to_gfp(g1x.real, point1[0][0]);
-    str_to_gfp(g1x.imag, point1[0][1]);
-    str_to_gfp(g1y.real, point1[1][0]);
-    str_to_gfp(g1y.imag, point1[1][1]);
-    str_to_gfp(g1z.real, point1[2][0]);
-    str_to_gfp(g1z.imag, point1[2][1]);
+    this->str_to_gfp(g1x.real, point1[0][0]);
+    this->str_to_gfp(g1x.imag, point1[0][1]);
+    this->str_to_gfp(g1y.real, point1[1][0]);
+    this->str_to_gfp(g1y.imag, point1[1][1]);
+    this->str_to_gfp(g1z.real, point1[2][0]);
+    this->str_to_gfp(g1z.imag, point1[2][1]);
 
-    str_to_gfp(g2x.real, point2[0][0]);
-    str_to_gfp(g2x.imag, point2[0][1]);
-    str_to_gfp(g2y.real, point2[1][0]);
-    str_to_gfp(g2y.imag, point2[1][1]);
-    str_to_gfp(g2z.real, point2[2][0]);
-    str_to_gfp(g2z.imag, point2[2][1]);
+    this->str_to_gfp(g2x.real, point2[0][0]);
+    this->str_to_gfp(g2x.imag, point2[0][1]);
+    this->str_to_gfp(g2y.real, point2[1][0]);
+    this->str_to_gfp(g2y.imag, point2[1][1]);
+    this->str_to_gfp(g2z.real, point2[2][0]);
+    this->str_to_gfp(g2z.imag, point2[2][1]);
 
     G2_Jacobian_Coordinates_Plain<T> jcp(g2x, g2y, g2z);
 
     vector<G2_Jacobian_Coordinates<T>> jc(2);
-    get_inputs(0, jc[0].X, g1x);
-    get_inputs(0, jc[0].Y, g1y);
-    get_inputs(0, jc[0].Z, g1z);
+    this->get_inputs(0, jc[0].X, g1x);
+    this->get_inputs(0, jc[0].Y, g1y);
+    this->get_inputs(0, jc[0].Z, g1z);
 
-    get_inputs(1, jc[1].X, g2x);
-    get_inputs(1, jc[1].Y, g2y);
-    get_inputs(1, jc[1].Z, g2z);
+    this->get_inputs(1, jc[1].X, g2x);
+    this->get_inputs(1, jc[1].Y, g2y);
+    this->get_inputs(1, jc[1].Z, g2z);
     cout << "--------test add_affine--------" << endl;
     G2_Jacobian_Coordinates<T> res(jc[0]);
     reveal_and_print(res);
@@ -856,12 +859,15 @@ void G2Op<T>::G2_test_add_jac()
     res = jc[0];
     add_plain_jac_inplace(res, jcp);
     reveal_and_print(res);
+
+    PRINT_TEST_END();
 }
 
 template <class T>
 void G2Op<T>::G2_test_add_proj()
 {
-    cout << "============================== BEG " << __FUNCTION__ << " ==============================" << endl;
+    PRINT_TEST_BEG();
+
     vector<vector<string>> point1(3, vector<string>(2)), point2(3, vector<string>(2));
     point2[0][0] = "1742093039426388910190435408185630482619497668278122082509857459325558330158451672629801719804701484028492682526291";
     point2[0][1] = "844703880925914646774744081548865505412209193553910985816318417485674697200984506935957160322668798027043802952303";
@@ -878,30 +884,30 @@ void G2Op<T>::G2_test_add_proj()
     point1[2][1] = "3434379341704883699773086001133464230110209518970604638631997996547497569874240408424089912586478220784695002343712";
 
     Complex_Plain<T> g1x, g1y, g1z, g2x, g2y, g2z;
-    str_to_gfp(g1x.real, point1[0][0]);
-    str_to_gfp(g1x.imag, point1[0][1]);
-    str_to_gfp(g1y.real, point1[1][0]);
-    str_to_gfp(g1y.imag, point1[1][1]);
-    str_to_gfp(g1z.real, point1[2][0]);
-    str_to_gfp(g1z.imag, point1[2][1]);
+    this->str_to_gfp(g1x.real, point1[0][0]);
+    this->str_to_gfp(g1x.imag, point1[0][1]);
+    this->str_to_gfp(g1y.real, point1[1][0]);
+    this->str_to_gfp(g1y.imag, point1[1][1]);
+    this->str_to_gfp(g1z.real, point1[2][0]);
+    this->str_to_gfp(g1z.imag, point1[2][1]);
 
-    str_to_gfp(g2x.real, point2[0][0]);
-    str_to_gfp(g2x.imag, point2[0][1]);
-    str_to_gfp(g2y.real, point2[1][0]);
-    str_to_gfp(g2y.imag, point2[1][1]);
-    str_to_gfp(g2z.real, point2[2][0]);
-    str_to_gfp(g2z.imag, point2[2][1]);
+    this->str_to_gfp(g2x.real, point2[0][0]);
+    this->str_to_gfp(g2x.imag, point2[0][1]);
+    this->str_to_gfp(g2y.real, point2[1][0]);
+    this->str_to_gfp(g2y.imag, point2[1][1]);
+    this->str_to_gfp(g2z.real, point2[2][0]);
+    this->str_to_gfp(g2z.imag, point2[2][1]);
 
     G2_Projective_Coordinates_Plain<T> pcp(g2x, g2y, g2z);
 
     vector<G2_Projective_Coordinates<T>> pc(2);
-    get_inputs(0, pc[0].X, g1x);
-    get_inputs(0, pc[0].Y, g1y);
-    get_inputs(0, pc[0].Z, g1z);
+    this->get_inputs(0, pc[0].X, g1x);
+    this->get_inputs(0, pc[0].Y, g1y);
+    this->get_inputs(0, pc[0].Z, g1z);
 
-    get_inputs(1, pc[1].X, g2x);
-    get_inputs(1, pc[1].Y, g2y);
-    get_inputs(1, pc[1].Z, g2z);
+    this->get_inputs(1, pc[1].X, g2x);
+    this->get_inputs(1, pc[1].Y, g2y);
+    this->get_inputs(1, pc[1].Z, g2z);
     cout << "--------test add_affine--------" << endl;
     G2_Projective_Coordinates<T> res(pc[0]);
     reveal_and_print(res);
@@ -915,4 +921,6 @@ void G2Op<T>::G2_test_add_proj()
     res = pc[0];
     add_plain_proj_inplace(res, pcp);
     reveal_and_print(res);
+
+    PRINT_TEST_END();
 }

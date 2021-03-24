@@ -1,6 +1,6 @@
 #pragma once
 
-#include "OnlineOp.hpp"
+#include "OnlineOp.h"
 
 template <class T>
 class G1_Affine_Coordinates
@@ -277,3 +277,4 @@ public:
     void G2_test_add_jac();
     void G2_test_add_proj();
 };
+#include "Group.hpp"

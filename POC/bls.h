@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Math/bls12_381.h"
-#include "Group.hpp"
+#include "Group.h"
 
 typedef mclBnFr bls_sk;
 typedef mclBnG1 bls_vk;

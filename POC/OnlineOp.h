@@ -36,6 +36,7 @@ public:
   }
 
 public:
+  void str_to_gfp(clear &ans, const string &str);
   void power(clear &a, int exp);
   void dotprod(const vector<T> &a, const vector<T> &b, T &c);
 
@@ -191,3 +192,5 @@ public:
   void test_get_inputs();
   void test_bit_ops();
 };
+#include "OnlineOp.hpp"
+#include "OnlineOp.test.hpp"
