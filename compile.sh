@@ -40,4 +40,23 @@ function run_tests() {
 }
 run_tests mascot_example.x
 run_tests poc_online_op_test.x
-run_tests poc_main.x
+
+# run_tests <program name>
+function run_tests_ex() {
+  cd ${curdir}
+  prog=$1
+  if [ ! -f "${builddir}/${prog}" ]; then
+    return
+  fi
+
+  echo -e "run ${prog} ...\n"
+  sleep 1
+  Scripts/setup-ssl.sh $parties
+  cp -f ${builddir}/${prog} ./
+  for ((i = 1; i < $parties; i++)); do
+    ./${prog} -P $i -N $parties -lgp 381 >logs/${prog}-$i.log 2>&1 &
+  done
+  ./${prog} -P 0 -N $parties -lgp 381 | tee logs/${prog}-0.log 2>&1
+  cat logs/${prog}-0.log | grep POC | grep elapsed
+}
+run_tests_ex poc_main.x
