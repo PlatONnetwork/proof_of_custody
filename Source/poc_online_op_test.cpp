@@ -70,7 +70,7 @@ void run(char **argv, int prime_length)
     */
     OnlineOptions &online_opts = OnlineOptions::singleton;
     cout << "online_opts.batch_size:" << online_opts.batch_size << endl;
-    online_opts.batch_size = 500;
+    online_opts.batch_size = 100;
     cout << "online_opts.batch_size:" << online_opts.batch_size << endl;
 
     // set up networking on localhost

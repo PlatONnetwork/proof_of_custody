@@ -54,10 +54,7 @@ void OnlineOp<T>::add(vector<T> &c, const vector<T> &a, const vector<T> &b, unsi
 template <class T>
 void OnlineOp<T>::add_plain(T &c, const T &a, const clear &b)
 {
-  //yyltodo? no Share::add(Share, clear)
-  T sb;
-  get_inputs(0, sb, b);
-
+  T sb = T::constant(b, P.my_num(), processor.MC.get_alphai());
   c = a + sb;
 }
 template <class T>
@@ -87,10 +84,7 @@ void OnlineOp<T>::add_inplace(vector<T> &c, const vector<T> &a, unsigned int k /
 template <class T>
 void OnlineOp<T>::add_plain_inplace(T &c, const clear &a)
 {
-  //yyltodo? no Share::add(Share, clear)
-  T sa;
-  get_inputs(0, sa, a);
-
+  T sa = T::constant(a, P.my_num(), processor.MC.get_alphai());
   c += sa;
 }
 template <class T>
@@ -122,10 +116,7 @@ void OnlineOp<T>::sub(vector<T> &c, const vector<T> &a, const vector<T> &b, unsi
 template <class T>
 void OnlineOp<T>::sub_plain(T &c, const T &a, const clear &b)
 {
-  //yyltodo? no Share::sub(Share, clear)
-  T sb;
-  get_inputs(0, sb, b);
-
+  T sb = T::constant(b, P.my_num(), processor.MC.get_alphai());
   c = a - sb;
 }
 template <class T>
@@ -155,10 +146,7 @@ void OnlineOp<T>::sub_inplace(vector<T> &c, const vector<T> &a, unsigned int k /
 template <class T>
 void OnlineOp<T>::sub_plain_inplace(T &c, const clear &a)
 {
-  //yyltodo? no Share::sub(Share, clear)
-  T sa;
-  get_inputs(0, sa, a);
-
+  T sa = T::constant(a, P.my_num(), processor.MC.get_alphai());
   c -= sa;
 }
 template <class T>
@@ -1089,4 +1077,3 @@ void OnlineOp<T>::get_inputs(unsigned int party, Complex<T> &sa, const Complex_P
   get_inputs(party, sa.real, inputs.real);
   get_inputs(party, sa.imag, inputs.imag);
 }
-
