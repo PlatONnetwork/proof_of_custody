@@ -1,5 +1,19 @@
 [TOC]
+
 Under Development ...
+
+
+```bash
+git clone --recurse https://github.com/PlatONnetwork/proof_of_custody.git
+./pre_compile.sh
+```
+
+```bash
+./compile.sh
+```
+
+
+[OLD,TODO]
 
 ## Introduction
 This project implements the proof of custody algorithm in Ethereum 2.0 with secure multi-party computation.
