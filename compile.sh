@@ -1,20 +1,26 @@
 #!/bin/bash
+set -x
 
 curdir=$(pwd)
 builddir=${curdir}/build
 install_dir=${curdir}/local
 mkdir -p ${builddir}
-mkdir -p logs
+mkdir -p logs Player-Data
+
+build_type=Debug
+build_type=Release
+verbose=0
 
 # spdz
 cd ${builddir}
-cmake .. -DCMAKE_INSTALL_PREFIX=${install_dir} -DCMAKE_PREFIX_PATH=${install_dir}
+cmake .. -DCMAKE_INSTALL_PREFIX=${install_dir} -DCMAKE_PREFIX_PATH=${install_dir} \
+  -DCMAKE_BUILD_TYPE=${build_type} -DVERBOSE=${verbose}
 make -j8
 
 # run examples and tests
 export LD_LIBRARY_PATH=${install_dir}/lib:$LD_LIBRARY_PATH
 
-parties=3
+parties=2
 # run_tests <program name>
 function run_tests() {
   cd ${curdir}
