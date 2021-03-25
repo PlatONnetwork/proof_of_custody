@@ -1,10 +1,3 @@
-/*
- * paper-example.cpp
- *
- * Working example similar to Figure 2 in https://eprint.iacr.org/2020/521
- *
- */
-
 #define NO_MIXED_CIRCUITS
 
 #include "Math/gfp.hpp"
