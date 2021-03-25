@@ -714,10 +714,13 @@ void OnlineOp<T>::lt(T &bit, vector<T> &a, vector<T> &b, unsigned int k)
 template <class T>
 void OnlineOp<T>::lt(T &bit, vector<T> &a, vector<clear> &b, unsigned int k)
 {
+  PRINT_DEBUG_INFO();
   vector<T> c, d;
   XOR_plain(c, a, b, k);
   reverse(c.begin(), c.end());
+  PRINT_DEBUG_INFO();
   prefix_OR(d, c, k);
+  PRINT_DEBUG_INFO();
   reverse(d.begin(), d.end());
 
   vector<T> e(k);
@@ -726,14 +729,17 @@ void OnlineOp<T>::lt(T &bit, vector<T> &a, vector<clear> &b, unsigned int k)
     sub(e[i], d[i], d[i + 1]);
   }
   e[k - 1] = d[k - 1];
+  PRINT_DEBUG_INFO();
 
   vector<T> tmp;
   mul_plain(tmp, e, b, k);
   bit = tmp[0];
+  PRINT_DEBUG_INFO();
   for (int i = 1; i < k; i++)
   {
     add_inplace(bit, tmp[i]);
   }
+  PRINT_DEBUG_INFO();
 }
 
 //output random shares of r and bits of r, with uniformly random r.
@@ -749,9 +755,9 @@ void OnlineOp<T>::pre_rand(T &r, vector<T> &bitr)
 
   PRINT_DEBUG_INFO();
   decompose(pbits, clear::pr(), PSIZE);
-  PRINT_DEBUG_INFO();
   while (1)
   {
+    PRINT_DEBUG_INFO();
     vector<T> tmp(1);
     for (int i = 0; i < PSIZE; i++)
     {
@@ -772,12 +778,13 @@ void OnlineOp<T>::pre_rand(T &r, vector<T> &bitr)
 
     lt(flag, bitr, pbits, PSIZE);
     reveal({flag}, pflag);
-    cout << "pflag[0]:" << pflag[0] << endl;
+    // cout << "pflag[0]:" << pflag[0] << endl;
     // sleep(1);
 
     if (pflag[0] == 1)
     {
       B2A(r, bitr, PSIZE);
+      PRINT_DEBUG_INFO();
       return;
     }
   }
@@ -920,6 +927,7 @@ void OnlineOp<T>::A2B(vector<T> &bits, const T &a)
   PRINT_DEBUG_INFO();
   T r, c;
   vector<T> bitr;
+  PRINT_DEBUG_INFO();
   pre_rand(r, bitr);
   PRINT_DEBUG_INFO();
 
@@ -950,6 +958,7 @@ void OnlineOp<T>::A2B(vector<T> &bits, const T &a)
   PRINT_DEBUG_INFO();
 
   lt(factor, bitr, bound, PSIZE);
+  PRINT_DEBUG_INFO();
 
   //share of 1-factor
   mul_plain(tmp, factor, TWO);

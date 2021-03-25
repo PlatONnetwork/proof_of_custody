@@ -12,11 +12,14 @@
 #define PRINT_TEST_BEG() cout << "======== " << __FUNCTION__ << " ======== BEG " << time(0) << endl
 #define PRINT_TEST_END() cout << "======== " << __FUNCTION__ << " ======== END " << time(0) << endl
 
+#ifdef DEBUG
+#define PRINT_DEBUG_INFO() cout << "======== DEBUG " << __FILE__ << " " << __LINE__ << " " << __FUNCTION__ << " " << time(0) << endl
+#else
+#define PRINT_DEBUG_INFO() (void)0
+#endif
+
 static const unsigned int PSIZE = 381;
 static const unsigned int QSIZE = 254;
-
-#define PRINT_DEBUG_INFO() cout << "======== DEBUG " << __FILE__ << " " << __LINE__ << " " << __FUNCTION__ << " " << time(0) << endl
-
 template <class T>
 class OnlineOp
 {

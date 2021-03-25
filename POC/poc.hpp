@@ -116,7 +116,11 @@ void POC<T>::shared_rand_bits_phase_one(vector<T> &shared_bits, vector<bigint> &
     shared_bits.resize(2 * PSIZE);
 
     vector<uint8_t> rnd(96); // 2*381/8
-    //*RC*// P.G.get_random_bytes(rnd); //yyltodo?
+    //*RC*// P.G.get_random_bytes(rnd);
+    PRNG prng;
+    prng.ReSeed();
+    prng.get_octets((octet *)rnd.data(), sizeof(uint8_t) * rnd.size());
+
     for (int i = 0; i < local_bits.size(); i++)
     {
         local_bits[i] = (rnd[i / 8] >> (i % 8)) & 1;

@@ -46,7 +46,7 @@ void BLS_::sign_scale(const bls_sk scale, const string msg)
 
 void BLS_::dstb_keygen(Player &P)
 {
-    VSS v(nparty, threshold); // yyltodo?
+    VSS v(nparty, threshold);
     vector<bls_sk> shs;
     vector<bls_vk> aux;
     v.rnd_secret();
@@ -152,7 +152,7 @@ void BLS_::dstb_keygen(Player &P)
             bls_vk a0;
             str_to_mclBnG1(a0, ss);
             bool res3 = mclBnG1_isEqual(&a0, &aux_tmp[i][0]) ? true : false;
-            cout << " res1:" << res1 << " res2:" << res2 << " res3:" << res3 << endl;
+            //*RC*// cout << " res1:" << res1 << " res2:" << res2 << " res3:" << res3 << endl;
             if (res1 && res2 && res3)
             {
                 mclBnFr_add(&sk, &sk, &tmp_shares[i]);

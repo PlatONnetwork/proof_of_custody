@@ -132,8 +132,7 @@ public:
         }
         point_add_time.stop();
 
-        cout << endl
-             << "point addition time (including part of the offline time): " << point_add_time.elapsed() << " seconds" << endl;
+        cout << "point addition time (including part of the offline time): " << point_add_time.elapsed() << " seconds" << endl;
 
 #if OK_CODE
         cout << "used triple: " << g2op.UT.UsedTriples << endl;
