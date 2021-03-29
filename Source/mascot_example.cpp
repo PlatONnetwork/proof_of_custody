@@ -41,6 +41,8 @@ int main(int argc, char **argv)
     }
     cout << "time1:" << time(0) << endl;
     cout << "time:" << time(0) - xtime << endl;
+
+    return 0;
 }
 
 template <class T>

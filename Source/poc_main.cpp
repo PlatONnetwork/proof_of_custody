@@ -46,6 +46,8 @@ int main(int argc, const char **argv)
     }
     PRINT_DEBUG_INFO();
     cout << "POC run elapsed(s):" << timer.elapsed() << endl;
+
+    return 0;
 }
 
 template <class T>
