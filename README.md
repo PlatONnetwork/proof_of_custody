@@ -2,6 +2,7 @@
 
 Under Development ...
 
+## Quick start
 
 ```bash
 git clone --recurse https://github.com/PlatONnetwork/proof_of_custody.git
@@ -10,6 +11,7 @@ git clone --recurse https://github.com/PlatONnetwork/proof_of_custody.git
 
 ```bash
 ./compile.sh
+./test.sh
 ```
 
 
