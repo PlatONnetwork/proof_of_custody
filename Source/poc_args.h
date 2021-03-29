@@ -12,9 +12,11 @@ public:
   int partyid = -1;
   int lgp = 128; // Bit length of GF(p) field
   std::string hostname = "127.0.0.1";
-  int baseport = 5000;
+  int baseport = 8201;
   int batchsize = 100;
   bool use_encryption = false;
+  bool run_stage = false; // if true, separate two processes
+  int stage = 0; // 0,all;1,stage one;2,stage two
 };
 
 static inline bool parse_args(int argc, const char **argv, Paras &paras)
@@ -49,15 +51,15 @@ static inline bool parse_args(int argc, const char **argv, Paras &paras)
       "--hostname"                                          // Flag token.
   );
   opt.add(
-      "5000",                              // Default.
+      "8201",                              // Default.
       0,                                   // Required?
       1,                                   // Number of args expected.
       0,                                   // Delimiter if expecting multiple args.
-      "Base port number (default: 5000).", // Help description.
+      "Base port number (default: 8201).", // Help description.
       "-pn",                               // Flag token.
       "--portnum"                          // Flag token.
   );
-  opt.add("500", 0, 1, 0, "Batch size", "-bs", "--batchsize");
+  opt.add("100", 0, 1, 0, "Batch size", "-bs", "--batchsize");
   opt.add(
       "",                        // Default.
       0,                         // Required?
@@ -67,6 +69,7 @@ static inline bool parse_args(int argc, const char **argv, Paras &paras)
       "-e",                      // Flag token.
       "--encrypted"              // Flag token.
   );
+  opt.add("", 0, 0, 0, "Run stages in two processes", "-r", "--run_stage");
 
   opt.parse(argc, argv);
   opt.get("-N")->getInt(paras.parties);
@@ -76,6 +79,7 @@ static inline bool parse_args(int argc, const char **argv, Paras &paras)
   opt.get("-pn")->getInt(paras.baseport);
   opt.get("-bs")->getInt(paras.batchsize);
   paras.use_encryption = opt.isSet("-e");
+  paras.run_stage = opt.isSet("-s");
 
 #ifdef VERBOSE
   string usage;

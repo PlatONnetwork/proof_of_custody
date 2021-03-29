@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.10)
 project(mp-spdz)
 
 ADD_DEFINITIONS(-DPREP_DIR="Player-Data/")
@@ -55,9 +55,11 @@ file(GLOB_RECURSE poc_src POC/*.cpp)
 add_library(poc ${poc_src})
 target_link_libraries(poc spdz mcl mclbn384_256)
 
-add_executable(poc_online_op_test.x Source/poc_online_op_test.cpp)
-target_link_libraries(poc_online_op_test.x poc)
-
-add_executable(poc_main.x Source/poc_main.cpp)
-target_link_libraries(poc_main.x poc)
+function(compile_poc_programs prog_name)
+  add_executable(${prog_name}.x Source/${prog_name}.cpp)
+  target_link_libraries(${prog_name}.x poc)
+endfunction()
+compile_poc_programs(poc_online_op_test)
+compile_poc_programs(poc_main)
+compile_poc_programs(poc_main2fork)
 
