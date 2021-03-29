@@ -656,8 +656,11 @@ void OnlineOp<T>::KOR(T &c, const vector<T> &a, unsigned int k)
 template <class T>
 void OnlineOp<T>::prefix_XOR(vector<T> &c, const vector<T> &a, unsigned int k) { TT_FUNC_NOT_IMPLEMENTED(); }
 template <class T>
-void OnlineOp<T>::prefix_OR(vector<T> &c, const vector<T> &a, unsigned int k)
+void OnlineOp<T>::prefix_OR(vector<T> &c, const vector<T> &a, unsigned int k, int depth /*= -1*/)
 {
+  if (depth == -1)
+    depth = 0;
+
   if (a.size() != k)
     throw invalid_length();
 
@@ -675,11 +678,12 @@ void OnlineOp<T>::prefix_OR(vector<T> &c, const vector<T> &a, unsigned int k)
   half_a0.insert(half_a0.begin(), a.begin(), a.begin() + half);
   half_a1.insert(half_a1.begin(), a.begin() + half, a.end());
 
-  prefix_OR(half_c0, half_a0, half);
-  prefix_OR(half_c1, half_a1, k - half);
+  prefix_OR(half_c0, half_a0, half, depth + 1);
+  prefix_OR(half_c1, half_a1, k - half, depth + 1);
 
   vector<T> tmp(k - half, half_c0[half - 1]);
 
+  // cout << "depth:" << depth << ",k:" << k << ",half:" << half << ",t:" << time(0) << endl;
   OR_inplace(tmp, half_c1, k - half);
 
   copy(half_c0.begin(), half_c0.end(), c.begin());
@@ -714,7 +718,6 @@ void OnlineOp<T>::lt(T &bit, vector<T> &a, vector<T> &b, unsigned int k)
 template <class T>
 void OnlineOp<T>::lt(T &bit, vector<T> &a, vector<clear> &b, unsigned int k)
 {
-  PRINT_DEBUG_INFO();
   vector<T> c, d;
   XOR_plain(c, a, b, k);
   reverse(c.begin(), c.end());
@@ -729,17 +732,14 @@ void OnlineOp<T>::lt(T &bit, vector<T> &a, vector<clear> &b, unsigned int k)
     sub(e[i], d[i], d[i + 1]);
   }
   e[k - 1] = d[k - 1];
-  PRINT_DEBUG_INFO();
 
   vector<T> tmp;
   mul_plain(tmp, e, b, k);
   bit = tmp[0];
-  PRINT_DEBUG_INFO();
   for (int i = 1; i < k; i++)
   {
     add_inplace(bit, tmp[i]);
   }
-  PRINT_DEBUG_INFO();
 }
 
 //output random shares of r and bits of r, with uniformly random r.
@@ -778,7 +778,9 @@ void OnlineOp<T>::pre_rand(T &r, vector<T> &bitr)
 
     lt(flag, bitr, pbits, PSIZE);
     reveal({flag}, pflag);
-    // cout << "pflag[0]:" << pflag[0] << endl;
+#if DEBUG
+    cout << "pflag[0]:" << pflag[0] << endl;
+#endif
     // sleep(1);
 
     if (pflag[0] == 1)
@@ -924,7 +926,6 @@ void OnlineOp<T>::A2B(vector<T> &bits, const T &c, unsigned int k) { TT_FUNC_NOT
 template <class T>
 void OnlineOp<T>::A2B(vector<T> &bits, const T &a)
 {
-  PRINT_DEBUG_INFO();
   T r, c;
   vector<T> bitr;
   PRINT_DEBUG_INFO();
@@ -934,20 +935,16 @@ void OnlineOp<T>::A2B(vector<T> &bits, const T &a)
   sub(c, a, r); // c = a-r
   vector<clear> cp;
   reveal({c}, cp);
-  PRINT_DEBUG_INFO();
 
   bigint bcp;
   to_bigint(bcp, cp[0]); // reveal c
-  PRINT_DEBUG_INFO();
 
   T factor, tmp;
   clear ONE = 1;
   // ONE.assign(1);
-  PRINT_DEBUG_INFO();
 
   bigint TWO(2);
   vector<clear> bound;
-  PRINT_DEBUG_INFO();
 
   if (bcp == 0)
   {
@@ -956,7 +953,6 @@ void OnlineOp<T>::A2B(vector<T> &bits, const T &a)
   }
   decompose(bound, clear::pr() - bcp, PSIZE);
   PRINT_DEBUG_INFO();
-
   lt(factor, bitr, bound, PSIZE);
   PRINT_DEBUG_INFO();
 
@@ -964,7 +960,6 @@ void OnlineOp<T>::A2B(vector<T> &bits, const T &a)
   mul_plain(tmp, factor, TWO);
   sub_inplace(factor, tmp);
   add_plain_inplace(factor, ONE);
-  PRINT_DEBUG_INFO();
 
   vector<clear> f, tf;
   vector<T> tg(PSIZE);
@@ -972,13 +967,11 @@ void OnlineOp<T>::A2B(vector<T> &bits, const T &a)
   decompose(f, bcp, PSIZE);
   decompose(tf, (TWO << PSIZE) + bcp - clear::pr(), PSIZE);
 
-  PRINT_DEBUG_INFO();
   for (int i = 0; i < PSIZE; i++)
   {
     mul_plain(tg[i], factor, tf[i] - f[i]);
     add_plain_inplace(tg[i], f[i]);
   }
-  PRINT_DEBUG_INFO();
 
   add_bit(bits, tg, bitr);
   bits.pop_back();
@@ -1080,6 +1073,16 @@ void OnlineOp<T>::get_inputs(unsigned int party, T &sa, const clear &inputs)
   input0.exchange();
   sa = input0.finalize(party);
 }
+template <class T>
+void OnlineOp<T>::get_inputs(unsigned int party, vector<T> &sa, const vector<clear> &inputs)
+{
+  size_t n = inputs.size();
+  sa.resize(n);
+
+  for (size_t i = 0; i < n; i++)
+    get_inputs(party, sa[i], inputs[i]);
+}
+
 template <class T>
 void OnlineOp<T>::get_inputs(unsigned int party, Complex<T> &sa, const Complex_Plain<T> &inputs)
 {

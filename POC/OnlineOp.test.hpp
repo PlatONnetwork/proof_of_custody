@@ -400,3 +400,41 @@ void OnlineOp<T>::test_bit_ops()
 
   PRINT_TEST_END();
 }
+
+template <class T>
+void OnlineOp<T>::test_performance()
+{
+  PRINT_TEST_BEG();
+
+  Timer timer;
+  timer.start();
+
+  int times = 10;
+  int size = 97;
+  vector<T> a(size), b(size), c(size);
+  vector<clear> ca(size), cb(size), cc(size);
+  get_inputs(0, a, ca);
+  get_inputs(1, b, cb);
+  cout << "mul get_inputs:" << timer.elapsed_then_reset() << endl;
+  usleep(10);
+  P.comm_stats.print();
+
+  timer.start();
+
+  mul(c, a, b);
+  cout << "mul perf:" << timer.elapsed_then_reset() << endl;
+
+  mul_inplace(c, a);
+  cout << "mul_inplace perf:" << timer.elapsed_then_reset() << endl;
+
+  mul_plain(c, a, cb);
+  cout << "mul_plain perf:" << timer.elapsed_then_reset() << endl;
+
+  mul_plain_inplace(c, cb);
+  cout << "mul_plain_inplace perf:" << timer.elapsed_then_reset() << endl;
+
+  usleep(10);
+  P.comm_stats.print();
+
+  PRINT_TEST_END();
+}

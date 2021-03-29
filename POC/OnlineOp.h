@@ -13,7 +13,8 @@
 #define PRINT_TEST_END() cout << "======== " << __FUNCTION__ << " ======== END " << time(0) << endl
 
 #ifdef DEBUG
-#define PRINT_DEBUG_INFO() cout << "======== DEBUG " << __FILE__ << " " << __LINE__ << " " << __FUNCTION__ << " " << time(0) << endl
+#define PRINT_DEBUG_INFO() cout << "======== DEBUG " << __FILE__ << " " << __LINE__ << " " << __FUNCTION__ \
+                                << " " << time(0) << " pid:" << getpid() << endl
 #else
 #define PRINT_DEBUG_INFO() (void)0
 #endif
@@ -138,7 +139,7 @@ public:
   void KXOR(T &c, const vector<T> &a, unsigned int k);
   void KOR(T &c, const vector<T> &a, unsigned int k);
   void prefix_XOR(vector<T> &c, const vector<T> &a, unsigned int k); /*not implemented*/
-  void prefix_OR(vector<T> &c, const vector<T> &a, unsigned int k);
+  void prefix_OR(vector<T> &c, const vector<T> &a, unsigned int k, int depth = -1);
 
   /*return (a<b)*/
   void lt(T &bit, vector<T> &a, vector<T> &b, unsigned int k);
@@ -180,6 +181,7 @@ public:
 
   /*inputs*/
   void get_inputs(unsigned int party, T &sa, const clear &inputs);
+  void get_inputs(unsigned int party, vector<T> &sa, const vector<clear> &inputs);
   void get_inputs(unsigned int party, Complex<T> &sa, const Complex_Plain<T> &inputs);
 
   // the following apis for testing
@@ -194,6 +196,8 @@ public:
   void test_legendre();
   void test_get_inputs();
   void test_bit_ops();
+
+  void test_performance();
 };
 #include "OnlineOp.hpp"
 #include "OnlineOp.test.hpp"
