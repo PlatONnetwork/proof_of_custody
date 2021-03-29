@@ -1,22 +1,25 @@
 #!/bin/bash
+# set -x
 
+# ====================
 curdir=$(pwd)
 builddir=${curdir}/build
 install_dir=${curdir}/local
 mkdir -p ${builddir}
+# ====================
 
-apt-get install -y automake build-essential git libboost-dev libboost-thread-dev libsodium-dev libssl-dev libtool m4 python texinfo yasm libntl-dev
+sudo apt-get install -y automake build-essential git libboost-dev libboost-thread-dev libsodium-dev libssl-dev libtool m4 python texinfo yasm libntl-dev
 
 # mcl
 # https://github.com/herumi/mcl
 cd ${curdir}/mcl
 make -j8
-sudo make install PREFIX=${install_dir}
+make install PREFIX=${install_dir}
 mkdir -p build
 cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=${install_dir} -DCMAKE_PREFIX_PATH=${install_dir}
+CXXFLAGS="-Wl,-rpath -Wl,./local/lib -L./local/lib" cmake .. -DCMAKE_INSTALL_PREFIX=${install_dir} -DCMAKE_PREFIX_PATH=${install_dir}
 make -j8
-sudo make install
+make install
 cd ${curdir}
 
 # mpir
