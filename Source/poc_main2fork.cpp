@@ -12,6 +12,20 @@ template <class T>
 void run(const Paras &paras);
 int run_stage(const Paras &paras);
 
+// //////////////////////
+static inline std::string get_nonce(int partyid)
+{
+    return "123456";
+}
+
+template <typename U> // U = T::clear
+inline void get_msg(int partyid, vector<U> &msg)
+{
+    for (size_t i = 0; i < msg.size(); i++)
+        msg[i] = i * 2;
+}
+// //////////////////////
+
 int main(int argc, const char **argv)
 {
     Paras paras;
@@ -21,7 +35,7 @@ int main(int argc, const char **argv)
         exit(1);
     }
 
-    paras.batchsize = 100;
+    paras.batchsize = 50;
     paras.run_stage = true;
     if (!paras.run_stage)
     {
@@ -45,6 +59,7 @@ int main(int argc, const char **argv)
     {
         cout << "stage one pid:" << getpid() << " Begin!" << endl;
         paras.stage = 1;
+        paras.lgp = paras.lgp1;
         ret = run_stage(paras);
         cout << "stage one pid:" << getpid() << " End!" << endl;
     }
@@ -52,8 +67,8 @@ int main(int argc, const char **argv)
     {
         cout << "stage two pid:" << getpid() << " Begin!" << endl;
         paras.stage = 2;
-        paras.lgp = 128;
-        paras.baseport = (paras.baseport > 50000) ? (paras.baseport - 10000) : (paras.baseport + 10000);
+        paras.lgp = paras.lgp2;
+        paras.baseport = (paras.baseport > 50000) ? (paras.baseport - 500) : (paras.baseport + 500);
         ret = run_stage(paras);
         cout << "stage two pid:" << getpid() << " End!" << endl;
 
@@ -111,6 +126,24 @@ void run(const Paras &paras)
 
     OnlineOptions &online_opts = OnlineOptions::singleton;
     online_opts.batch_size = paras.batchsize;
+    do
+    {
+        string strp = "";
+        if (paras.lgp == 128)
+            strp = "170141183460469231731687303715885907969";
+        else if (paras.lgp == 256)
+            strp = "57896044618658097711785492504343953926634992332820282019728792003956566065153";
+        //strp = "115792089237316195423570985008687907853269984665640564039457584007913129639747";
+        else if (paras.lgp == 381)
+            strp = "4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787";
+        else
+            break;
+
+        mpz_class bnx(strp, 10);
+        bigint bn(bnx);
+        online_opts.prime = bn;
+    } while (0);
+
     Names N;
     Server::start_networking(N, paras.partyid, paras.parties, paras.hostname, paras.baseport);
     Player *player = nullptr;
@@ -147,6 +180,9 @@ void run(const Paras &paras)
     {
         POC<T> poc(P, protocol, preprocessing, processor, output);
         OnlineOp<T> online_op(P, protocol, preprocessing, processor, output);
+        {
+            // online_op.test_mul();
+        }
         BLS<T> bls(P.num_players(), P.num_players() - 1);
         RunPOC<T> runpoc(poc, P, protocol, preprocessing, processor, output);
         Config_Info CI;
@@ -161,7 +197,7 @@ void run(const Paras &paras)
         vector<bigint> local_bits, reveal_bits;
         if (stage == 0 || stage == 1)
         {
-            string nonce = "123456";
+            string nonce = get_nonce(P.my_num());
 
             // stage 1-1
             runpoc.run_poc_compute_ephem_key_2primes_phase_one(local_bits, reveal_bits, bls, nonce, CI);
@@ -267,11 +303,10 @@ void run(const Paras &paras)
             PRINT_DEBUG_INFO();
 
             // stage 2-3
-            for (int iii = 0; iii < 10; iii++)
+            for (int k = 0; k < 10; k++)
             {
                 vector<clear> msg(CHUNK_NUM);
-                for (int i = 0; i < msg.size(); i++)
-                    msg[i] = i * 2;
+                get_msg(P.my_num(), msg);
 
                 PRINT_DEBUG_INFO();
                 int bit = runpoc.run_poc_compute_custody_bit_online_2primes(pre_key, ek[0], msg, CI);
@@ -283,7 +318,27 @@ void run(const Paras &paras)
     }
 
     output.Check(P);
+
+    // cout << "--------------------------" << endl
+    //      << std::flush;
+    // player->comm_stats.print();
+    // cout << "--------------------------" << endl
+    //      << std::flush;
+    // auto xx = preprocessing.triple_generator;
+    // for (auto &p : xx->players)
+    // {
+    //     cout << std::flush;
+    //     cout << "------------------p" << endl;
+    //     usleep(1000);
+    //     cout << "----------sent:" << p->sent << ", my_real_num:" << p->my_real_num()
+    //          << ", elapsed:" << p->timer.elapsed() << endl;
+    //     p->comm_stats.print();
+    //     cout << "------------------x" << endl;
+    // }
+
     T::LivePrep::teardown();
+#ifndef VERBOSE
     player->comm_stats.print();
+#endif
     delete player;
 }

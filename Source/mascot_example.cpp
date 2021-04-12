@@ -172,5 +172,14 @@ void run(char **argv, int prime_length)
 #endif
     output.Check(P);
 
+    // auto xx = preprocessing.triple_generator;
+    // for (auto &p : xx->players)
+    // {
+    //     cout << "------------------q" << endl;
+    //     p->comm_stats.print();
+    //     cout << "------------------x" << endl;
+    // }
+
     T::LivePrep::teardown();
+    P.comm_stats.print();
 }
