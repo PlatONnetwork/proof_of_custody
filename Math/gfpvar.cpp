@@ -11,6 +11,9 @@
 
 Zp_Data gfpvar::ZpD;
 
+const true_type gfpvar::invertible;
+const true_type gfpvar::prime_field;
+
 string gfpvar::type_string()
 {
     return "gfpvar";

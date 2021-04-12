@@ -15,6 +15,7 @@ const false_type ValueInterface::invertible;
 
 const true_type gf2n_short::characteristic_two;
 const true_type gf2n_long::characteristic_two;
+const true_type gf2n_long::invertible;
 
 int gf2n_short::n = 0;
 int gf2n_short::t1;

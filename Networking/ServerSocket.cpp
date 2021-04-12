@@ -44,6 +44,7 @@ ServerSocket::ServerSocket(int Portnum) : portnum(Portnum), thread(0)
   octet my_name[512];
   memset(my_name,0,512*sizeof(octet));
   gethostname((char*)my_name,512);
+  cout << "server["<< my_name << "] will listen on port:" << Portnum << endl;
 
   /* bind serv information to mysocket
    *   - Just assume it will eventually wake up
