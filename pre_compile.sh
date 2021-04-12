@@ -1,14 +1,14 @@
 #!/bin/bash
 # set -x
 
+bash ./pre_install.sh
+
 # ====================
 curdir=$(pwd)
 builddir=${curdir}/build
 install_dir=${curdir}/local
 mkdir -p ${builddir}
 # ====================
-
-sudo apt-get install -y automake build-essential git libboost-dev libboost-thread-dev libsodium-dev libssl-dev libtool m4 python texinfo yasm libntl-dev
 
 # mcl
 # https://github.com/herumi/mcl
