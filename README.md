@@ -5,13 +5,17 @@ Under Development ...
 ## Quick start
 
 ```bash
+sudo bash ./pre_install.sh
+```
+
+```bash
 git clone --recurse https://github.com/PlatONnetwork/proof_of_custody.git
 ./pre_compile.sh
 ```
 
 ```bash
 ./compile.sh
-./test.sh
+./test.sh [<parties> [<host>]]
 ```
 
 

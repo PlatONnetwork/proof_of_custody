@@ -44,3 +44,6 @@ local/
 logs/
 Player-Data/**
 /*.x
+
+#######
+/cbft*
