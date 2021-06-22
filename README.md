@@ -4,19 +4,38 @@ Under Development ...
 
 ## Quick start
 
+- First, clone the code from Github. (`with --recurse`)
+
+```bash
+git clone --recurse https://github.com/PlatONnetwork/proof_of_custody.git
+```
+
+- Next, install some dependencies by executing the following script.
+
 ```bash
 sudo bash ./pre_install.sh
 ```
 
+- Next, compile `mcl`/`mpir`/`SimpleOT`.
+
 ```bash
-git clone --recurse https://github.com/PlatONnetwork/proof_of_custody.git
 ./pre_compile.sh
 ```
 
+- Next, compile this project.
+
 ```bash
 ./compile.sh
+```
+
+- Now, run the test.
+
+```bash
 ./test.sh [<parties> [<host>]]
 ```
+> parties: the number of parties. default `2`. 
+> host: the host or ip of the party 0. default `localhost`. 
+
 
 
 [OLD,TODO]
